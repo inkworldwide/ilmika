@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PropertyCard from "@/components/property/PropertyCard";
+import PostListingButton from "@/components/ui/PostListingButton";
 import { 
   Building, MapPin, Search, ShieldCheck, Heart, ArrowRight, 
   Sparkles, Layers, Users, PhoneCall, CheckCircle2, Star, Award,
@@ -13,19 +14,25 @@ import {
 export const revalidate = 60; // Revalidate cache every 60 seconds
 
 export default async function HomePage() {
-  // Fetch active listings from the database dynamically
-  const featured = await prisma.property.findMany({
+  const propertyInclude = {
+    city: true,
+    locality: true,
+    images: { take: 1, orderBy: { sortOrder: "asc" as const } },
+    owner: { include: { agentProfile: true } },
+  };
+
+  const rawFeatured = await prisma.property.findMany({
     where: { status: "ACTIVE", isVerified: true },
-    include: { city: true, locality: true, images: { take: 1, orderBy: { sortOrder: "asc" } } },
-    take: 6,
-    orderBy: { createdAt: "desc" }
+    include: propertyInclude,
+    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    take: 12,
   });
 
-  const recent = await prisma.property.findMany({
+  const rawRecent = await prisma.property.findMany({
     where: { status: "ACTIVE" },
-    include: { city: true, locality: true, images: { take: 1, orderBy: { sortOrder: "asc" } } },
-    take: 6,
-    orderBy: { createdAt: "desc" }
+    include: propertyInclude,
+    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    take: 12,
   });
 
   const cities = await prisma.city.findMany({
@@ -38,20 +45,42 @@ export default async function HomePage() {
     take: 6,
   });
 
-  const pgs = await prisma.property.findMany({
+  const rawPgs = await prisma.property.findMany({
     where: { status: "ACTIVE", propertyType: { in: ["PG", "CO_LIVING", "SHARED_ROOM"] } },
-    include: { city: true, locality: true, images: { take: 1, orderBy: { sortOrder: "asc" } } },
-    take: 4,
+    include: propertyInclude,
+    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    take: 8,
   });
 
-  const commercials = await prisma.property.findMany({
+  const rawCommercials = await prisma.property.findMany({
     where: { status: "ACTIVE", propertyType: { in: ["OFFICE_SPACE", "COWORKING_SPACE", "SHOP"] } },
-    include: { city: true, locality: true, images: { take: 1, orderBy: { sortOrder: "asc" } } },
-    take: 4,
+    include: propertyInclude,
+    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    take: 8,
   });
+
+  const sortByFeaturedOwnerFirst = <T extends { isFeatured?: boolean; owner?: { agentProfile?: { isFeatured?: boolean } | null } | null }>(items: T[]) => {
+    return [...items].sort((a, b) => {
+      const aIsFeatured = (a.isFeatured ?? false) || (a.owner?.agentProfile?.isFeatured ?? false);
+      const bIsFeatured = (b.isFeatured ?? false) || (b.owner?.agentProfile?.isFeatured ?? false);
+      if (aIsFeatured && !bIsFeatured) return -1;
+      if (!aIsFeatured && bIsFeatured) return 1;
+      return 0;
+    });
+  };
+
+  const featured = sortByFeaturedOwnerFirst(rawFeatured).slice(0, 6);
+  const recent = sortByFeaturedOwnerFirst(rawRecent).slice(0, 6);
+  const pgs = sortByFeaturedOwnerFirst(rawPgs).slice(0, 4);
+  const commercials = sortByFeaturedOwnerFirst(rawCommercials).slice(0, 4);
 
   const agents = await prisma.user.findMany({
-    where: { role: "AGENT", agentProfile: { isNot: null } },
+    where: { 
+      role: { in: ["AGENT", "OWNER"] }, 
+      isApproved: true,
+      isSuspended: false,
+      agentProfile: { isFeatured: true }
+    },
     include: { agentProfile: true },
     take: 4,
   });
@@ -118,7 +147,7 @@ export default async function HomePage() {
           <div className="pointer-events-auto mt-20 md:mt-0">
             <h1 className="font-serif text-5xl md:text-[3.5rem] lg:text-[4.5rem] font-bold tracking-tight leading-[1.15] mb-5 drop-shadow-md">
               <span className="text-accent">Re</span>{" "}
-              <span className="text-white">One Stop</span>{" "}
+              <span className="text-white">Onestop</span>{" "}
               <span className="text-accent">Page</span>
             </h1>
             <div className="flex items-center gap-3 mb-6 max-w-max">
@@ -437,44 +466,49 @@ export default async function HomePage() {
         </div>
       </section>
 
+
+
       {/* 7. TOP AGENTS */}
       {agents.length > 0 && (
         <section className="py-16 bg-white border-t border-line">
           <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-8">
             <div className="text-center max-w-xl mx-auto space-y-2">
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Top Verified Agents</h2>
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Top Verified Agents &amp; Owners</h2>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Connect with Indian PropTech specialists carrying licensed credentials and top ratings.
+                Connect with Indian PropTech specialists and verified property owners carrying top credentials.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {agents.map((agent) => (
-                <Link 
-                  key={agent.id}
-                  href={`/agent/${agent.id}`} 
-                  className="bg-secondary border border-line rounded-2xl p-5 text-center hover:shadow-xs transition duration-300 space-y-4 flex flex-col items-center"
-                >
-                  {agent.avatar ? (
-                    <img src={agent.avatar} alt={agent.name} className="w-16 h-16 rounded-full object-cover border border-line" />
-                  ) : (
-                    <span className="w-16 h-16 rounded-full bg-primary text-secondary flex items-center justify-center font-bold text-xl uppercase border border-line">
-                      {agent.name.charAt(0)}
-                    </span>
-                  )}
-                  <div>
-                    <h4 className="font-semibold text-sm text-primary">{agent.name}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-wide">
-                      {agent.agentProfile?.companyName || "Independent Agent"}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-white border border-line px-3 py-1 rounded-full">
-                    <Star className="w-3.5 h-3.5 text-accent fill-accent" />
-                    <span>{agent.agentProfile?.ratingAverage || 0} Rating</span>
-                  </div>
-                </Link>
-              ))}
+              {agents.map((agent) => {
+                const cleanName = agent.name.replace(/\s*\([^)]*\)/g, "").trim();
+                return (
+                  <Link 
+                    key={agent.id}
+                    href={`/agent/${agent.id}`} 
+                    className="bg-secondary border border-line rounded-2xl p-5 text-center hover:shadow-xs transition duration-300 space-y-4 flex flex-col items-center"
+                  >
+                    {agent.avatar ? (
+                      <img src={agent.avatar} alt={cleanName} className="w-16 h-16 rounded-full object-cover border border-line" />
+                    ) : (
+                      <span className="w-16 h-16 rounded-full bg-primary text-secondary flex items-center justify-center font-bold text-xl uppercase border border-line">
+                        {cleanName.charAt(0)}
+                      </span>
+                    )}
+                    <div>
+                      <h4 className="font-semibold text-sm text-primary">{cleanName}</h4>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-wide">
+                        {agent.agentProfile?.companyName || "Independent Agent"}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 bg-white border border-line px-3 py-1 rounded-full">
+                      <Star className="w-3.5 h-3.5 text-accent fill-accent" />
+                      <span>{agent.agentProfile?.ratingAverage || 0} Rating</span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -546,12 +580,9 @@ export default async function HomePage() {
             Post your residential flat, villa, PG, or commercial shop and connect with thousands of verified seekers. Start listing your home now.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <Link 
-              href="/properties/add" 
-              className="bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-7 py-3 rounded-full transition"
-            >
+            <PostListingButton className="bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-7 py-3 rounded-full transition cursor-pointer">
               Post Your Listing
-            </Link>
+            </PostListingButton>
             <Link 
               href="/auth/register" 
               className="border border-white/20 hover:bg-white/5 text-white font-bold text-xs px-7 py-3 rounded-full transition"

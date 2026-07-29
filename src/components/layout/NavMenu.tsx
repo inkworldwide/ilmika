@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Sparkles, ArrowRight, FileText, Building2, UserCheck, Home, Briefcase, MapPin, Compass } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const SHARED_CATEGORIES = [
@@ -176,7 +176,9 @@ export default function NavMenu() {
             {activeService && SERVICES_DATA.find(s => s.name === activeService)?.hasAvailableRequired ? (
               <div className="grid grid-cols-2 gap-12">
                 <div>
-                  <h3 className="font-bold text-accent text-lg mb-6 border-b-2 border-accent/20 pb-2 inline-block">Available (Listing)</h3>
+                  <h3 className="font-bold text-accent text-sm uppercase tracking-wider mb-6 border-b-2 border-accent/30 pb-2 inline-flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-accent" /> Available Verified Listings
+                  </h3>
                   <div className="grid grid-cols-1 gap-4">
                     <CategoryList 
                       categories={SERVICES_DATA.find(s => s.name === activeService)?.categories || []} 
@@ -185,12 +187,89 @@ export default function NavMenu() {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-bold text-accent text-lg mb-6 border-b-2 border-accent/20 pb-2 inline-block">Required</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <CategoryList 
-                      categories={SERVICES_DATA.find(s => s.name === activeService)?.categories || []} 
-                      txParam={SERVICES_DATA.find(s => s.name === activeService)?.txParam} 
-                    />
+                  <h3 className="font-bold text-accent text-sm uppercase tracking-wider mb-6 border-b-2 border-accent/30 pb-2 inline-flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-accent" /> Seeker Demands & Custom Requests
+                  </h3>
+                  
+                  {/* Seeker Requirement CTA Card */}
+                  <div className="bg-gradient-to-br from-slate-950 via-[#0B132B] to-[#060C1B] text-white rounded-2xl p-5 border border-slate-800 space-y-3.5 mb-6 shadow-md relative overflow-hidden group">
+                    <div className="flex items-center gap-2 text-accent font-bold text-xs uppercase tracking-widest">
+                      <Sparkles className="w-4 h-4 text-accent" />
+                      <span>Custom Property Acquisition</span>
+                    </div>
+                    
+                    <h4 className="font-serif text-base font-bold text-white leading-snug">
+                      Can't Find Your Ideal Match?
+                    </h4>
+
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                      Specify your preferred location, budget, and requirements. Get matched directly with verified owners and licensed proptech agents.
+                    </p>
+
+                    <Link 
+                      href="/inquire" 
+                      className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm cursor-pointer hover:translate-x-0.5 transform"
+                    >
+                      <span>Post Custom Requirement</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+
+                  {/* Categorized Seeker Options */}
+                  <div className="space-y-5">
+                    <div>
+                      <h4 className="font-semibold text-primary text-xs uppercase tracking-wider mb-3 flex items-center gap-1.5 border-b border-line pb-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                        Residential Property Requests
+                      </h4>
+                      <ul className="space-y-2.5 pl-3 text-xs text-slate-600">
+                        <li>
+                          <Link href="/inquire?category=residential" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>Flats & Apartments Wanted</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/inquire?category=villa" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>Villas & Luxury Homes Wanted</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/inquire?category=studio" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>Studio Apartments Wanted</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold text-primary text-xs uppercase tracking-wider mb-3 flex items-center gap-1.5 border-b border-line pb-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                        Commercial & Land Acquisition
+                      </h4>
+                      <ul className="space-y-2.5 pl-3 text-xs text-slate-600">
+                        <li>
+                          <Link href="/inquire?category=commercial" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <Briefcase className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>Commercial Offices & Shops Demands</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/inquire?category=pg" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <Building2 className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>PG & Co-Living Spaces Wanted</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/inquire?category=land" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                            <MapPin className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
+                            <span>Land & Plot Acquisition Requests</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               </div>

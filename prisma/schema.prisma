@@ -170,6 +170,7 @@ model User {
   avatar                 String?
   isEmailVerified        Boolean          @default(false)
   isApproved             Boolean          @default(false)
+  isSuspended            Boolean          @default(false)
   emailVerificationToken String?
   passwordResetToken     String?
   passwordResetExpires   DateTime?
@@ -201,6 +202,7 @@ model AgentProfile {
   licenseNumber   String?
   bio             String?
   ratingAverage   Float    @default(0.0)
+  isFeatured      Boolean  @default(true)
   reviews         Review[] @relation("AgentReviews")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

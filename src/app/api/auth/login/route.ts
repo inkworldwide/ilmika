@@ -55,6 +55,14 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check account suspension
+    if (user.isSuspended) {
+      return NextResponse.json(
+        { error: "Your account has been suspended by the administrator. Please contact support." },
+        { status: 403 }
+      );
+    }
+
     // Check admin approval
     if (!user.isApproved && user.role !== "ADMIN") {
       return NextResponse.json(

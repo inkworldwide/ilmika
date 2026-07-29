@@ -39,7 +39,7 @@ async function main() {
     data: {
       email: "admin@rentahouse.in",
       passwordHash: adminPassword,
-      name: "Rajesh Kumar (Admin)",
+      name: "Rajesh Kumar",
       phone: "9876543210",
       role: Role.ADMIN,
       isEmailVerified: true,
@@ -51,7 +51,7 @@ async function main() {
     data: {
       email: "amit.sharma@gmail.com",
       passwordHash: ownerPassword,
-      name: "Amit Sharma (Owner)",
+      name: "Amit Sharma",
       phone: "9812345670",
       role: Role.OWNER,
       isEmailVerified: true,
@@ -63,7 +63,7 @@ async function main() {
     data: {
       email: "priya.patel@gmail.com",
       passwordHash: ownerPassword,
-      name: "Priya Patel (Owner)",
+      name: "Priya Patel",
       phone: "9823456789",
       role: Role.OWNER,
       isEmailVerified: true,
@@ -75,7 +75,7 @@ async function main() {
     data: {
       email: "vikram.singh@agent.com",
       passwordHash: agentPassword,
-      name: "Vikram Singh (Agent)",
+      name: "Vikram Singh",
       phone: "9834567890",
       role: Role.AGENT,
       isEmailVerified: true,
@@ -87,7 +87,7 @@ async function main() {
     data: {
       email: "kavita.jain@agent.com",
       passwordHash: agentPassword,
-      name: "Kavita Jain (Agent)",
+      name: "Kavita Jain",
       phone: "9845678901",
       role: Role.AGENT,
       isEmailVerified: true,
@@ -99,7 +99,7 @@ async function main() {
     data: {
       email: "arjun.das@gmail.com",
       passwordHash: userPassword,
-      name: "Arjun Das (Buyer/Tenant)",
+      name: "Arjun Das",
       phone: "9856789012",
       role: Role.USER,
       isEmailVerified: true,

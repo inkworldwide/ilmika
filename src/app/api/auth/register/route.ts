@@ -10,7 +10,7 @@ const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number").optional().or(z.literal("")),
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
   role: z.enum(["USER", "OWNER", "AGENT"], {
     message: "Invalid role selected",
   }),
@@ -57,8 +57,26 @@ export async function POST(req: Request) {
     const passwordHash = await hashPassword(password);
     const verificationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
+    const getPrefix = (cityName?: string) => {
+      if (!cityName) return "KO";
+      const clean = cityName.trim().toUpperCase();
+      if (clean.startsWith("BENGALURU") || clean.startsWith("BANGALORE")) return "BE";
+      if (clean.startsWith("KOCHI") || clean.startsWith("COCHIN")) return "KO";
+      if (clean.startsWith("MUMBAI") || clean.startsWith("BOMBAY")) return "MU";
+      if (clean.startsWith("DELHI")) return "DE";
+      if (clean.startsWith("HYDERABAD")) return "HY";
+      if (clean.startsWith("CHENNAI")) return "CH";
+      if (clean.startsWith("PUNE")) return "PU";
+      if (clean.startsWith("KOLKATA")) return "KO";
+      if (clean.startsWith("AHMEDABAD")) return "AH";
+      if (clean.startsWith("GURUGRAM") || clean.startsWith("GURGAON")) return "GU";
+      if (clean.startsWith("NOIDA")) return "NO";
+      return clean.substring(0, 2);
+    };
+
+    const cityPrefix = getPrefix(body.city);
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    const customId = `RE${randomDigits}`;
+    const customId = `${cityPrefix}${randomDigits}`;
 
     // In dev: auto-verify email so user can login immediately without email link
     const isDev = process.env.NODE_ENV !== "production";
@@ -91,7 +109,7 @@ export async function POST(req: Request) {
           isEmailVerified: user.isEmailVerified,
         },
         // We output the verification token in development so we can mock verify it easily
-        verificationToken: emailVerificationToken,
+        verificationToken: process.env.NODE_ENV !== "production" ? verificationToken : undefined,
       },
       { status: 201 }
     );

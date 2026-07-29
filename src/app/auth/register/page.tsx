@@ -3,12 +3,27 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Building2, Lock, Mail, User, Phone, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Loader2, Building2, Lock, Mail, User, Phone, ChevronDown, MapPin } from "lucide-react";
 
 const ROLES = [
   { value: "USER", label: "Tenant / Buyer" },
   { value: "OWNER", label: "Property Owner" },
   { value: "AGENT", label: "Real Estate Agent" },
+];
+
+const CITIES = [
+  { name: "Kochi", code: "KO" },
+  { name: "Bengaluru", code: "BE" },
+  { name: "Mumbai", code: "MU" },
+  { name: "Delhi NCR", code: "DE" },
+  { name: "Hyderabad", code: "HY" },
+  { name: "Chennai", code: "CH" },
+  { name: "Pune", code: "PU" },
+  { name: "Kolkata", code: "KO" },
+  { name: "Ahmedabad", code: "AH" },
+  { name: "Gurugram", code: "GU" },
+  { name: "Noida", code: "NO" },
+  { name: "Others...", code: "OT" },
 ];
 
 export default function RegisterPage() {
@@ -17,6 +32,8 @@ export default function RegisterPage() {
     name: "",
     email: "",
     phone: "",
+    city: "Kochi",
+    customCity: "",
     password: "",
     confirmPassword: "",
     role: "USER",
@@ -30,6 +47,10 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
+    if (!form.phone || form.phone.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -41,6 +62,8 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
+      const selectedCity = form.city === "Others..." ? (form.customCity.trim() || "Others") : form.city;
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,6 +71,7 @@ export default function RegisterPage() {
           name: form.name,
           email: form.email,
           phone: form.phone || undefined,
+          city: selectedCity,
           password: form.password,
           role: form.role,
         }),
@@ -93,7 +117,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re One Stop Page</span>
+            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re Onestop Page</span>
           </Link>
           <p className="text-xs text-slate-400 mt-2 font-mono">India's Verified Property Marketplace</p>
         </div>
@@ -147,14 +171,13 @@ export default function RegisterPage() {
 
             {/* Phone */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                Mobile Number <span className="text-slate-300 font-normal">(optional)</span>
-              </label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Mobile Number</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   id="reg-phone"
                   type="text"
+                  required
                   maxLength={10}
                   value={form.phone}
                   onChange={(e) => setForm(p => ({ ...p, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
@@ -162,6 +185,38 @@ export default function RegisterPage() {
                   className="w-full pl-9 pr-4 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
                 />
               </div>
+            </div>
+
+            {/* Primary City */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Primary City</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <select
+                  id="reg-city"
+                  value={form.city}
+                  onChange={(e) => setForm(p => ({ ...p, city: e.target.value }))}
+                  className="w-full pl-9 pr-8 py-2.5 border border-line rounded-xl text-sm bg-secondary appearance-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition cursor-pointer"
+                >
+                  {CITIES.map(c => (
+                    <option key={c.name} value={c.name}>{c.name} ({c.code})</option>
+                  ))}
+                </select>
+              </div>
+
+              {form.city === "Others..." && (
+                <div className="mt-2.5 relative animate-fadeIn">
+                  <input
+                    type="text"
+                    required
+                    value={form.customCity}
+                    onChange={(e) => setForm(p => ({ ...p, customCity: e.target.value }))}
+                    placeholder="Type your city name (e.g. Jaipur, Surat, Goa...)"
+                    className="w-full px-4 py-2.5 border border-line rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Role */}

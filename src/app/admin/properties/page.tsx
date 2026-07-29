@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { LayoutGrid, Trash2, Edit3, RotateCcw, XCircle, Star, Plus, Archive } from "lucide-react";
+import { LayoutGrid, Trash2, Edit3, RotateCcw, XCircle, Star, Plus, Archive, Search } from "lucide-react";
 import Link from "next/link";
 
 interface Property {
@@ -10,11 +10,50 @@ interface Property {
   price: number;
   status: string;
   ownerId: string;
-  owner?: { customId: string | null };
+  owner?: { customId: string | null; name?: string | null; role?: string | null };
+  city?: { name: string };
   isFeatured: boolean;
   rejectionReason?: string | null;
   images: Array<{ url: string }>;
 }
+
+const getCityCode = (cityName?: string, userId?: string) => {
+  if (cityName && cityName.trim().length >= 2) {
+    const clean = cityName.trim().toUpperCase();
+    if (clean.startsWith("BENGALURU") || clean.startsWith("BANGALORE")) return "BE";
+    if (clean.startsWith("KOCHI") || clean.startsWith("COCHIN")) return "KO";
+    if (clean.startsWith("MUMBAI") || clean.startsWith("BOMBAY")) return "MU";
+    if (clean.startsWith("DELHI")) return "DE";
+    if (clean.startsWith("HYDERABAD")) return "HY";
+    if (clean.startsWith("CHENNAI")) return "CH";
+    if (clean.startsWith("PUNE")) return "PU";
+    if (clean.startsWith("KOLKATA")) return "KO";
+    if (clean.startsWith("AHMEDABAD")) return "AH";
+    if (clean.startsWith("GURUGRAM") || clean.startsWith("GURGAON")) return "GU";
+    if (clean.startsWith("NOIDA")) return "NO";
+    return clean.substring(0, 2);
+  }
+  const cityCodes = ["KO", "MU", "BE", "DE", "HY", "CH", "PU", "AH", "GU", "NO"];
+  const charSum = (userId || "").split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return cityCodes[charSum % cityCodes.length];
+};
+
+const getOwnerDisplayId = (owner?: { customId: string | null } | null, ownerId?: string, cityName?: string) => {
+  if (owner?.customId && !owner.customId.startsWith("RE")) {
+    return owner.customId;
+  }
+  const idStr = ownerId || "";
+  const cityCode = getCityCode(cityName, idStr);
+  const deterministicNum = parseInt(idStr.substring(0, 4), 16) % 9000 + 1000;
+  return `${cityCode}${isNaN(deterministicNum) ? "1000" : deterministicNum}`;
+};
+
+const getOwnerTooltip = (owner?: { name?: string | null; role?: string | null } | null) => {
+  if (!owner || !owner.name) return "Lister Details";
+  const cleanName = owner.name.replace(/\s*\([^)]*\)/g, "").trim();
+  const roleLabel = owner.role === "AGENT" ? "Agent" : owner.role === "ADMIN" ? "Admin" : owner.role === "OWNER" ? "Owner" : "User";
+  return `${roleLabel}: ${cleanName}`;
+};
 
 export default function AdminListedProperties() {
   const [activeProperties, setActiveProperties] = useState<Property[]>([]);
@@ -25,6 +64,7 @@ export default function AdminListedProperties() {
   const [archivingId, setArchivingId] = useState<string | null>(null);
   const [archiveReason, setArchiveReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -158,8 +198,32 @@ export default function AdminListedProperties() {
     );
   }
 
+  const filteredActive = activeProperties.filter(p => {
+    const ownerDisplayId = getOwnerDisplayId(p.owner, p.ownerId, p.city?.name);
+    const ownerName = p.owner?.name || "";
+    return (
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      ownerDisplayId.toLowerCase().includes(search.toLowerCase()) ||
+      ownerName.toLowerCase().includes(search.toLowerCase()) ||
+      p.ownerId.toLowerCase().includes(search.toLowerCase()) ||
+      p.price.toString().includes(search)
+    );
+  });
+
+  const filteredArchived = archivedProperties.filter(p => {
+    const ownerDisplayId = getOwnerDisplayId(p.owner, p.ownerId, p.city?.name);
+    const ownerName = p.owner?.name || "";
+    return (
+      p.title.toLowerCase().includes(search.toLowerCase()) ||
+      ownerDisplayId.toLowerCase().includes(search.toLowerCase()) ||
+      ownerName.toLowerCase().includes(search.toLowerCase()) ||
+      p.ownerId.toLowerCase().includes(search.toLowerCase()) ||
+      p.price.toString().includes(search)
+    );
+  });
+
   return (
-    <div className="space-y-10 text-left relative">
+    <div className="space-y-8 text-left relative">
       {/* Active Properties Card */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -177,7 +241,24 @@ export default function AdminListedProperties() {
           </Link>
         </div>
 
-        {activeProperties.length === 0 ? (
+        {/* Search Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white p-3.5 rounded-2xl border border-line shadow-xs">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search properties by title, owner ID, or price..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-secondary/50 border border-line rounded-xl pl-10 pr-4 py-2 text-xs focus:outline-none focus:border-accent text-primary transition"
+            />
+          </div>
+          <div className="text-xs font-mono font-semibold text-slate-400">
+            {filteredActive.length} active listings
+          </div>
+        </div>
+
+        {filteredActive.length === 0 ? (
           <div className="border border-line rounded-2xl p-12 text-center bg-secondary/35">
             <p className="text-xs text-slate-500 leading-relaxed">No active listed properties found.</p>
           </div>
@@ -197,7 +278,7 @@ export default function AdminListedProperties() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {activeProperties.map((prop) => {
+                  {filteredActive.map((prop) => {
                     const coverUrl = prop.images && prop.images.length > 0
                       ? prop.images[0].url
                       : "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80";
@@ -212,9 +293,9 @@ export default function AdminListedProperties() {
                             {prop.title}
                           </Link>
                         </td>
-                        <td className="px-6 py-4 font-mono text-[10px] text-slate-400 select-all max-w-[100px] truncate" title={prop.owner?.customId || prop.ownerId}>
+                        <td className="px-6 py-4 font-mono text-[10px] text-slate-400 select-all max-w-[100px] truncate" title={getOwnerTooltip(prop.owner)}>
                           <span className="text-[11px] font-bold text-secondary bg-primary shadow-xs px-2.5 py-1 rounded border border-primary tracking-wider">
-                            {prop.owner?.customId || prop.ownerId}
+                            {getOwnerDisplayId(prop.owner, prop.ownerId, prop.city?.name)}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
@@ -297,12 +378,12 @@ export default function AdminListedProperties() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {archivedProperties.map((prop) => (
+                  {filteredArchived.map((prop) => (
                     <tr key={prop.id} className="hover:bg-secondary/15 transition-colors">
                       <td className="px-6 py-4 font-semibold text-slate-700">{prop.title}</td>
-                      <td className="px-6 py-4 font-mono text-[10px] text-slate-400 select-all max-w-[100px] truncate" title={prop.owner?.customId || prop.ownerId}>
+                      <td className="px-6 py-4 font-mono text-[10px] text-slate-400 select-all max-w-[100px] truncate" title={getOwnerTooltip(prop.owner)}>
                         <span className="text-[11px] font-bold text-secondary bg-primary shadow-xs px-2.5 py-1 rounded border border-primary tracking-wider">
-                          {prop.owner?.customId || prop.ownerId}
+                          {getOwnerDisplayId(prop.owner, prop.ownerId, prop.city?.name)}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-500 italic max-w-xs truncate">

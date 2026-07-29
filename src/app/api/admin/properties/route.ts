@@ -12,10 +12,21 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const ownerId = searchParams.get("ownerId");
+
+    const whereClause: any = {};
+    if (ownerId) {
+      whereClause.ownerId = ownerId;
+    }
+
     const properties = await prisma.property.findMany({
+      where: whereClause,
       include: {
         images: { take: 1 },
-        owner: { select: { customId: true } }
+        city: { select: { name: true } },
+        locality: { select: { name: true } },
+        owner: { select: { customId: true, name: true, role: true } }
       },
       orderBy: { updatedAt: "desc" },
     });

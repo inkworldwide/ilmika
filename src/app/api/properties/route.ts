@@ -310,13 +310,34 @@ export async function GET(req: Request) {
               amenity: true,
             },
           },
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+              agentProfile: {
+                select: {
+                  isFeatured: true
+                }
+              }
+            }
+          }
         },
       }),
       prisma.property.count({ where }),
     ]);
 
+    // Sort properties so that properties from Featured Agents and Owners appear first
+    const sortedProperties = [...properties].sort((a: any, b: any) => {
+      const aIsFeatured = (a.isFeatured ?? false) || (a.owner?.agentProfile?.isFeatured ?? false);
+      const bIsFeatured = (b.isFeatured ?? false) || (b.owner?.agentProfile?.isFeatured ?? false);
+      if (aIsFeatured && !bIsFeatured) return -1;
+      if (!aIsFeatured && bIsFeatured) return 1;
+      return 0;
+    });
+
     return NextResponse.json({
-      properties,
+      properties: sortedProperties,
       meta: {
         total: totalCount,
         page,

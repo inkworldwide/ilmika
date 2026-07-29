@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch all active agent user IDs
   const agents = await prisma.user.findMany({
-    where: { role: "AGENT" },
+    where: { role: "AGENT", isApproved: true, isSuspended: false },
     select: { id: true, updatedAt: true },
   });
 

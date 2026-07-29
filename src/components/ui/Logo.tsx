@@ -36,7 +36,7 @@ export const Logo: React.FC<LogoProps> = ({
       {/* Brand Text */}
       <div className="flex items-center text-[15px] sm:text-[17px] md:text-[19px] lg:text-[22px] font-extrabold tracking-[0.02em] whitespace-nowrap">
         <span className="text-[#D4AF37]">Re</span>
-        <span className={`mx-1.5 md:mx-2 ${theme === "dark" ? "text-white" : "text-[#0F172A]"}`}>One Stop</span>
+        <span className={`mx-1.5 md:mx-2 ${theme === "dark" ? "text-white" : "text-[#0F172A]"}`}>Onestop</span>
         <span className="text-[#D4AF37]">Page</span>
       </div>
     </Link>

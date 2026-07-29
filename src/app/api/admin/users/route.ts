@@ -24,14 +24,24 @@ export async function GET(req: Request) {
         role: true,
         isEmailVerified: true,
         isApproved: true,
+        isSuspended: true,
         createdAt: true,
         plainPassword: true,
+        properties: {
+          select: {
+            city: {
+              select: { name: true }
+            }
+          },
+          take: 1
+        },
         agentProfile: {
           select: {
             id: true,
             companyName: true,
             experienceYears: true,
             ratingAverage: true,
+            isFeatured: true,
           },
         },
       },
@@ -60,7 +70,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { targetUserId, name, email, phone, role, isApproved, password } = body;
+    const { targetUserId, name, email, phone, role, isApproved, isSuspended, isAgentFeatured, password } = body;
 
     if (!targetUserId) {
       return NextResponse.json(
@@ -85,6 +95,7 @@ export async function PUT(req: Request) {
       if (phone !== undefined) updateData.phone = phone || null;
       if (role !== undefined) updateData.role = role as Role;
       if (isApproved !== undefined) updateData.isApproved = isApproved;
+      if (isSuspended !== undefined) updateData.isSuspended = isSuspended;
       if (password !== undefined && password.trim() !== "") {
         updateData.plainPassword = password;
         updateData.passwordHash = await hashPassword(password);
@@ -95,8 +106,9 @@ export async function PUT(req: Request) {
         data: updateData,
       });
 
-      // If role becomes AGENT, ensure AgentProfile exists
-      if (role === "AGENT") {
+      // If approving an AGENT or OWNER, ensure AgentProfile exists
+      const targetUserRole = role || user.role;
+      if (isApproved && (targetUserRole === "AGENT" || targetUserRole === "OWNER")) {
         const existing = await tx.agentProfile.findUnique({
           where: { userId: targetUserId },
         });
@@ -104,8 +116,30 @@ export async function PUT(req: Request) {
           await tx.agentProfile.create({
             data: {
               userId: targetUserId,
-              companyName: "Re One Stop Page Agent",
+              companyName: `${targetUserRole === "AGENT" ? "Re Onestop Page Agent" : "Property Owner"}`,
               experienceYears: 1,
+              isFeatured: true,
+            },
+          });
+        }
+      }
+
+      if (isAgentFeatured !== undefined) {
+        const profile = await tx.agentProfile.findUnique({
+          where: { userId: targetUserId },
+        });
+        if (profile) {
+          await tx.agentProfile.update({
+            where: { userId: targetUserId },
+            data: { isFeatured: isAgentFeatured },
+          });
+        } else if (isAgentFeatured) {
+          await tx.agentProfile.create({
+            data: {
+              userId: targetUserId,
+              companyName: "Re Onestop Page Agent",
+              experienceYears: 1,
+              isFeatured: true,
             },
           });
         }

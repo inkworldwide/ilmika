@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fdfbf7;
+  --foreground: #0f172a;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  --color-primary: #0f172a;
+  --color-secondary: #fdfbf7;
+  --color-paper: #f5f2e9;
+  --color-accent: #d4af37;
+  --color-accent-hover: #c59f2e;
+  --color-highlight: #6366f1;
+  --color-line: #e2dac6;
+  
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
+  
+  --animate-shimmer: shimmer 2s infinite linear;
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Keytag Punched Hole Signature Shape */
+.keytag {
+  position: relative;
+  border-radius: 16px;
+}
+
+.keytag::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #fdfbf7;
+  border: 2px solid #e2dac6;
+  z-index: 2;
+}
+
+.keytag::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #c9bc98;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+.keytag-dark::before {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.keytag-dark::after {
+  background: #64748b;
+}
+
+/* Price tag on cards */
+.price-tag {
+  position: relative;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.price-tag::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 24px;
+  background: inherit;
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+
+.price-tag::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #fdfbf7;
+  z-index: 2;
+}
+
+/* Hide scrollbars but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom shimmer skeleton */
+.shimmer-bg {
+  background: linear-gradient(90deg, #f5f2e9 25%, #e2dac6 50%, #f5f2e9 75%);
+  background-size: 200% 100%;
+}
+
+/* Prefers Reduced Motion Accessibility Support */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
 }

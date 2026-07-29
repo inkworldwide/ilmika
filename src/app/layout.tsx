@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Re Onestop Page — Premium Real Estate Platform in India",
-    template: "%s | Re Onestop Page",
+    default: "RE OneStopPage — Premium Real Estate Platform in India",
+    template: "%s | RE OneStopPage",
   },
   description: "Browse verified residential apartments, independent villas, builder floors, PGs, and commercial workspaces in India. Lease, buy, or rent with zero brokerage hassles.",
   metadataBase: new URL("https://rentahouse.in"),
@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Re Onestop Page — Premium Indian Real Estate Platform",
-    description: "Browse verified apartments, PGs, villas, and workspaces in India. Experience seamless digital leasing and direct landlord messaging.",
+    title: "RE OneStopPage — Premium Indian Real Estate Platform",
+    description: "Browse verified apartments, PGs, and workspaces in India. Experience seamless digital leasing and direct landlord messaging.",
     url: "https://rentahouse.in",
-    siteName: "Re Onestop Page",
+    siteName: "RE OneStopPage",
     locale: "en_IN",
     type: "website",
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, Sparkles, ArrowRight, FileText, Building2, UserCheck, Home, Briefcase, MapPin, Compass } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -52,14 +52,14 @@ export const SERVICES_DATA = [
     name: "Buying",
     href: "/properties?transactionType=SALE",
     txParam: "SALE",
-    hasAvailableRequired: false,
+    hasAvailableRequired: true,
     categories: SHARED_CATEGORIES
   },
   {
     name: "Selling",
     href: "/properties?transactionType=SALE",
     txParam: "SALE",
-    hasAvailableRequired: false,
+    hasAvailableRequired: true,
     categories: SHARED_CATEGORIES
   },
   {
@@ -80,7 +80,7 @@ export const SERVICES_DATA = [
     name: "PG/Co-living",
     href: "/properties?propertyType=PG",
     txParam: "RENT",
-    hasAvailableRequired: false,
+    hasAvailableRequired: true,
     categories: [
       {
         name: "Houses",
@@ -140,6 +140,16 @@ const CategoryList = ({ categories, txParam }: { categories: any[], txParam?: st
 export default function NavMenu() {
   const [activeService, setActiveService] = useState<string>("Buying");
   const pathname = usePathname();
+  
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const search = window.location.search.toLowerCase();
+      if (search.includes("lease")) setActiveService("Leasing");
+      else if (search.includes("rent")) setActiveService("Renting");
+      else if (search.includes("pg")) setActiveService("PG/Co-living");
+      else if (search.includes("sale")) setActiveService("Buying");
+    }
+  }, [pathname]);
   
   return (
     <nav className="hidden lg:flex items-center gap-8 text-[15px] font-semibold text-primary/80">
@@ -207,7 +217,7 @@ export default function NavMenu() {
                     </p>
 
                     <Link 
-                      href="/inquire" 
+                      href={`/inquire?purpose=${encodeURIComponent(activeService)}`} 
                       className="inline-flex items-center gap-2 bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm cursor-pointer hover:translate-x-0.5 transform"
                     >
                       <span>Post Custom Requirement</span>
@@ -224,19 +234,19 @@ export default function NavMenu() {
                       </h4>
                       <ul className="space-y-2.5 pl-3 text-xs text-slate-600">
                         <li>
-                          <Link href="/inquire?category=residential" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=residential&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>Flats & Apartments Wanted</span>
                           </Link>
                         </li>
                         <li>
-                          <Link href="/inquire?category=villa" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=villa&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>Villas & Luxury Homes Wanted</span>
                           </Link>
                         </li>
                         <li>
-                          <Link href="/inquire?category=studio" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=studio&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <Home className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>Studio Apartments Wanted</span>
                           </Link>
@@ -251,19 +261,19 @@ export default function NavMenu() {
                       </h4>
                       <ul className="space-y-2.5 pl-3 text-xs text-slate-600">
                         <li>
-                          <Link href="/inquire?category=commercial" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=commercial&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <Briefcase className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>Commercial Offices & Shops Demands</span>
                           </Link>
                         </li>
                         <li>
-                          <Link href="/inquire?category=pg" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=pg&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <Building2 className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>PG & Co-Living Spaces Wanted</span>
                           </Link>
                         </li>
                         <li>
-                          <Link href="/inquire?category=land" className="hover:text-accent font-medium transition flex items-center gap-2 group">
+                          <Link href={`/inquire?category=land&purpose=${encodeURIComponent(activeService)}`} className="hover:text-accent font-medium transition flex items-center gap-2 group">
                             <MapPin className="w-3.5 h-3.5 text-accent transition-transform group-hover:scale-110" />
                             <span>Land & Plot Acquisition Requests</span>
                           </Link>

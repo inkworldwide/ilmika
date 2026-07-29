@@ -5,7 +5,7 @@ import { NotificationType } from "@prisma/client";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, message, purpose, propertyType, city, budget, type } = body;
+    const { name, email, phone, message, purpose, propertyType, city, localities, budget, type } = body;
 
     // Build a readable message string from the payload
     let notificationText = `New ${type || "Contact"} from ${name} (${email}, ${phone}):\n`;
@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     if (purpose) notificationText += `Purpose: ${purpose}\n`;
     if (propertyType) notificationText += `Type: ${propertyType}\n`;
     if (city) notificationText += `City: ${city}\n`;
+    if (localities) notificationText += `Localities: ${localities}\n`;
     if (budget) notificationText += `Budget: ${budget}\n`;
     if (message) notificationText += `Message: ${message}`;
 

@@ -45,7 +45,7 @@ export default function MobileNavMenu({ closeMenu }: { closeMenu: () => void }) 
                       <div className="bg-slate-900 text-white rounded-xl p-3.5 text-xs space-y-2.5 border border-slate-800 my-1">
                         <p className="text-slate-300 leading-relaxed">Can't find your ideal property? Post your requirement to get matched directly with verified owners & agents.</p>
                         <Link 
-                          href="/inquire" 
+                          href={`/inquire?purpose=${encodeURIComponent(service.name)}`} 
                           onClick={closeMenu} 
                           className="inline-block bg-accent hover:bg-accent-hover text-primary font-bold px-3.5 py-1.5 rounded-lg text-xs"
                         >

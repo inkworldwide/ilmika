@@ -28,63 +28,55 @@ const POPULAR_LOCALITIES_MAP: Record<string, string[]> = {
 function InquireFormContent() {
   const searchParams = useSearchParams();
 
-  const getParam = (keys: string[]) => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      for (const k of keys) {
-        const val = urlParams.get(k);
-        if (val) return val;
-      }
-    }
-    for (const k of keys) {
-      const val = searchParams.get(k);
-      if (val) return val;
-    }
+  const mapPurpose = (param: string) => {
+    if (!param) return "";
+    const lower = param.toLowerCase().trim();
+    if (lower.includes("lease") || lower === "leasing") return "Leasing";
+    if (lower.includes("rent") || lower === "renting") return "Renting";
+    if (lower.includes("sell") || lower === "selling") return "Selling";
+    if (lower.includes("pg") || lower.includes("co-living")) return "PG / Co-living";
+    if (lower.includes("buy") || lower.includes("sale") || lower === "buying") return "Buying";
     return "";
   };
 
-  const rawPurpose = getParam(["purpose", "purposeParam", "tx", "transactionType"]);
-  const rawCategory = getParam(["category", "propertyType"]);
-
-  const getInitialPurpose = (param: string) => {
-    if (!param) return "Buying";
-    const lower = param.toLowerCase().trim();
-    if (lower.includes("lease")) return "Leasing";
-    if (lower.includes("rent")) return "Renting";
-    if (lower.includes("sell")) return "Selling";
-    if (lower.includes("pg") || lower.includes("co-living")) return "PG / Co-living";
-    if (lower.includes("buy") || lower.includes("sale")) return "Buying";
-    return "Buying";
-  };
-
-  const getInitialPropertyType = (param: string) => {
-    if (!param) return "House / Apartment";
+  const mapPropertyType = (param: string) => {
+    if (!param) return "";
     const lower = param.toLowerCase().trim();
     if (lower.includes("commercial") || lower.includes("office") || lower.includes("shop")) return "Commercial Space";
     if (lower.includes("industrial") || lower.includes("industry")) return "Industrial Building";
     if (lower.includes("land") || lower.includes("plot")) return "Land / Plot";
     if (lower.includes("pg") || lower.includes("co-living")) return "PG / Co-living";
-    return "House / Apartment";
+    return "";
   };
 
-  const [purpose, setPurpose] = useState(() => getInitialPurpose(rawPurpose));
-  const [propertyType, setPropertyType] = useState(() => getInitialPropertyType(rawCategory));
+  const [purpose, setPurpose] = useState("Buying");
+  const [propertyType, setPropertyType] = useState("House / Apartment");
   const [city, setCity] = useState("");
   const [localities, setLocalities] = useState<[string, string, string]>(["", "", ""]);
 
+  // Read URL params on mount (client-side only) — this is the primary mechanism
   useEffect(() => {
-    const current = getParam(["purpose", "purposeParam", "tx", "transactionType"]);
-    if (current) {
-      setPurpose(getInitialPurpose(current));
-    }
-  }, [rawPurpose, searchParams]);
+    const urlParams = new URLSearchParams(window.location.search);
+    const purposeVal = urlParams.get("purpose") || urlParams.get("purposeParam") || urlParams.get("tx") || urlParams.get("transactionType") || "";
+    const categoryVal = urlParams.get("category") || urlParams.get("propertyType") || "";
+    
+    const mapped = mapPurpose(purposeVal);
+    if (mapped) setPurpose(mapped);
+    
+    const mappedCat = mapPropertyType(categoryVal);
+    if (mappedCat) setPropertyType(mappedCat);
+  }, []);
 
+  // Also react to searchParams changes for in-app navigation
   useEffect(() => {
-    const currentCat = getParam(["category", "propertyType"]);
-    if (currentCat) {
-      setPropertyType(getInitialPropertyType(currentCat));
-    }
-  }, [rawCategory, searchParams]);
+    const purposeVal = searchParams.get("purpose") || searchParams.get("purposeParam") || searchParams.get("tx") || searchParams.get("transactionType") || "";
+    const mapped = mapPurpose(purposeVal);
+    if (mapped) setPurpose(mapped);
+
+    const categoryVal = searchParams.get("category") || searchParams.get("propertyType") || "";
+    const mappedCat = mapPropertyType(categoryVal);
+    if (mappedCat) setPropertyType(mappedCat);
+  }, [searchParams]);
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -110,6 +102,8 @@ function InquireFormContent() {
 
   const [budgetRange, setBudgetRange] = useState("Under ₹50 Lacs");
   const [customBudget, setCustomBudget] = useState("");
+  const [showCustomLocalityInput, setShowCustomLocalityInput] = useState(false);
+  const [customLocalityInput, setCustomLocalityInput] = useState("");
 
   const handleLocalityChange = (index: number, value: string) => {
     const next = [...localities] as [string, string, string];
@@ -129,6 +123,28 @@ function InquireFormContent() {
     } else {
       handleLocalityChange(2, localityName);
     }
+  };
+
+  const handleAddCustomLocalitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const val = customLocalityInput.trim();
+    if (!val) return;
+
+    if (localities.includes(val)) {
+      setCustomLocalityInput("");
+      setShowCustomLocalityInput(false);
+      return;
+    }
+
+    const emptyIndex = localities.findIndex(l => !l.trim());
+    if (emptyIndex !== -1) {
+      handleLocalityChange(emptyIndex, val);
+    } else {
+      handleLocalityChange(2, val);
+    }
+
+    setCustomLocalityInput("");
+    setShowCustomLocalityInput(false);
   };
 
   const getMatchingLocalities = (cityName: string) => {
@@ -293,11 +309,11 @@ function InquireFormContent() {
                     <span className="text-[11px] text-slate-500 font-medium">Click suggestions or type custom areas</span>
                   </div>
 
-                  {/* Popular Locality Chips */}
-                  {matchingLocalities.length > 0 && (
+                  {/* Popular Locality Chips + Custom Locality Plus Chip */}
+                  {(matchingLocalities.length > 0 || localities.some(l => l.trim().length > 0)) && (
                     <div className="space-y-1.5 pt-1">
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Popular in {city}:</p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 items-center">
                         {matchingLocalities.map((loc) => {
                           const isSelected = localities.includes(loc);
                           return (
@@ -316,6 +332,54 @@ function InquireFormContent() {
                             </button>
                           );
                         })}
+
+                        {/* Custom user-added localities not in predefined list */}
+                        {localities
+                          .filter(loc => loc.trim().length > 0 && !matchingLocalities.includes(loc.trim()))
+                          .map((loc, idx) => (
+                            <button
+                              key={`custom-${idx}-${loc}`}
+                              type="button"
+                              onClick={() => handleChipClick(loc)}
+                              className="text-xs px-3 py-1.5 rounded-xl border border-accent bg-accent/15 text-accent font-bold shadow-xs cursor-pointer flex items-center gap-1.5"
+                              title="Click to remove"
+                            >
+                              <span>✓</span>
+                              <span>{loc}</span>
+                              <span className="text-[10px] ml-0.5 opacity-70 hover:opacity-100">✕</span>
+                            </button>
+                          ))
+                        }
+
+                        {/* Plus icon / Add Other Locality chip */}
+                        {showCustomLocalityInput ? (
+                          <form onSubmit={handleAddCustomLocalitySubmit} className="flex items-center gap-1 bg-white border border-accent/80 rounded-xl px-2.5 py-1 shadow-xs animate-fadeIn">
+                            <input
+                              type="text"
+                              autoFocus
+                              value={customLocalityInput}
+                              onChange={(e) => setCustomLocalityInput(e.target.value)}
+                              placeholder="Type custom locality..."
+                              className="text-xs px-1 py-0.5 outline-none w-36 text-slate-800 font-medium"
+                            />
+                            <button type="submit" className="text-xs bg-accent text-primary px-2.5 py-1 rounded-lg font-bold hover:bg-accent/90 cursor-pointer">
+                              Add
+                            </button>
+                            <button type="button" onClick={() => setShowCustomLocalityInput(false)} className="text-xs text-slate-400 hover:text-slate-600 px-1 cursor-pointer">
+                              ✕
+                            </button>
+                          </form>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomLocalityInput(true)}
+                            className="text-xs px-3 py-1.5 rounded-xl border border-dashed border-accent/60 text-accent font-semibold bg-accent/5 hover:bg-accent/20 transition cursor-pointer flex items-center gap-1.5"
+                            title="Add another custom locality"
+                          >
+                            <span className="font-bold text-sm">+</span>
+                            <span>Other Locality</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}

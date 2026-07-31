@@ -80,7 +80,7 @@ export const SERVICES_DATA = [
     name: "PG/Co-living",
     href: "/properties?propertyType=PG",
     txParam: "RENT",
-    hasAvailableRequired: true,
+    hasAvailableRequired: false,
     categories: [
       {
         name: "Houses",

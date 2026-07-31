@@ -125,8 +125,8 @@ function InquireFormContent() {
     }
   };
 
-  const handleAddCustomLocalitySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddCustomLocalitySubmit = (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
     const val = customLocalityInput.trim();
     if (!val) return;
 
@@ -353,22 +353,36 @@ function InquireFormContent() {
 
                         {/* Plus icon / Add Other Locality chip */}
                         {showCustomLocalityInput ? (
-                          <form onSubmit={handleAddCustomLocalitySubmit} className="flex items-center gap-1 bg-white border border-accent/80 rounded-xl px-2.5 py-1 shadow-xs animate-fadeIn">
+                          <div className="flex items-center gap-1 bg-white border border-accent/80 rounded-xl px-2.5 py-1 shadow-xs animate-fadeIn">
                             <input
                               type="text"
                               autoFocus
                               value={customLocalityInput}
                               onChange={(e) => setCustomLocalityInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleAddCustomLocalitySubmit();
+                                }
+                              }}
                               placeholder="Type custom locality..."
                               className="text-xs px-1 py-0.5 outline-none w-36 text-slate-800 font-medium"
                             />
-                            <button type="submit" className="text-xs bg-accent text-primary px-2.5 py-1 rounded-lg font-bold hover:bg-accent/90 cursor-pointer">
+                            <button
+                              type="button"
+                              onClick={() => handleAddCustomLocalitySubmit()}
+                              className="text-xs bg-accent text-primary px-2.5 py-1 rounded-lg font-bold hover:bg-accent/90 cursor-pointer"
+                            >
                               Add
                             </button>
-                            <button type="button" onClick={() => setShowCustomLocalityInput(false)} className="text-xs text-slate-400 hover:text-slate-600 px-1 cursor-pointer">
+                            <button
+                              type="button"
+                              onClick={() => setShowCustomLocalityInput(false)}
+                              className="text-xs text-slate-400 hover:text-slate-600 px-1 cursor-pointer"
+                            >
                               ✕
                             </button>
-                          </form>
+                          </div>
                         ) : (
                           <button
                             type="button"

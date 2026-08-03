@@ -36,7 +36,7 @@ export default async function PublicAgentProfilePage({ params }: PageProps) {
     },
   });
 
-  if (!agentUser || agentUser.role !== "AGENT" || !agentUser.agentProfile) {
+  if (!agentUser || !["AGENT", "OWNER"].includes(agentUser.role) || !agentUser.agentProfile) {
     return notFound();
   }
 

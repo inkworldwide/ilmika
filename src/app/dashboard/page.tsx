@@ -110,44 +110,62 @@ export default function DashboardOverview() {
         {user.role === "USER" ? (
           // USER / Seeker Stats
           <>
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <Heart className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/saved" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <Heart className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.savedCount || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Shortlisted Properties</p>
-            </div>
+            </Link>
 
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <Mail className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <Mail className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.enquiriesCount || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Sent Enquiries</p>
-            </div>
+            </Link>
 
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <CalendarRange className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/visits" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <CalendarRange className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.visitsCount || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Scheduled Visits</p>
-            </div>
+            </Link>
           </>
         ) : (
           // OWNER / AGENT / ADMIN Stats
           <>
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <Building2 className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/properties" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <Building2 className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.totalProperties || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Total Listings ({stats?.activeProperties || 0} Active)</p>
-            </div>
+            </Link>
 
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <Eye className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/analytics" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <Eye className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.totalViews || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Total Views generated</p>
-            </div>
+            </Link>
 
-            <div className="bg-secondary border border-line rounded-xl p-5 shadow-xs">
-              <Mail className="w-8 h-8 text-accent mb-3" />
+            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <Mail className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.enquiriesCount || 0}</p>
               <p className="text-xs text-slate-500 mt-0.5">Total Enquiries &amp; Leads</p>
-            </div>
+            </Link>
           </>
         )}
       </div>

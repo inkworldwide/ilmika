@@ -50,13 +50,13 @@ export async function POST(
       return NextResponse.json({ error: "Property not found" }, { status: 404 });
     }
 
-    // Create a callback enquiry notification for the owner
+    // Create a callback enquiry and notify owner + all admins
     await prisma.$transaction(async (tx) => {
       // Create an enquiry record marked as callback
       await tx.enquiry.create({
         data: {
           propertyId,
-          senderId: user?.id || property.ownerId, // fallback to owner if unauthenticated
+          senderId: user?.id || property.ownerId, // fallback if unauthenticated
           name,
           email: user?.email || `${phone}@callback.rentahouse.in`,
           phone,
@@ -66,18 +66,27 @@ export async function POST(
         },
       });
 
-      // Notify the property owner
-      await tx.notification.create({
-        data: {
-          userId: property.ownerId,
-          type: NotificationType.ENQUIRY,
-          message: `${name} (${phone}) has requested a callback for: "${property.title}"${preferredTime ? ` — Preferred: ${preferredTime}` : ""}`,
-        },
+      // Find all Admins
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN" },
+        select: { id: true },
       });
+
+      const notifyUserIds = Array.from(new Set([property.ownerId, ...admins.map(a => a.id)]));
+
+      for (const uid of notifyUserIds) {
+        await tx.notification.create({
+          data: {
+            userId: uid,
+            type: NotificationType.ENQUIRY,
+            message: `📞 Callback Request from ${name} (${phone}) for "${property.title}"${preferredTime ? ` — Preferred: ${preferredTime}` : ""}`,
+          },
+        });
+      }
     });
 
     return NextResponse.json(
-      { message: "Callback request submitted. The owner will contact you shortly." },
+      { message: "Callback request submitted. Our admin team will contact you shortly." },
       { status: 201 }
     );
   } catch (error: any) {

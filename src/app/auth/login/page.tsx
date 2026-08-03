@@ -57,7 +57,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re Onestop Page</span>
+            <span className="font-serif text-2xl font-bold text-primary tracking-tight">RE OneStopPage</span>
           </Link>
           <p className="text-xs text-slate-400 mt-2 font-mono">India's Verified Property Marketplace</p>
         </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
           <div>
             <h1 className="font-serif text-xl font-bold text-primary">Welcome back</h1>
-            <p className="text-xs text-slate-400 mt-1">Sign in to your Re Onestop Page account</p>
+            <p className="text-xs text-slate-400 mt-1">Sign in to your RE OneStopPage account</p>
           </div>
 
           {error && (

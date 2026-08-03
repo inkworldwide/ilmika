@@ -8,7 +8,7 @@ import {
   Mail, MessageSquare, Phone, ChevronLeft, ChevronRight, Eye, 
   Star, Award, CheckCircle2, Send, Clock, Heart, Link as LinkIcon, 
   BarChart3, AlertTriangle, ArrowUpRight, Bus, Train, Plane,
-  Wifi, Dumbbell, Car, Waves, Shield, Zap, ArrowUpDown, Leaf, Home, Flame, Droplet, TreePine, Droplets
+  Wifi, Dumbbell, Car, Waves, Shield, Zap, ArrowUpDown, Leaf, Home, Flame, Droplet, TreePine, Droplets, Camera
 } from "lucide-react";
 import PropertyCard from "./PropertyCard";
 
@@ -57,6 +57,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
   // Image index active state
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [galleryMode, setGalleryMode] = useState<"photos" | "video">("photos");
+  const [selectedPlaceName, setSelectedPlaceName] = useState<string | null>(null);
 
   // Helper to resolve coordinates deterministically from PIN code or City
   const getCoordinates = () => {
@@ -853,33 +854,79 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
           {/* Amenities checklist */}
           {property.amenities && property.amenities.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-serif text-xl font-semibold text-primary">Amenities</h3>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-xl font-semibold text-primary">Amenities &amp; Facilities</h3>
+                <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/80 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Verified Facilities
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {property.amenities.map(({ amenity }: any) => {
-                  // Map amenities to specific Lucide icons and colors based on Image 2 style
                   let Icon = ShieldCheck;
-                  let bgClass = "bg-blue-50 text-blue-500";
-                  let iconColor = "text-slate-800";
-                  
+                  let iconBgGradient = "from-blue-500 via-indigo-600 to-blue-700";
+                  let shadowColor = "shadow-blue-500/25";
+                  let iconColor = "text-white";
+
                   const name = amenity.name.toLowerCase();
-                  if (name.includes("power")) { Icon = Zap; bgClass = "bg-orange-100 text-orange-500"; iconColor = "text-slate-800"; }
-                  else if (name.includes("security") || name.includes("cctv")) { Icon = ShieldCheck; bgClass = "bg-blue-50 text-blue-400"; iconColor = "text-blue-500"; }
-                  else if (name.includes("parking")) { Icon = Car; bgClass = "bg-slate-100 text-slate-500"; iconColor = "text-slate-900"; }
-                  else if (name.includes("water")) { Icon = Droplets; bgClass = "bg-cyan-50 text-cyan-500"; iconColor = "text-slate-900"; }
-                  else if (name.includes("gym") || name.includes("fitness")) { Icon = Dumbbell; bgClass = "bg-rose-50 text-rose-500"; iconColor = "text-slate-800"; }
-                  else if (name.includes("pool") || name.includes("swim")) { Icon = Waves; bgClass = "bg-sky-50 text-sky-500"; iconColor = "text-slate-800"; }
-                  else if (name.includes("garden") || name.includes("park")) { Icon = TreePine; bgClass = "bg-emerald-50 text-emerald-500"; iconColor = "text-slate-800"; }
-                  else if (name.includes("wifi") || name.includes("internet")) { Icon = Wifi; bgClass = "bg-indigo-50 text-indigo-500"; iconColor = "text-slate-800"; }
-                  else if (name.includes("elevator") || name.includes("lift")) { Icon = ArrowUpDown; bgClass = "bg-slate-100 text-slate-500"; iconColor = "text-slate-800"; }
+                  if (name.includes("power") || name.includes("backup")) {
+                    Icon = Zap;
+                    iconBgGradient = "from-amber-400 via-orange-500 to-amber-600";
+                    shadowColor = "shadow-orange-500/25";
+                  } else if (name.includes("cctv") || name.includes("camera")) {
+                    Icon = Camera;
+                    iconBgGradient = "from-indigo-500 via-purple-600 to-indigo-700";
+                    shadowColor = "shadow-indigo-500/25";
+                  } else if (name.includes("security")) {
+                    Icon = ShieldCheck;
+                    iconBgGradient = "from-blue-500 via-blue-600 to-indigo-700";
+                    shadowColor = "shadow-blue-500/25";
+                  } else if (name.includes("parking")) {
+                    Icon = Car;
+                    iconBgGradient = "from-slate-700 via-slate-800 to-slate-900";
+                    shadowColor = "shadow-slate-900/25";
+                  } else if (name.includes("water")) {
+                    Icon = Droplets;
+                    iconBgGradient = "from-cyan-400 via-teal-500 to-cyan-600";
+                    shadowColor = "shadow-cyan-500/25";
+                  } else if (name.includes("gym") || name.includes("fitness")) {
+                    Icon = Dumbbell;
+                    iconBgGradient = "from-rose-500 via-pink-600 to-rose-700";
+                    shadowColor = "shadow-rose-500/25";
+                  } else if (name.includes("pool") || name.includes("swim")) {
+                    Icon = Waves;
+                    iconBgGradient = "from-sky-400 via-blue-500 to-sky-600";
+                    shadowColor = "shadow-sky-500/25";
+                  } else if (name.includes("garden") || name.includes("park")) {
+                    Icon = TreePine;
+                    iconBgGradient = "from-emerald-400 via-teal-600 to-emerald-700";
+                    shadowColor = "shadow-emerald-500/25";
+                  } else if (name.includes("wifi") || name.includes("internet")) {
+                    Icon = Wifi;
+                    iconBgGradient = "from-purple-500 via-indigo-600 to-purple-700";
+                    shadowColor = "shadow-purple-500/25";
+                  } else if (name.includes("elevator") || name.includes("lift")) {
+                    Icon = ArrowUpDown;
+                    iconBgGradient = "from-slate-600 via-slate-700 to-slate-800";
+                    shadowColor = "shadow-slate-600/25";
+                  }
 
                   return (
-                    <div key={amenity.id} className="flex items-center gap-3 bg-white border border-line rounded-xl px-5 py-3 shadow-xs hover:shadow-sm transition-shadow w-full sm:w-auto min-w-[200px]">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${bgClass} relative overflow-hidden`}>
-                         {/* Subtle decorative background shape like the image */}
-                         <div className="absolute inset-0 opacity-20 rotate-45 scale-150 border-4 border-current border-dashed rounded-full"></div>
-                         <Icon className={`w-5 h-5 relative z-10 ${iconColor}`} />
+                    <div 
+                      key={amenity.id} 
+                      className="flex items-center gap-3.5 bg-white border border-line/80 rounded-2xl p-3.5 shadow-xs hover:shadow-md hover:border-accent/40 hover:-translate-y-0.5 transition-all duration-300 group"
+                    >
+                      <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${iconBgGradient} ${shadowColor} shadow-md flex items-center justify-center shrink-0 border border-white/20 transform group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className={`w-5.5 h-5.5 ${iconColor}`} />
                       </div>
-                      <span className="text-sm font-medium text-primary">{amenity.name}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold text-primary block truncate group-hover:text-accent transition-colors">{amenity.name}</span>
+                        <span className="text-[10px] font-mono text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                          Available &amp; Verified
+                        </span>
+                      </div>
                     </div>
                   );
                 })}
@@ -889,35 +936,55 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
 
           {/* Locality Map Integration */}
           <div className="space-y-4">
-            <h3 className="font-serif text-xl font-semibold text-primary">Location &amp; Connectivity</h3>
-            <p className="text-xs text-slate-400 font-mono">Neighborhood and transport connectivity analysis based on PIN code: <span className="bg-accent/5 px-2 py-0.5 rounded border border-accent/20 text-accent font-bold font-sans">{property.pincode}</span></p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-serif text-xl font-semibold text-primary">Location &amp; Connectivity Intelligence</h3>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">Neighborhood and transport connectivity analysis based on PIN code: <span className="bg-accent/5 px-2 py-0.5 rounded border border-accent/20 text-accent font-bold font-sans">{property.pincode}</span></p>
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full border border-slate-200 shrink-0">
+                💡 Tip: Hover item to view on map
+              </span>
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] border border-line rounded-2xl overflow-hidden shadow-xs bg-white">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] border border-line rounded-2xl overflow-hidden shadow-sm bg-white">
               {/* Map container */}
-              <div className="h-[400px] min-h-[350px] relative z-10 border-b lg:border-b-0 lg:border-r border-line">
+              <div className="h-[430px] min-h-[380px] relative z-10 border-b lg:border-b-0 lg:border-r border-line">
                 <DetailMap 
                   latitude={latitude} 
                   longitude={longitude} 
                   localityName={property.locality.name}
                   nearbyPlaces={flattenedPlaces}
+                  selectedPlaceName={selectedPlaceName}
                 />
               </div>
 
               {/* Transit Options list */}
-              <div className="p-5 bg-secondary/10 flex flex-col justify-start text-left h-[400px] overflow-y-auto no-scrollbar space-y-5">
+              <div className="p-5 bg-secondary/10 flex flex-col justify-start text-left h-[430px] overflow-y-auto no-scrollbar space-y-5">
                 {/* Bus section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 border-b border-line pb-1.5">
-                    <div className="w-6 h-6 rounded bg-sky-500/10 border border-sky-500/20 text-sky-600 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-600 flex items-center justify-center font-bold">
                       <Bus className="w-3.5 h-3.5" />
                     </div>
                     <h4 className="text-xs font-bold font-mono tracking-wider text-primary uppercase">Bus Stations</h4>
                   </div>
                   <div className="space-y-2">
                     {nearbyPlaces.busStops.map((stop, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs text-slate-600">
-                        <span className="font-medium truncate pr-4">{stop.name}</span>
-                        <span className="font-mono text-[10px] shrink-0 text-slate-400 font-semibold">{stop.distance} | {stop.time}</span>
+                      <div 
+                        key={i} 
+                        onMouseEnter={() => setSelectedPlaceName(stop.name)}
+                        onMouseLeave={() => setSelectedPlaceName(null)}
+                        className={`flex items-center justify-between text-xs p-2 rounded-xl border transition-all cursor-pointer ${
+                          selectedPlaceName === stop.name
+                            ? "bg-sky-50 border-sky-300 text-sky-900 font-bold shadow-xs scale-[1.02]"
+                            : "bg-white/80 border-line/60 text-slate-700 hover:border-sky-300 hover:bg-sky-50/50"
+                        }`}
+                      >
+                        <span className="font-medium truncate pr-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                          {stop.name}
+                        </span>
+                        <span className="font-mono text-[10px] shrink-0 text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-semibold">{stop.distance} | {stop.time}</span>
                       </div>
                     ))}
                   </div>
@@ -926,16 +993,28 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                 {/* Metro/Railway Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 border-b border-line pb-1.5">
-                    <div className="w-6 h-6 rounded bg-violet-500/10 border border-violet-500/20 text-violet-600 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-violet-500/15 border border-violet-500/30 text-violet-600 flex items-center justify-center font-bold">
                       <Train className="w-3.5 h-3.5" />
                     </div>
                     <h4 className="text-xs font-bold font-mono tracking-wider text-primary uppercase">Metro &amp; Stations</h4>
                   </div>
                   <div className="space-y-2">
                     {nearbyPlaces.stations.map((station, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs text-slate-600">
-                        <span className="font-medium truncate pr-4">{station.name}</span>
-                        <span className="font-mono text-[10px] shrink-0 text-slate-400 font-semibold">{station.distance} | {station.time}</span>
+                      <div 
+                        key={i} 
+                        onMouseEnter={() => setSelectedPlaceName(station.name)}
+                        onMouseLeave={() => setSelectedPlaceName(null)}
+                        className={`flex items-center justify-between text-xs p-2 rounded-xl border transition-all cursor-pointer ${
+                          selectedPlaceName === station.name
+                            ? "bg-purple-50 border-purple-300 text-purple-900 font-bold shadow-xs scale-[1.02]"
+                            : "bg-white/80 border-line/60 text-slate-700 hover:border-purple-300 hover:bg-purple-50/50"
+                        }`}
+                      >
+                        <span className="font-medium truncate pr-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                          {station.name}
+                        </span>
+                        <span className="font-mono text-[10px] shrink-0 text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-semibold">{station.distance} | {station.time}</span>
                       </div>
                     ))}
                   </div>
@@ -944,16 +1023,28 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                 {/* Famous Places Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 border-b border-line pb-1.5">
-                    <div className="w-6 h-6 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 flex items-center justify-center font-bold">
                       <Star className="w-3.5 h-3.5 fill-current" />
                     </div>
                     <h4 className="text-xs font-bold font-mono tracking-wider text-primary uppercase">Famous Places</h4>
                   </div>
                   <div className="space-y-2">
                     {nearbyPlaces.famousPlaces.map((place, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs text-slate-600">
-                        <span className="font-medium truncate pr-4">{place.name}</span>
-                        <span className="font-mono text-[10px] shrink-0 text-slate-400 font-semibold">{place.distance} | {place.time}</span>
+                      <div 
+                        key={i} 
+                        onMouseEnter={() => setSelectedPlaceName(place.name)}
+                        onMouseLeave={() => setSelectedPlaceName(null)}
+                        className={`flex items-center justify-between text-xs p-2 rounded-xl border transition-all cursor-pointer ${
+                          selectedPlaceName === place.name
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-900 font-bold shadow-xs scale-[1.02]"
+                            : "bg-white/80 border-line/60 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50"
+                        }`}
+                      >
+                        <span className="font-medium truncate pr-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          {place.name}
+                        </span>
+                        <span className="font-mono text-[10px] shrink-0 text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-semibold">{place.distance} | {place.time}</span>
                       </div>
                     ))}
                   </div>
@@ -962,14 +1053,25 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                 {/* Airport Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 border-b border-line pb-1.5">
-                    <div className="w-6 h-6 rounded bg-rose-500/10 border border-rose-500/20 text-rose-600 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-600 flex items-center justify-center font-bold">
                       <Plane className="w-3.5 h-3.5" />
                     </div>
                     <h4 className="text-xs font-bold font-mono tracking-wider text-primary uppercase">Airport</h4>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-600">
-                    <span className="font-medium truncate pr-4">{nearbyPlaces.airport.name}</span>
-                    <span className="font-mono text-[10px] shrink-0 text-slate-400 font-semibold">{nearbyPlaces.airport.distance} | {nearbyPlaces.airport.time}</span>
+                  <div 
+                    onMouseEnter={() => setSelectedPlaceName(nearbyPlaces.airport.name)}
+                    onMouseLeave={() => setSelectedPlaceName(null)}
+                    className={`flex items-center justify-between text-xs p-2 rounded-xl border transition-all cursor-pointer ${
+                      selectedPlaceName === nearbyPlaces.airport.name
+                        ? "bg-rose-50 border-rose-300 text-rose-900 font-bold shadow-xs scale-[1.02]"
+                        : "bg-white/80 border-line/60 text-slate-700 hover:border-rose-300 hover:bg-rose-50/50"
+                    }`}
+                  >
+                    <span className="font-medium truncate pr-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      {nearbyPlaces.airport.name}
+                    </span>
+                    <span className="font-mono text-[10px] shrink-0 text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-semibold">{nearbyPlaces.airport.distance} | {nearbyPlaces.airport.time}</span>
                   </div>
                 </div>
               </div>
@@ -1033,7 +1135,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     <div className="text-center py-6">
                       <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-2" />
                       <h4 className="font-semibold text-primary text-sm">Enquiry Submitted</h4>
-                      <p className="text-xs text-slate-400 mt-1">The owner has been notified and will contact you shortly.</p>
+                      <p className="text-xs text-slate-400 mt-1">Your enquiry has been received by our admin & concierge team. We will review and connect with you shortly.</p>
                     </div>
                   ) : (
                     <form onSubmit={handleEnquirySubmit} className="space-y-4 text-xs">
@@ -1099,7 +1201,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     <div className="text-center py-6">
                       <CalendarRange className="w-10 h-10 text-green-600 mx-auto mb-2" />
                       <h4 className="font-semibold text-primary text-sm">Tour Requested</h4>
-                      <p className="text-xs text-slate-400 mt-1">Visit booking is pending owner approval. Track under dashboard.</p>
+                      <p className="text-xs text-slate-400 mt-1">Tour request submitted! Our admin concierge team will verify details and coordinate with you.</p>
                     </div>
                   ) : (
                     <form onSubmit={handleVisitSubmit} className="space-y-4 text-xs">
@@ -1144,7 +1246,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                         </div>
                       </div>
                       <div>
-                        <label className="block text-slate-500 mb-1 font-semibold">Message for Owner</label>
+                        <label className="block text-slate-500 mb-1 font-semibold">Message for Admin / Concierge</label>
                         <textarea
                           rows={2}
                           value={visitForm.message}
@@ -1171,7 +1273,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                   {!currentUser ? (
                     <div className="text-center py-6 space-y-3">
                       <MessageSquare className="w-10 h-10 text-slate-300 mx-auto" />
-                      <p className="text-xs text-slate-500">Please log in to chat directly with the owner.</p>
+                      <p className="text-xs text-slate-500">Please log in to chat with our team.</p>
                       <Link href="/auth/login" className="inline-block bg-primary text-secondary text-xs font-bold px-5 py-2 rounded-full hover:bg-slate-800 transition">
                         Log In
                       </Link>
@@ -1180,7 +1282,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     <div className="text-center py-6">
                       <CheckCircle2 className="w-10 h-10 text-green-600 mx-auto mb-2" />
                       <h4 className="font-semibold text-primary text-sm">Message Sent</h4>
-                      <p className="text-xs text-slate-400 mt-1">Open your Dashboard inbox thread to continue chatting.</p>
+                      <p className="text-xs text-slate-400 mt-1">Our admin team has received your message and will respond shortly.</p>
                       <button 
                         onClick={() => setMessageSuccess(false)}
                         type="button"
@@ -1191,7 +1293,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     </div>
                   ) : (
                     <form onSubmit={handleMessageSubmit} className="space-y-4 text-xs">
-                      <p className="text-slate-400 leading-relaxed">Send a direct message to the listing owner. This starts a chat thread.</p>
+                      <p className="text-slate-400 leading-relaxed">Send a direct message to our support and admin team regarding this listing.</p>
                       <div>
                         <textarea
                           required
@@ -1212,8 +1314,8 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                       </button>
                     </form>
                   )}
-                  </>
-                )}
+                </>
+              )}
 
               {/* 4. REQUEST CALLBACK FORM */}
               {activeTab === "callback" && (
@@ -1222,7 +1324,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     <div className="text-center py-6">
                       <Phone className="w-10 h-10 text-green-600 mx-auto mb-2" />
                       <h4 className="font-semibold text-primary text-sm">Callback Requested</h4>
-                      <p className="text-xs text-slate-400 mt-1">The owner will call you back shortly at your number.</p>
+                      <p className="text-xs text-slate-400 mt-1">Our admin team will call you back shortly at your number.</p>
                       <button
                         onClick={() => { setCallbackSuccess(false); setCallbackForm({ name: "", phone: "", preferredTime: "" }); }}
                         type="button"
@@ -1254,7 +1356,7 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                       }}
                       className="space-y-4 text-xs"
                     >
-                      <p className="text-slate-400 leading-relaxed">Enter your name and phone number and we'll have the owner call you back.</p>
+                      <p className="text-slate-400 leading-relaxed">Enter your name and phone number and we'll have our admin team call you back.</p>
                       <div>
                         <label className="block text-slate-500 mb-1 font-semibold">Your Name</label>
                         <input
@@ -1334,21 +1436,6 @@ export default function PropertyDetailClient({ property, similarProperties }: Pr
                     <p className="text-[10px] font-mono text-slate-400 capitalize">{property.owner.role.toLowerCase()}</p>
                   </div>
                 </div>
-                
-                {/* Show Agent details if listed by agent */}
-                {property.owner.role === "AGENT" && property.owner.agentProfile && (
-                  <div className="bg-secondary p-3 rounded-xl border border-line space-y-2 text-xs">
-                    <p className="flex items-center gap-1 font-semibold text-primary">
-                      <Award className="w-4 h-4 text-accent" />
-                      {property.owner.agentProfile.companyName || "Professional Agent"}
-                    </p>
-                    <p className="text-slate-500 font-medium">{property.owner.agentProfile.experienceYears || 0} years experience</p>
-                    <div className="flex items-center gap-1 text-[11px] font-bold text-slate-700">
-                      <Star className="w-3.5 h-3.5 text-accent fill-accent" />
-                      <span>{property.owner.agentProfile.ratingAverage} Average Rating</span>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })()}

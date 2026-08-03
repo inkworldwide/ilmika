@@ -105,14 +105,23 @@ export async function POST(
         data: { updatedAt: new Date() },
       });
 
-      // 5. Fire Notification to the owner
-      await tx.notification.create({
-        data: {
-          userId: property.ownerId,
-          type: NotificationType.MESSAGE_RECEIVED,
-          message: `New message from ${user.name} regarding your listing: "${property.title}"`,
-        },
+      // 5. Fire Notification to the owner and Admins
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN" },
+        select: { id: true },
       });
+
+      const notifyUserIds = Array.from(new Set([property.ownerId, ...admins.map(a => a.id)]));
+
+      for (const uid of notifyUserIds) {
+        await tx.notification.create({
+          data: {
+            userId: uid,
+            type: NotificationType.MESSAGE_RECEIVED,
+            message: `💬 New message from ${user.name} regarding property: "${property.title}"`,
+          },
+        });
+      }
 
       return msg;
     });

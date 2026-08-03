@@ -146,8 +146,8 @@ export default async function HomePage() {
         <div className="absolute left-0 top-0 bottom-0 w-full md:w-[45%] z-20 flex flex-col justify-center px-8 md:px-12 lg:px-20 bg-gradient-to-r from-primary via-primary/95 to-transparent pointer-events-none">
           <div className="pointer-events-auto mt-20 md:mt-0">
             <h1 className="font-serif text-5xl md:text-[3.5rem] lg:text-[4.5rem] font-bold tracking-tight leading-[1.15] mb-5 drop-shadow-md">
-              <span className="text-accent">Re</span>{" "}
-              <span className="text-white">Onestop</span>{" "}
+              <span className="text-accent">RE</span>{" "}
+              <span className="text-white">OneStop</span>
               <span className="text-accent">Page</span>
             </h1>
             <div className="flex items-center gap-3 mb-6 max-w-max">

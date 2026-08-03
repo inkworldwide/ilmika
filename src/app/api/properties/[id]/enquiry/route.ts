@@ -74,14 +74,23 @@ export async function POST(
         },
       });
 
-      // 2. Create Notification for Property Owner
-      await tx.notification.create({
-        data: {
-          userId: property.ownerId,
-          type: NotificationType.ENQUIRY,
-          message: `New enquiry received from ${name} for your listing: "${property.title}"`,
-        },
+      // 2. Create Notification for Property Owner and Admins
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN" },
+        select: { id: true },
       });
+
+      const notifyUserIds = Array.from(new Set([property.ownerId, ...admins.map(a => a.id)]));
+
+      for (const uid of notifyUserIds) {
+        await tx.notification.create({
+          data: {
+            userId: uid,
+            type: NotificationType.ENQUIRY,
+            message: `📩 New enquiry received from ${name} (${phone}) for listing: "${property.title}"`,
+          },
+        });
+      }
 
       return enq;
     });

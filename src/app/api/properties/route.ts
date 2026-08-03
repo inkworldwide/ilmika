@@ -140,19 +140,20 @@ export async function GET(req: Request) {
     }
 
     const propertyType = searchParams.get("propertyType");
+    const category = searchParams.get("category");
+
     if (propertyType) {
       where.propertyType = propertyType as PropertyType;
-    }
-
-    const category = searchParams.get("category");
-    if (category === "homes") {
-      where.propertyType = { in: ["APARTMENT", "INDEPENDENT_HOUSE", "VILLA", "BUILDER_FLOOR", "STUDIO_APARTMENT", "PENTHOUSE", "FARM_HOUSE"] };
-    } else if (category === "land") {
-      where.propertyType = { in: ["RESIDENTIAL_PLOT", "COMMERCIAL_LAND", "DEVELOPER_SITE", "PLOT", "AGRICULTURE_LAND", "RESORT"] };
-    } else if (category === "commercial") {
-      where.propertyType = { in: ["OFFICE_SPACE", "COWORKING_SPACE", "SHOP", "SHOWROOM", "HOTEL", "COMMERCIAL_COMPLEX"] };
-    } else if (category === "industry") {
-      where.propertyType = { in: ["WAREHOUSE", "INDUSTRIAL_PROPERTY", "INDUSTRIAL_SITE", "INDUSTRIAL_BUILDING"] };
+    } else if (category) {
+      if (category === "homes") {
+        where.propertyType = { in: ["APARTMENT", "INDEPENDENT_HOUSE", "VILLA", "BUILDER_FLOOR", "STUDIO_APARTMENT", "PENTHOUSE", "FARM_HOUSE"] };
+      } else if (category === "land") {
+        where.propertyType = { in: ["RESIDENTIAL_PLOT", "COMMERCIAL_LAND", "DEVELOPER_SITE", "PLOT", "AGRICULTURE_LAND", "RESORT"] };
+      } else if (category === "commercial") {
+        where.propertyType = { in: ["OFFICE_SPACE", "COWORKING_SPACE", "SHOP", "SHOWROOM", "HOTEL", "COMMERCIAL_COMPLEX"] };
+      } else if (category === "industry") {
+        where.propertyType = { in: ["WAREHOUSE", "INDUSTRIAL_PROPERTY", "INDUSTRIAL_SITE", "INDUSTRIAL_BUILDING"] };
+      }
     }
 
     // Price ranges

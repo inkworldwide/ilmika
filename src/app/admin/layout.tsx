@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { ShieldAlert, ShieldCheck, Database, LayoutGrid, LogOut, AlertTriangle, Users, BarChart3, LayoutDashboard } from "lucide-react";
+import { ShieldAlert, ShieldCheck, Database, LayoutGrid, LogOut, AlertTriangle, Users, BarChart3, LayoutDashboard, PhoneCall } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -46,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { name: "Verification Queue", path: "/admin", icon: ShieldCheck },
+    { name: "Inquiries & Leads", path: "/admin/inquiries", icon: PhoneCall },
     { name: "User Directory", path: "/admin/users", icon: Users },
     { name: "Listed Properties", path: "/admin/properties", icon: LayoutGrid },
     { name: "Platform Analytics", path: "/admin/analytics", icon: BarChart3 },

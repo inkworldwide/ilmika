@@ -86,14 +86,23 @@ export async function POST(
         },
       });
 
-      // 2. Create Notification for Property Owner
-      await tx.notification.create({
-        data: {
-          userId: property.ownerId,
-          type: NotificationType.VISIT_BOOKED,
-          message: `New tour requested by ${user.name} for your property: "${property.title}" on ${tourDate.toLocaleDateString("en-IN")}`,
-        },
+      // 2. Create Notification for Property Owner and Admins
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN" },
+        select: { id: true },
       });
+
+      const notifyUserIds = Array.from(new Set([property.ownerId, ...admins.map(a => a.id)]));
+
+      for (const uid of notifyUserIds) {
+        await tx.notification.create({
+          data: {
+            userId: uid,
+            type: NotificationType.VISIT_BOOKED,
+            message: `🗓️ New tour requested by ${user.name} for "${property.title}" on ${tourDate.toLocaleDateString("en-IN")}`,
+          },
+        });
+      }
 
       return vis;
     });

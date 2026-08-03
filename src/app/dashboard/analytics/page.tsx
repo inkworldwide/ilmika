@@ -25,6 +25,7 @@ interface AnalyticsData {
   monthlyTrends: Array<{
     month: string;
     views: number;
+    propertiesListed?: number;
     leads: number;
   }>;
 }
@@ -118,27 +119,45 @@ export default function DashboardAnalyticsPage() {
       {/* Visual Charts section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
         
-        {/* Chart 1: Monthly Traffic Trend Bar Graph */}
-        <div className="border border-line rounded-2xl p-5 space-y-4">
-          <div>
-            <h3 className="font-serif text-sm font-semibold text-primary">Views Traffic Trend</h3>
-            <p className="text-[11px] text-slate-400 mt-0.5">Estimated view impressions for the last 6 months.</p>
+        {/* Chart 1: Monthly Traffic & Property Listings Trend Bar Graph */}
+        <div className="border border-line rounded-2xl p-5 space-y-4 bg-white">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <h3 className="font-serif text-sm font-semibold text-primary">Views &amp; Listings Monthly Trend</h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">View impressions and new properties listed per month (last 6 months).</p>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] font-mono font-semibold">
+              <span className="flex items-center gap-1 text-slate-600">
+                <span className="w-2.5 h-2.5 rounded bg-accent"></span> Views
+              </span>
+              <span className="flex items-center gap-1 text-slate-600">
+                <span className="w-2.5 h-2.5 rounded bg-slate-900"></span> Listed
+              </span>
+            </div>
           </div>
 
           <div className="h-44 flex items-end justify-between pt-6 border-b border-line px-2">
             {monthlyTrends.map((trend) => {
               const pct = (trend.views / maxViewsInTrend) * 100;
+              const propsCount = trend.propertiesListed ?? 0;
+
               return (
-                <div key={trend.month} className="flex flex-col items-center gap-2 group cursor-pointer w-full">
+                <div key={trend.month} className="flex flex-col items-center gap-1.5 group cursor-pointer w-full">
                   <div className="w-8 sm:w-10 bg-primary/10 hover:bg-primary transition rounded-t relative flex items-end" style={{ height: `120px` }}>
-                    <div className="w-full bg-accent rounded-t hover:bg-accent-hover transition" style={{ height: `${pct}%` }}>
-                      {/* Tooltip */}
-                      <span className="absolute -top-6 left-50% -translate-x-50% bg-primary text-secondary text-[8px] font-mono font-bold px-1.5 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                        {trend.views} views
-                      </span>
+                    <div className="w-full bg-accent rounded-t hover:bg-accent-hover transition relative" style={{ height: `${pct}%` }}>
+                      {/* Tooltip on Hover */}
+                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-950 text-white text-[9px] font-mono font-bold px-2 py-1 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-30 pointer-events-none border border-slate-700">
+                        <div>👁️ {trend.views} views</div>
+                        <div className="text-amber-300">🏢 {propsCount} properties listed</div>
+                      </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-semibold text-slate-500">{trend.month}</span>
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-semibold text-slate-700">{trend.month}</span>
+                    <span className="text-[9px] font-mono font-bold text-accent bg-accent/10 px-1.5 py-0.2 rounded border border-accent/20 mt-0.5">
+                      {propsCount} listed
+                    </span>
+                  </div>
                 </div>
               );
             })}

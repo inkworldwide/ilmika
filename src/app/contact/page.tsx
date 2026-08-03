@@ -2,10 +2,14 @@
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { MapPin, Phone, Mail, Clock, Send, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Phone, Mail, Send, MessageSquare } from "lucide-react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
-export default function ContactPage() {
+function ContactFormContent() {
+  const searchParams = useSearchParams();
+  const isFeedbackMode = searchParams.get("type") === "feedback";
+  
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -17,7 +21,7 @@ export default function ContactPage() {
     const form = e.currentTarget;
     const formData = new FormData(form);
     const data = {
-      type: "Contact",
+      type: isFeedbackMode ? "Feedback" : "Contact",
       name: `${formData.get("firstName")} ${formData.get("lastName")}`.trim(),
       phone: formData.get("phone"),
       email: formData.get("email"),
@@ -47,7 +51,7 @@ export default function ContactPage() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section with Parallax/Gradient effect */}
+        {/* Hero Section */}
         <div className="relative bg-primary pt-32 pb-40 overflow-hidden">
           {/* Decorative Background Elements */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
@@ -58,13 +62,15 @@ export default function ContactPage() {
           <div className="max-w-7xl mx-auto px-5 relative z-10 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent text-sm font-semibold mb-6">
               <MessageSquare className="w-4 h-4" />
-              <span>We're Here to Help</span>
+              <span>{isFeedbackMode ? "We Value Your Feedback" : "We're Here to Help"}</span>
             </div>
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-              Get in Touch with Us
+              {isFeedbackMode ? "Share Your Feedback" : "Get in Touch with Us"}
             </h1>
             <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Whether you're looking for your dream home or a lucrative investment, our team of experts is ready to guide you every step of the way.
+              {isFeedbackMode 
+                ? "Help us improve RE Onestoppage. Share your ideas, suggestions, or user experience feedback."
+                : "Whether you're looking for your dream home or a lucrative investment, our team of experts is ready to guide you every step of the way."}
             </p>
           </div>
         </div>
@@ -111,22 +117,31 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Contact Form */}
+            {/* Form */}
             <div className="lg:col-span-7 bg-white p-8 md:p-12 rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.07)] border border-line/40">
-              <h2 className="font-serif text-3xl font-bold text-primary mb-2">Send a Message</h2>
-              <p className="text-slate-500 mb-8">Fill out the form below and we will get back to you within 24 hours.</p>
+              <h2 className="font-serif text-3xl font-bold text-primary mb-2">
+                {isFeedbackMode ? "Submit Your Feedback" : "Send a Message"}
+              </h2>
+              <p className="text-slate-500 mb-8">
+                {isFeedbackMode 
+                  ? "We read all user suggestions to improve our platform experience."
+                  : "Fill out the form below and we will get back to you within 24 hours."}
+              </p>
               
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {status === "success" && (
-                  <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl">
-                    Your message has been sent to our support team!
+                  <div className="p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl font-medium">
+                    {isFeedbackMode 
+                      ? "Thank you! Your feedback has been sent to our management team." 
+                      : "Your contact message has been sent to our support team!"}
                   </div>
                 )}
                 {status === "error" && (
-                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl font-medium">
                     {errorMessage}
                   </div>
                 )}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2 relative group">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">First Name</label>
@@ -176,18 +191,20 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-2 relative group">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">How can we help?</label>
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+                    {isFeedbackMode ? "Your Feedback / Suggestion" : "How can we help?"}
+                  </label>
                   <textarea 
                     required
                     name="message"
                     rows={4} 
                     className="w-full px-5 py-4 rounded-xl border-2 border-line/60 focus:border-primary outline-none transition-all bg-slate-50/50 hover:bg-slate-50 resize-none" 
-                    placeholder="Tell us about your requirements..."
+                    placeholder={isFeedbackMode ? "Share your feedback or suggestions with us..." : "Tell us about your requirements..."}
                   ></textarea>
                 </div>
                 
-                <button disabled={status === "loading"} type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary/90 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70">
-                  <span>{status === "loading" ? "Sending..." : "Send Message"}</span>
+                <button disabled={status === "loading"} type="submit" className="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-primary/90 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-70 cursor-pointer">
+                  <span>{status === "loading" ? "Sending..." : isFeedbackMode ? "Submit Feedback" : "Send Contact Message"}</span>
                   <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </form>
@@ -198,5 +215,13 @@ export default function ContactPage() {
       
       <Footer />
     </div>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-xs text-slate-500 font-mono">Loading form...</div>}>
+      <ContactFormContent />
+    </Suspense>
   );
 }

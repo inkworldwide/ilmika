@@ -117,7 +117,7 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
             <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re Onestop Page</span>
+            <span className="font-serif text-2xl font-bold text-primary tracking-tight">RE OneStopPage</span>
           </Link>
           <p className="text-xs text-slate-400 mt-2 font-mono">India's Verified Property Marketplace</p>
         </div>

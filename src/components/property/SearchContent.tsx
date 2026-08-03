@@ -76,10 +76,10 @@ export default function SearchContent() {
 
   const [filters, setFilters] = useState({
     category: searchParams.get("category") || "",
-    transactionType: searchParams.get("transactionType") || "",
+    transactionType: searchParams.get("transactionType") || searchParams.get("type") || "",
     propertyType: searchParams.get("propertyType") || "",
     cityId: searchParams.get("cityId") || "",
-    citySearch: searchParams.get("citySearch") || "",
+    citySearch: searchParams.get("citySearch") || searchParams.get("city") || "",
     localityId: searchParams.get("localityId") || "",
     minPrice: searchParams.get("minPrice") || "",
     maxPrice: searchParams.get("maxPrice") || "",
@@ -127,10 +127,10 @@ export default function SearchContent() {
   useEffect(() => {
     setFilters({
       category: searchParams.get("category") || "",
-      transactionType: searchParams.get("transactionType") || "",
+      transactionType: searchParams.get("transactionType") || searchParams.get("type") || "",
       propertyType: searchParams.get("propertyType") || "",
       cityId: searchParams.get("cityId") || "",
-      citySearch: searchParams.get("citySearch") || "",
+      citySearch: searchParams.get("citySearch") || searchParams.get("city") || "",
       localityId: searchParams.get("localityId") || "",
       minPrice: searchParams.get("minPrice") || "",
       maxPrice: searchParams.get("maxPrice") || "",

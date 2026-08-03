@@ -7,8 +7,8 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, phone, message, purpose, propertyType, city, localities, budget, type } = body;
 
-    // Build a readable message string from the payload
-    let notificationText = `New ${type || "Contact"} from ${name} (${email}, ${phone}):\n`;
+    const headerType = (type === "Feedback" || type === "feedback") ? "Feedback" : "Contact";
+    let notificationText = `New ${headerType} from ${name} (${email}, ${phone}):\n`;
     
     if (purpose) notificationText += `Purpose: ${purpose}\n`;
     if (propertyType) notificationText += `Type: ${propertyType}\n`;

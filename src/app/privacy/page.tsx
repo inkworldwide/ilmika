@@ -4,8 +4,8 @@ import Footer from "@/components/layout/Footer";
 import { Lock, ShieldCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Privacy Policy - Ink EduVerse",
-  description: "Privacy Policy outlining how student data is protected and managed on Ink EduVerse.",
+  title: "Privacy Policy - ILMIKA",
+  description: "Privacy Policy outlining how student data is protected and managed on ILMIKA.",
 };
 
 export default function PrivacyPolicyPage() {
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
 
             <h2 className="font-serif text-lg font-bold text-primary">2. How We Use Information</h2>
             <p>
-              Your information is used to facilitate university counselling, process direct application inquiries, send relevant college alerts, and improve user experience across Ink EduVerse.
+              Your information is used to facilitate university counselling, process direct application inquiries, send relevant college alerts, and improve user experience across ILMIKA.
             </p>
 
             <h2 className="font-serif text-lg font-bold text-primary">3. Data Security &amp; Sharing</h2>

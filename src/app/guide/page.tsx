@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Student Guide - Ink EduVerse",
+  title: "Student Guide - ILMIKA",
   description: "Complete step-by-step guide to discovering colleges, entrance exams, cut-off marks, scholarships, and international university admissions.",
 };
 

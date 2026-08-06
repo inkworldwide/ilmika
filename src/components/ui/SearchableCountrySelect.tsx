@@ -56,6 +56,7 @@ export default function SearchableCountrySelect({
   }, [isOpen]);
 
   const selectedCountryObj = useMemo(() => {
+    if (!value || value === "ANY") return { code: "ANY", name: "🌍 Any / Open to Suggestions" };
     return effectiveCountries.find((c) => c.code.toLowerCase() === value.toLowerCase() || c.name.toLowerCase() === value.toLowerCase());
   }, [effectiveCountries, value]);
 
@@ -78,7 +79,7 @@ export default function SearchableCountrySelect({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-full px-4 py-3 text-xs md:text-sm text-slate-700 bg-slate-50 border border-line rounded-xl flex items-center justify-between gap-2 focus:outline-none focus:border-accent cursor-pointer transition hover:bg-slate-100/80"
+        className="w-full h-full px-4 py-3 text-xs md:text-sm text-slate-700 bg-white border border-line rounded-xl flex items-center justify-between gap-2 focus:outline-none focus:border-accent cursor-pointer transition hover:bg-slate-50 shadow-2xs"
       >
         <span className="truncate font-medium">
           {selectedCountryObj ? selectedCountryObj.name : placeholder}
@@ -87,8 +88,8 @@ export default function SearchableCountrySelect({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1.5 w-full min-w-[240px] max-h-80 bg-white border border-line rounded-2xl shadow-2xl z-[100] flex flex-col overflow-hidden animate-in fade-in-50 zoom-in-95 duration-100">
-          {/* Sticky Search Bar Above Afghanistan */}
+        <div className="absolute left-0 top-full mt-1.5 w-full min-w-[260px] max-h-80 bg-white border border-line rounded-2xl shadow-2xl z-[100] flex flex-col overflow-hidden animate-in fade-in-50 zoom-in-95 duration-100">
+          {/* Sticky Search Bar Above Countries */}
           <div className="p-2 border-b border-line bg-slate-50 sticky top-0 z-10">
             <div className="relative flex items-center bg-white border border-line rounded-xl px-2.5 py-1.5 focus-within:border-accent">
               <Search className="w-3.5 h-3.5 text-slate-400 shrink-0 mr-2" />
@@ -97,7 +98,7 @@ export default function SearchableCountrySelect({
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search country..."
+                placeholder="Search country (e.g. UK, Germany, Japan)..."
                 className="w-full text-xs text-primary placeholder:text-slate-400 focus:outline-none bg-transparent"
               />
               {search && (
@@ -113,16 +114,16 @@ export default function SearchableCountrySelect({
           </div>
 
           {/* Countries List */}
-          <div className="overflow-y-auto flex-1 p-1 max-h-60 space-y-0.5">
+          <div className="overflow-y-auto flex-1 p-1 max-h-60 space-y-0.5 custom-scrollbar">
             <button
               type="button"
-              onClick={() => handleSelect("")}
+              onClick={() => handleSelect("ANY")}
               className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
-                !value ? "bg-accent/15 text-accent font-bold" : "text-slate-700 hover:bg-slate-50"
+                !value || value === "ANY" ? "bg-accent/15 text-accent font-bold" : "text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <span>All Countries</span>
-              {!value && <Check className="w-3.5 h-3.5 text-accent shrink-0" />}
+              <span>🌍 Any / Open to Suggestions</span>
+              {(!value || value === "ANY") && <Check className="w-3.5 h-3.5 text-accent shrink-0" />}
             </button>
 
             {filteredCountries.length === 0 ? (

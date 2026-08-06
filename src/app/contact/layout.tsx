@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Contact Us | Re One Stop Page",
-  description: "Get in touch with Re One Stop Page.",
+  title: "Contact Us | ILMIKA",
+  description: "Get in touch with ILMIKA.",
 };
 
 export default function ContactLayout({

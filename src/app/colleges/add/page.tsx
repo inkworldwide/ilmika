@@ -89,7 +89,7 @@ export default function AddCollegePage() {
               {step === 3 && "Rankings, Media & Review"}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              List your institution on Ink EduVerse to reach millions of prospective students worldwide.
+              List your institution on ILMIKA to reach millions of prospective students worldwide.
             </p>
           </div>
 

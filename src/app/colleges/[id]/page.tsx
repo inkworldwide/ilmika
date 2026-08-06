@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   });
 
   if (!college) {
-    return { title: "College Not Found | Ink EduVerse" };
+    return { title: "College Not Found | ILMIKA" };
   }
 
   return {

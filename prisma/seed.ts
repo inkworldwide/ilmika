@@ -52,7 +52,7 @@ async function main() {
   });
   const student = await prisma.user.upsert({
     where: { email: "student@inkeduverse.com" },
-    update: { city: "Bengaluru", country: "India", phone: "+91 98765 00003" },
+    update: { role: "USER", city: "Bengaluru", country: "India", phone: "+91 98765 00003" },
     create: {
       email: "student@inkeduverse.com",
       passwordHash,

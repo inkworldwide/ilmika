@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Inquire | Re One Stop Page",
-  description: "Submit a property inquiry to Re One Stop Page.",
+  title: "Inquire | ILMIKA",
+  description: "Submit a study abroad & college inquiry to ILMIKA.",
 };
 
 export default function InquireLayout({

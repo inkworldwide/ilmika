@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { 
   LayoutDashboard, User, Heart, Clock, Mail, CalendarRange, 
-  MessageSquare, Bell, Building2, BarChart3, ChevronRight, Menu, ShieldAlert, GraduationCap
+  MessageSquare, Bell, GraduationCap, ChevronRight, Menu, ShieldAlert
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-serif text-lg text-primary">Loading your Ink EduVerse dashboard...</p>
+          <p className="font-serif text-lg text-primary">Loading your ILMIKA dashboard...</p>
         </div>
       </div>
     );
@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) return null;
 
-  // Sidebar link items for Ink EduVerse
+  // Sidebar link items for ILMIKA
   const menuItems = [
     { name: "Overview", path: "/dashboard", icon: LayoutDashboard, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
     { name: "My Profile", path: "/dashboard/profile", icon: User, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
@@ -79,7 +79,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex flex-col bg-secondary">
       <Navbar />
 
-      <div className="flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full px-4 md:px-6 py-6 gap-6 items-start">
+      <div className="flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full px-4 md:px-6 py-6 gap-6 items-stretch">
         
         {/* Mobile menu toggle bar */}
         <div className="md:hidden flex items-center justify-between bg-white border border-line p-4 rounded-xl shadow-xs w-full">
@@ -94,10 +94,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Sidebar Navigation */}
-        <aside className={`w-full md:w-64 bg-[#0B132B] text-slate-200 border border-slate-800 rounded-3xl p-5 shadow-xl md:flex flex-col shrink-0 md:sticky md:top-24 ${sidebarOpen ? "flex" : "hidden"}`}>
+        <aside className={`w-full md:w-64 bg-[#0B132B] text-slate-200 border border-slate-800 rounded-2xl p-5 shadow-xl md:flex flex-col justify-between shrink-0 self-stretch ${sidebarOpen ? "flex" : "hidden"}`}>
           <div className="px-2 py-1 border-b border-slate-800 pb-4 mb-4 text-left">
             <h3 className="font-serif font-bold text-white text-base leading-snug">{user.name}</h3>
-            <p className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest mt-0.5">{user.role.toLowerCase().replace("_", " ")} panel</p>
+            <p className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest mt-0.5">
+              {user.role === "USER" ? "Student Portal" : user.role === "COLLEGE_ADMIN" ? "College Admin Desk" : user.role === "AGENT" ? "Advisor Desk" : "System Admin"}
+            </p>
           </div>
 
           <nav className="space-y-1.5 flex-1">
@@ -111,7 +113,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-xs font-semibold group ${
                     isCurrent 
-                      ? "bg-accent text-primary font-bold shadow-lg shadow-accent/20 scale-[1.02]" 
+                      ? "bg-accent text-primary font-bold shadow-md shadow-accent/20" 
                       : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
                   }`}
                 >

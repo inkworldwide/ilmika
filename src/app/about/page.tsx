@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Building2, Users, Trophy, Target, ArrowRight, ShieldCheck, Gem, Briefcase } from "lucide-react";
 
 export const metadata = {
-  title: "About Us | Re One Stop Page",
-  description: "Learn more about Re One Stop Page, your complete real estate partner.",
+  title: "About Us | ILMIKA",
+  description: "Learn more about ILMIKA, your global education partner.",
 };
 
 export default function AboutPage() {
@@ -88,7 +88,7 @@ export default function AboutPage() {
             </div>
             <div className="space-y-6 text-lg text-slate-600 leading-relaxed font-light">
               <p>
-                Founded with a vision to revolutionize the real estate experience, Re One Stop Page has grown from a small local agency into a comprehensive property platform. We recognized early on that clients were tired of bouncing between different specialists.
+                Founded with a vision to revolutionize the real estate experience, ILMIKA has grown from a small local agency into a comprehensive property platform. We recognized early on that clients were tired of bouncing between different specialists.
               </p>
               <p>
                 That's why we built a unified ecosystem. Whether you're a first-time homebuyer, a business looking for warehouse space, or an investor seeking prime commercial land, our platform and dedicated experts provide everything you need under one roof.
@@ -106,7 +106,7 @@ export default function AboutPage() {
           <div className="max-w-7xl mx-auto px-5">
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="font-serif text-4xl font-bold text-primary mb-6">Our Core Values</h2>
-              <p className="text-lg text-slate-600">The principles that guide every interaction, negotiation, and decision we make at Re One Stop Page.</p>
+              <p className="text-lg text-slate-600">The principles that guide every interaction, negotiation, and decision we make at ILMIKA.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

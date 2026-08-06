@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import SearchableCountrySelect from "@/components/ui/SearchableCountrySelect";
 import { Send, GraduationCap, ShieldCheck, Search, HeadphonesIcon, ClipboardList, MapPin, BookOpen } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -161,19 +162,12 @@ function InquireFormContent() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Preferred Destination</label>
-                <select 
+                <SearchableCountrySelect 
                   value={country} 
-                  onChange={(e) => setCountry(e.target.value)} 
-                  className="w-full px-4 py-3 rounded-xl border border-line focus:border-accent outline-none text-sm bg-white cursor-pointer"
-                >
-                  <option value="IN">🇮🇳 India</option>
-                  <option value="US">🇺🇸 United States</option>
-                  <option value="GB">🇬🇧 United Kingdom</option>
-                  <option value="AU">🇦🇺 Australia</option>
-                  <option value="CA">🇨🇦 Canada</option>
-                  <option value="DE">🇩🇪 Germany</option>
-                  <option value="ANY">🌍 Any / Open to Suggestions</option>
-                </select>
+                  onChange={(val) => setCountry(val)} 
+                  className="w-full"
+                  placeholder="🌍 Any / Open to Suggestions"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Annual Budget</label>

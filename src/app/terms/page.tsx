@@ -4,8 +4,8 @@ import Footer from "@/components/layout/Footer";
 import { ShieldCheck, FileText } from "lucide-react";
 
 export const metadata = {
-  title: "Terms of Service - Ink EduVerse",
-  description: "Terms of Service and legal agreement for using the Ink EduVerse global university search platform.",
+  title: "Terms of Service - ILMIKA",
+  description: "Terms of Service and legal agreement for using the ILMIKA global university search platform.",
 };
 
 export default function TermsOfServicePage() {
@@ -26,12 +26,12 @@ export default function TermsOfServicePage() {
           <div className="space-y-5 text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
             <h2 className="font-serif text-lg font-bold text-primary">1. Agreement to Terms</h2>
             <p>
-              By accessing or using Ink EduVerse ("Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
+              By accessing or using ILMIKA ("Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
             </p>
 
             <h2 className="font-serif text-lg font-bold text-primary">2. Use of Educational Services</h2>
             <p>
-              Ink EduVerse provides higher education information, entrance exam cutoff details, college search tools, and scholarship listings. All information is provided for educational guidance and guidance purposes.
+              ILMIKA provides higher education information, entrance exam cutoff details, college search tools, and scholarship listings. All information is provided for educational guidance and guidance purposes.
             </p>
 
             <h2 className="font-serif text-lg font-bold text-primary">3. User Responsibilities</h2>
@@ -41,7 +41,7 @@ export default function TermsOfServicePage() {
 
             <h2 className="font-serif text-lg font-bold text-primary">4. Accuracy of Cutoffs &amp; Fees</h2>
             <p>
-              While Ink EduVerse strives to maintain up-to-date college tuition fees and qualifying entrance exam cutoffs, institutional criteria are subject to change by respective universities and examining bodies.
+              While ILMIKA strives to maintain up-to-date college tuition fees and qualifying entrance exam cutoffs, institutional criteria are subject to change by respective universities and examining bodies.
             </p>
 
             <h2 className="font-serif text-lg font-bold text-primary">5. Contact Information</h2>

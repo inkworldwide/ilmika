@@ -94,7 +94,7 @@ export default function RegisterPage() {
             ✓
           </div>
           <h2 className="font-serif text-xl font-bold text-primary">Account Created!</h2>
-          <p className="text-xs text-slate-500 leading-relaxed">Welcome to Ink EduVerse. Redirecting you to login...</p>
+          <p className="text-xs text-slate-500 leading-relaxed">Welcome to ILMIKA. Redirecting you to login...</p>
         </div>
       </div>
     );
@@ -110,7 +110,7 @@ export default function RegisterPage() {
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
           <div>
-            <h1 className="font-serif text-xl font-bold text-primary">Create your Ink EduVerse account</h1>
+            <h1 className="font-serif text-xl font-bold text-primary">Create your ILMIKA account</h1>
             <p className="text-xs text-slate-400 mt-1">Join thousands of students and college administrators worldwide</p>
           </div>
 

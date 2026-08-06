@@ -3,25 +3,29 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Ink EduVerse — Find Colleges & Courses Worldwide",
-    template: "%s | Ink EduVerse",
+    default: "Ilmika — Find Colleges & Courses Worldwide",
+    template: "%s | Ilmika",
   },
-  description: "Search and compare 12,000+ colleges and 50,000+ courses across 180+ countries. Find Bachelor's, Master's, PhD, and online programmes. Apply directly, book counselling, and discover scholarships on Ink EduVerse.",
-  metadataBase: new URL("https://inkedulverse.com"),
+  description: "Search and compare 12,000+ colleges and 50,000+ courses across 180+ countries. Find Bachelor's, Master's, PhD, and online programmes. Apply directly, book counselling, and discover scholarships on Ilmika.",
+  metadataBase: new URL("https://ilmika.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Ink EduVerse — One Universe. All Knowledge.",
+    title: "Ilmika — One Universe. All Knowledge.",
     description: "The world's premier platform for discovering and comparing colleges & courses across every country. Search, shortlist, apply, and get counselled.",
-    url: "https://inkedulverse.com",
-    siteName: "Ink EduVerse",
+    url: "https://ilmika.com",
+    siteName: "Ilmika",
     locale: "en_US",
     type: "website",
   },
   robots: {
     index: true,
     follow: true,
+  },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
   keywords: [
     "college search", "university search", "courses abroad", "study abroad",

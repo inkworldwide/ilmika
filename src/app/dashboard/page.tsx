@@ -40,12 +40,38 @@ export default function DashboardOverview() {
             });
           }
         } else {
-          // Student stats
-          setStats({
-            shortlistCount: 3,
-            applicationsCount: 2,
-            sessionsCount: 1,
-          });
+          // Student stats - fetch real counts from APIs
+          try {
+            const [enqRes, visitsRes] = await Promise.all([
+              fetch("/api/dashboard/enquiries"),
+              fetch("/api/dashboard/visits"),
+            ]);
+
+            let appsCount = 0;
+            let sessionsCount = 0;
+
+            if (enqRes.ok) {
+              const enqData = await enqRes.json();
+              appsCount = enqData.enquiries?.length || 0;
+            }
+
+            if (visitsRes.ok) {
+              const visitsData = await visitsRes.json();
+              sessionsCount = visitsData.visits?.length || visitsData.sessions?.length || 0;
+            }
+
+            setStats({
+              shortlistCount: 0,
+              applicationsCount: appsCount,
+              sessionsCount: sessionsCount,
+            });
+          } catch (e) {
+            setStats({
+              shortlistCount: 0,
+              applicationsCount: 0,
+              sessionsCount: 0,
+            });
+          }
         }
       } catch (err) {
         console.error("Dashboard overview load error:", err);
@@ -215,7 +241,7 @@ export default function DashboardOverview() {
 
           {/* Student Quick Shortcuts */}
           <div className="space-y-4">
-            <h3 className="font-serif text-lg font-semibold text-primary">Explore Ink EduVerse</h3>
+            <h3 className="font-serif text-lg font-semibold text-primary">Explore ILMIKA</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Link
                 href="/colleges"

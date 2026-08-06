@@ -62,7 +62,7 @@ function LoginForm() {
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
           <div>
             <h1 className="font-serif text-xl font-bold text-primary">Welcome back</h1>
-            <p className="text-xs text-slate-400 mt-1">Sign in to your Ink EduVerse account</p>
+            <p className="text-xs text-slate-400 mt-1">Sign in to your ILMIKA account</p>
           </div>
 
           {error && (

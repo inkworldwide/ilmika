@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import CollegeCard from "@/components/property/CollegeCard";
 import SearchableCountrySelect from "../ui/SearchableCountrySelect";
-import { Search, SlidersHorizontal, X, ChevronDown, Globe, GraduationCap, BookOpen, Filter } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronDown, Globe, GraduationCap, BookOpen, Filter, Layers } from "lucide-react";
 
 const STREAMS = [
   { value: "ENGINEERING", label: "Engineering" },
@@ -24,6 +24,80 @@ const STREAMS = [
   { value: "SOCIAL_SCIENCE", label: "Social Science" },
   { value: "MEDIA", label: "Media & Communication" },
 ];
+
+const STREAM_SPECIALISATIONS: Record<string, { label: string; query: string }[]> = {
+  ENGINEERING: [
+    { label: "Computer Science & Engineering", query: "Computer Science" },
+    { label: "Artificial Intelligence & Data Science", query: "Artificial Intelligence" },
+    { label: "Electronics & Comm (ECE)", query: "Electronics" },
+    { label: "Electrical & Electronics (EEE)", query: "Electrical" },
+    { label: "Mechanical Engineering", query: "Mechanical" },
+    { label: "Civil Engineering", query: "Civil" },
+    { label: "Biotechnology & Chemical Engg", query: "Biotechnology" },
+    { label: "Aerospace & Aeronautical", query: "Aerospace" },
+    { label: "Robotics & Automation", query: "Robotics" },
+  ],
+  MEDICAL: [
+    { label: "MBBS (Medicine & Surgery)", query: "MBBS" },
+    { label: "BDS (Dental Surgery)", query: "BDS" },
+    { label: "B.Sc Nursing & Clinical Care", query: "Nursing" },
+    { label: "Pharmacy & Clinical Research", query: "Pharmacy" },
+    { label: "Physiotherapy (BPT)", query: "Physiotherapy" },
+    { label: "MD / MS Clinical Specialisations", query: "Clinical" },
+    { label: "Medical Lab Tech (BMLT)", query: "Laboratory" },
+  ],
+  MANAGEMENT: [
+    { label: "Finance & Investment Banking", query: "Finance" },
+    { label: "Marketing & Brand Management", query: "Marketing" },
+    { label: "Human Resource Mgmt (HR)", query: "Human Resource" },
+    { label: "Operations & Supply Chain", query: "Supply Chain" },
+    { label: "Business Analytics & Data", query: "Analytics" },
+    { label: "International Business", query: "International Business" },
+  ],
+  LAW: [
+    { label: "Corporate & Commercial Law", query: "Corporate Law" },
+    { label: "Criminal Law & Criminology", query: "Criminal Law" },
+    { label: "Intellectual Property Rights (IPR)", query: "Intellectual Property" },
+    { label: "Constitutional & Human Rights", query: "Constitutional Law" },
+    { label: "Cyber Law & Tech Regulation", query: "Cyber Law" },
+  ],
+  INFORMATION_TECHNOLOGY: [
+    { label: "Computer Applications (BCA / MCA)", query: "BCA" },
+    { label: "Cybersecurity & Hacking", query: "Cybersecurity" },
+    { label: "Cloud Computing & DevOps", query: "Cloud" },
+    { label: "Software Systems Engineering", query: "Software" },
+    { label: "AI & Machine Learning", query: "Machine Learning" },
+  ],
+  ARTS: [
+    { label: "English Literature & Comm", query: "English" },
+    { label: "Psychology & Behavioural Science", query: "Psychology" },
+    { label: "Journalism & Mass Media", query: "Journalism" },
+    { label: "Political Science & Int Affairs", query: "Political Science" },
+  ],
+  COMMERCE: [
+    { label: "Accounting & Auditing (CA / CPA)", query: "Accounting" },
+    { label: "Financial Management & Banking", query: "Banking" },
+    { label: "Economics & Econometrics", query: "Economics" },
+  ],
+  SCIENCE: [
+    { label: "Physics & Applied Astronomy", query: "Physics" },
+    { label: "Chemistry & Materials Science", query: "Chemistry" },
+    { label: "Mathematics & Applied Statistics", query: "Mathematics" },
+    { label: "Biotechnology & Biochemistry", query: "Biotechnology" },
+  ],
+  DESIGN: [
+    { label: "Bachelor of Architecture (B.Arch)", query: "Architecture" },
+    { label: "Graphic & UI/UX Design", query: "UI/UX" },
+    { label: "Fashion & Apparel Design", query: "Fashion" },
+    { label: "Interior & Spatial Design", query: "Interior" },
+  ],
+  PHARMACY: [
+    { label: "Bachelor of Pharmacy (B.Pharm)", query: "B.Pharm" },
+    { label: "Doctor of Pharmacy (Pharm.D)", query: "Pharm.D" },
+    { label: "Pharmaceutical Chemistry", query: "Pharmaceutical" },
+    { label: "Pharmacology & Clinical Pharmacy", query: "Pharmacology" },
+  ],
+};
 
 const DEGREES = [
   { value: "BACHELOR", label: "Bachelor's" },
@@ -188,16 +262,18 @@ export default function CollegesSearchContent() {
     fetchColleges();
   }, [fetchColleges]);
 
+  const [selectedBranch, setSelectedBranch] = useState("");
+
   const clearFilters = () => {
     setSearch(""); setStream(""); setDegree(""); setMode("");
     setCountry(""); setCityId(""); setCollegeType(""); setVerifiedOnly(false); setScholarshipOnly(false);
-    setMaxFees("");
+    setMaxFees(""); setSelectedBranch("");
     setPage(1);
   };
 
-  const hasFilters = Boolean(search || stream || degree || mode || country || cityId || collegeType || verifiedOnly || scholarshipOnly || maxFees);
+  const hasFilters = Boolean(search || stream || degree || mode || country || cityId || collegeType || verifiedOnly || scholarshipOnly || maxFees || selectedBranch);
 
-  const filterCount = [stream, degree, mode, country, cityId, collegeType, verifiedOnly, scholarshipOnly, maxFees].filter(Boolean).length;
+  const filterCount = [stream, selectedBranch, degree, mode, country, cityId, collegeType, verifiedOnly, scholarshipOnly, maxFees].filter(Boolean).length;
 
   const renderFilterControls = () => (
     <div className="space-y-5">
@@ -206,12 +282,46 @@ export default function CollegesSearchContent() {
         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
           <BookOpen className="w-3.5 h-3.5 text-accent" /> Stream
         </label>
-        <select value={stream} onChange={e => { setStream(e.target.value); setPage(1); }}
-          className="w-full border border-line rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-accent bg-white">
+        <select 
+          value={stream} 
+          onChange={e => { 
+            const newStream = e.target.value;
+            setStream(newStream); 
+            setSelectedBranch("");
+            setPage(1); 
+          }}
+          className="w-full border border-line rounded-xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:border-accent bg-white"
+        >
           <option value="">All Streams</option>
           {STREAMS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
+
+      {/* Specialisation / Branch */}
+      {stream && STREAM_SPECIALISATIONS[stream] && (
+        <div className="animate-fadeIn">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+            <Layers className="w-3.5 h-3.5 text-accent" /> Specialisation / Branch
+          </label>
+          <select
+            value={selectedBranch}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedBranch(val);
+              setSearch(val);
+              setPage(1);
+            }}
+            className="w-full border border-accent/50 bg-amber-50/40 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-accent text-primary cursor-pointer shadow-2xs"
+          >
+            <option value="">All {STREAMS.find(s => s.value === stream)?.label || stream} Branches</option>
+            {STREAM_SPECIALISATIONS[stream].map((b) => (
+              <option key={b.query} value={b.query}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Degree */}
       <div>
@@ -412,7 +522,13 @@ export default function CollegesSearchContent() {
           {stream && (
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-accent/20 border border-accent/40 px-2.5 py-1 rounded-lg">
               Stream: {STREAMS.find(s => s.value === stream)?.label || stream}
-              <button onClick={() => setStream("")} className="hover:text-red-600 cursor-pointer"><X className="w-3 h-3" /></button>
+              <button onClick={() => { setStream(""); setSelectedBranch(""); }} className="hover:text-red-600 cursor-pointer"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          {selectedBranch && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-amber-100 border border-amber-300 px-2.5 py-1 rounded-lg">
+              Branch: {selectedBranch}
+              <button onClick={() => { setSelectedBranch(""); setSearch(""); }} className="hover:text-red-600 cursor-pointer"><X className="w-3 h-3" /></button>
             </span>
           )}
           {degree && (

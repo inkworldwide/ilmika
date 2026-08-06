@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   Admin Portal
                 </h3>
                 <p className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                  <Sparkles className="w-3 h-3 text-accent" /> Ink EduVerse Ops
+                  <Sparkles className="w-3 h-3 text-accent" /> Ilmika Ops
                 </p>
               </div>
             </div>

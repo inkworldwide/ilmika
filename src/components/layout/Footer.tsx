@@ -134,7 +134,7 @@ export default function Footer() {
       {/* Copyright Strip */}
       <div className="border-t border-slate-800/80 bg-slate-950/90 py-6">
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} <span className="text-slate-300 font-semibold">Ink EduVerse</span>. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} <span className="text-slate-300 font-semibold font-serif uppercase tracking-wider">Ilmika</span>. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <a href="#" aria-label="Instagram" className="hover:text-accent hover:scale-110 transition-all transform"><InstagramIcon className="w-4 h-4" /></a>
             <a href="#" aria-label="Twitter" className="hover:text-accent hover:scale-110 transition-all transform"><TwitterIcon className="w-4 h-4" /></a>

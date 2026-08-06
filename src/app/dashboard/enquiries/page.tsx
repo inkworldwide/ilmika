@@ -1,27 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mail, Clock, Phone, Globe, Check, ShieldCheck, ChevronRight } from "lucide-react";
+import { Mail, Phone, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 interface Enquiry {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   message: string;
   status: "NEW" | "CONTACTED" | "INTERESTED" | "VISIT_SCHEDULED" | "CLOSED" | "SPAM";
   createdAt: string;
-  property: {
+  college?: {
+    id: string;
+    name: string;
+    slug?: string;
+  };
+  property?: {
     id: string;
     title: string;
-    price: number;
-    transactionType: string;
   };
-  sender?: {
+  student?: {
+    id: string;
     name: string;
     email: string;
-    phone: string;
   };
 }
 
@@ -45,7 +48,7 @@ export default function DashboardEnquiriesPage() {
         if (enqData.enquiries) setEnquiries(enqData.enquiries);
       } catch (err) {
         console.error(err);
-      } finally {
+      } fontFinally: {
         setLoading(false);
       }
     }
@@ -75,7 +78,7 @@ export default function DashboardEnquiriesPage() {
     return (
       <div className="flex flex-col items-center gap-3 py-10 justify-center flex-1">
         <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs text-slate-500 font-mono">Loading enquiries...</p>
+        <p className="text-xs text-slate-500 font-mono">Loading enquiries &amp; applications...</p>
       </div>
     );
   }
@@ -85,11 +88,13 @@ export default function DashboardEnquiriesPage() {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">Enquiries &amp; Leads</h2>
+        <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">
+          {isOwner ? "Student Enquiries & Admissions Desk" : "My College Inquiries"}
+        </h2>
         <p className="text-xs text-slate-500 mt-1">
           {isOwner 
-            ? "Manage enquiries and contact requests received for your listings." 
-            : "Review property enquiries you have sent to owners/agents."}
+            ? "Review and manage student admission enquiries and applications received for your institution." 
+            : "Review your submitted admission inquiries and institution responses."}
         </p>
       </div>
 
@@ -97,11 +102,18 @@ export default function DashboardEnquiriesPage() {
         <div className="border border-line rounded-2xl p-12 text-center max-w-md mx-auto my-12 bg-secondary/35">
           <Mail className="w-12 h-12 text-accent mx-auto mb-4" />
           <h3 className="font-serif text-lg text-primary font-semibold mb-2">No enquiries found</h3>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs text-slate-500 leading-relaxed mb-6">
             {isOwner 
-              ? "When visitors submit the contact form on your listings, their details will display here." 
-              : "Explore properties and send an enquiry to connect directly with owners."}
+              ? "When students submit inquiry forms on your college listings, their details will display here." 
+              : "Explore universities and submit an inquiry to connect directly with admissions officers."}
           </p>
+          <Link
+            href="/colleges"
+            className="inline-flex items-center gap-2 bg-primary text-secondary font-bold text-xs px-5 py-2.5 rounded-full hover:bg-slate-800 transition"
+          >
+            <span>Browse Colleges</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       ) : (
         <div className="space-y-4">
@@ -109,7 +121,7 @@ export default function DashboardEnquiriesPage() {
             const dateStr = new Date(enq.createdAt).toLocaleDateString("en-IN", {
               year: "numeric", month: "short", day: "numeric"
             });
-            const statusColors = {
+            const statusColors: Record<string, string> = {
               NEW: "bg-red-50 text-red-700 border-red-200",
               CONTACTED: "bg-amber-50 text-amber-700 border-amber-200",
               INTERESTED: "bg-blue-50 text-blue-700 border-blue-200",
@@ -118,18 +130,20 @@ export default function DashboardEnquiriesPage() {
               SPAM: "bg-slate-50 text-slate-500 border-slate-200",
             };
 
+            const title = enq.college?.name || enq.property?.title || "College Admission Enquiry";
+
             return (
               <div key={enq.id} className="bg-white border border-line rounded-xl p-5 shadow-xs flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line/60 pb-3">
                   <div>
-                    <h3 className="font-serif text-sm font-semibold text-primary">{enq.property.title}</h3>
+                    <h3 className="font-serif text-sm font-semibold text-primary">{title}</h3>
                     <p className="text-[10px] text-slate-400 font-mono mt-0.5">Submitted on {dateStr}</p>
                   </div>
                   
                   {/* Status badge */}
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded border uppercase ${statusColors[enq.status]}`}>
-                      {enq.status.replace("_", " ")}
+                    <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded border uppercase ${statusColors[enq.status] || "bg-slate-50 text-slate-600 border-slate-200"}`}>
+                      {(enq.status || "NEW").replace("_", " ")}
                     </span>
                     
                     {/* Owner status selector */}
@@ -142,7 +156,7 @@ export default function DashboardEnquiriesPage() {
                         <option value="NEW">New</option>
                         <option value="CONTACTED">Contacted</option>
                         <option value="INTERESTED">Interested</option>
-                        <option value="VISIT_SCHEDULED">Visit Scheduled</option>
+                        <option value="VISIT_SCHEDULED">Session Scheduled</option>
                         <option value="CLOSED">Closed</option>
                         <option value="SPAM">Spam</option>
                       </select>
@@ -151,17 +165,17 @@ export default function DashboardEnquiriesPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {/* Sender contact details (for owner) */}
+                  {/* Sender contact details (for admin/owner) */}
                   {isOwner && (
                     <div className="bg-secondary p-3 rounded-lg border border-line text-xs grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <p className="text-[10px] font-mono text-slate-400 uppercase font-bold">Sender Name</p>
-                        <p className="font-semibold text-slate-700 mt-0.5">{enq.name}</p>
+                        <p className="text-[10px] font-mono text-slate-400 uppercase font-bold">Student Name</p>
+                        <p className="font-semibold text-slate-700 mt-0.5">{enq.student?.name || enq.name}</p>
                       </div>
                       <div>
                         <p className="text-[10px] font-mono text-slate-400 uppercase font-bold">Phone Number</p>
                         <a href={`tel:${enq.phone}`} className="font-semibold text-accent hover:underline flex items-center gap-1 mt-0.5">
-                          <Phone className="w-3.5 h-3.5" /> {enq.phone}
+                          <Phone className="w-3.5 h-3.5" /> {enq.phone || "N/A"}
                         </a>
                       </div>
                       <div>
@@ -173,7 +187,7 @@ export default function DashboardEnquiriesPage() {
 
                   {/* Enquiry message */}
                   <div className="text-xs text-slate-600 bg-secondary/30 p-3.5 rounded-lg border border-line/40 leading-relaxed">
-                    <p className="font-mono text-[10px] text-slate-400 uppercase font-bold mb-1">Message content</p>
+                    <p className="font-mono text-[10px] text-slate-400 uppercase font-bold mb-1">Inquiry Message</p>
                     <p className="italic">"{enq.message}"</p>
                   </div>
                 </div>

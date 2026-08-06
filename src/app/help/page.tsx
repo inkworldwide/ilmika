@@ -5,8 +5,8 @@ import Footer from "@/components/layout/Footer";
 import { HelpCircle, Search, Mail, MessageSquare, Phone, ArrowRight, ShieldCheck, BookOpen, Compass } from "lucide-react";
 
 export const metadata = {
-  title: "Help Center - Ink EduVerse",
-  description: "Get help with college search, admissions, entrance exams, scholarship applications, and user accounts on Ink EduVerse.",
+  title: "Help Center - ILMIKA",
+  description: "Get help with college search, admissions, entrance exams, scholarship applications, and user accounts on ILMIKA.",
 };
 
 const HELP_CATEGORIES = [

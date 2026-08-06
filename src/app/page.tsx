@@ -475,7 +475,7 @@ export default async function HomePage() {
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Recently Added Colleges</h2>
               <p className="text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-200/80 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mt-1.5 shadow-xs">
                 <Clock className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <span>Latest institutions joined the Ink EduVerse network.</span>
+                <span>Latest institutions joined the Ilmika network.</span>
               </p>
             </div>
             <Link href="/colleges" className="text-xs font-bold text-accent hover:underline flex items-center gap-1 font-mono uppercase">
@@ -702,7 +702,7 @@ export default async function HomePage() {
       <section className="py-16 bg-white border-t border-line">
         <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-10">
           <div className="text-center max-w-xl mx-auto space-y-2">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">How Ink EduVerse Works</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">How Ilmika Works</h2>
             <p className="text-xs font-semibold text-teal-900 bg-teal-50 border border-teal-200/80 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mt-1.5 shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-teal-600 shrink-0" />
               <span>Your path from search to enrolment — simplified.</span>
@@ -777,16 +777,16 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Student Success Stories</h2>
-            <p className="text-xs text-slate-500">Hear from students who found their dream college on Ink EduVerse.</p>
+            <p className="text-xs text-slate-500">Hear from students who found their dream college on Ilmika.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                text: "I was confused about which engineering college to pick for my B.Tech. Ink EduVerse let me compare 6 colleges side-by-side on fees, rankings, and placements. I got into IIT Delhi!",
+                text: "I was confused about which engineering college to pick for my B.Tech. Ilmika let me compare 6 colleges side-by-side on fees, rankings, and placements. I got into IIT Delhi!",
                 name: "Arjun Sharma", role: "B.Tech Student, IIT Delhi 🇮🇳", initial: "A"
               },
               {
-                text: "Finding an MBA programme in the United Kingdom as an international student was overwhelming. Ink EduVerse filtered everything by my budget and IELTS score. I'm now at Warwick Business School.",
+                text: "Finding an MBA programme in the United Kingdom as an international student was overwhelming. Ilmika filtered everything by my budget and IELTS score. I'm now at Warwick Business School.",
                 name: "Priya Mehta", role: "MBA Student, Warwick United Kingdom 🇬🇧", initial: "P"
               },
               {
@@ -818,7 +818,7 @@ export default async function HomePage() {
           <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent mx-auto">
             <Layers className="w-7 h-7" />
           </div>
-          <h2 className="font-serif text-3xl font-bold text-white">List Your College on Ink EduVerse</h2>
+          <h2 className="font-serif text-3xl font-bold text-white">List Your College on Ilmika</h2>
           <p className="text-xs text-slate-300 leading-relaxed font-medium">
             Reach over 2 million students actively searching for their perfect programme. 
             List your institution, showcase your courses, and receive direct applications — all for free.

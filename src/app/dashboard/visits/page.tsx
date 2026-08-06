@@ -15,11 +15,14 @@ interface Visit {
   type: "IN_PERSON" | "VIDEO_TOUR";
   message: string | null;
   createdAt: string;
-  property: {
+  college?: {
+    id: string;
+    name: string;
+    slug?: string;
+  };
+  property?: {
     id: string;
     title: string;
-    price: number;
-    transactionType: string;
   };
   visitor?: {
     id: string;
@@ -151,7 +154,9 @@ export default function DashboardVisitsPage() {
                 {/* Details */}
                 <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-serif text-sm font-semibold text-primary">{visit.property.title}</h3>
+                    <h3 className="font-serif text-sm font-semibold text-primary">
+                      {visit.college?.name || visit.property?.title || "Counselling Appointment"}
+                    </h3>
                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded border uppercase ${statusColors[visit.status]}`}>
                       {visit.status}
                     </span>

@@ -45,7 +45,7 @@ export default function DashboardRecentlyViewedPage() {
           <Clock className="w-12 h-12 text-accent mx-auto mb-4" />
           <h3 className="font-serif text-lg text-primary font-semibold mb-2">History is clean</h3>
           <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-            As you browse apartments, villas, and spaces on Re One Stop Page, your history will populate here.
+            As you browse colleges, universities, and programmes on ILMIKA, your history will populate here.
           </p>
           <Link
             href="/properties"

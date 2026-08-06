@@ -7,416 +7,586 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+
 enum Role {
   USER
-  OWNER
+  COLLEGE_ADMIN
   AGENT
   ADMIN
 }
 
-enum TransactionType {
-  RENT
-  SALE
-  LEASE
+enum CollegeType {
+  GOVERNMENT
+  PRIVATE
+  DEEMED
+  AUTONOMOUS
+  CENTRAL
+  INTERNATIONAL
 }
 
-enum PropertyType {
-  APARTMENT
-  INDEPENDENT_HOUSE
-  VILLA
-  STUDIO_APARTMENT
-  PENTHOUSE
-  BUILDER_FLOOR
-  RESIDENTIAL_PLOT
-  FARM_HOUSE
-  PG
-  CO_LIVING
-  SHARED_ROOM
-  OFFICE_SPACE
-  COWORKING_SPACE
-  SHOP
-  SHOWROOM
-  WAREHOUSE
-  INDUSTRIAL_PROPERTY
-  COMMERCIAL_LAND
-  DEVELOPER_SITE
-  PLOT
-  AGRICULTURE_LAND
-  RESORT
-  INDUSTRIAL_SITE
-  INDUSTRIAL_BUILDING
-  HOTEL
-  COMMERCIAL_COMPLEX
+enum Stream {
+  ENGINEERING
+  MEDICAL
+  ARTS
+  COMMERCE
+  SCIENCE
+  LAW
+  MANAGEMENT
+  DESIGN
+  PHARMACY
+  AGRICULTURE
+  EDUCATION
+  HOTEL_MANAGEMENT
+  ARCHITECTURE
+  NURSING
+  SOCIAL_SCIENCE
+  MEDIA
+  INFORMATION_TECHNOLOGY
+  OTHER
 }
 
-enum PropertyStatus {
+enum DegreeType {
+  BACHELOR
+  MASTER
+  DIPLOMA
+  PHD
+  CERTIFICATE
+  INTEGRATED
+  ASSOCIATE
+}
+
+enum StudyMode {
+  FULL_TIME
+  PART_TIME
+  ONLINE
+  DISTANCE
+  HYBRID
+}
+
+enum CollegeGender {
+  CO_ED
+  BOYS_ONLY
+  GIRLS_ONLY
+}
+
+enum CollegeStatus {
   DRAFT
   PENDING_VERIFICATION
   ACTIVE
   REJECTED
-  RENTED
-  SOLD
-  LEASED
   ARCHIVED
+}
+
+enum ApplicationStatus {
+  NEW
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+  ENROLLED
 }
 
 enum EnquiryStatus {
   NEW
   CONTACTED
-  INTERESTED
-  VISIT_SCHEDULED
+  RESPONDED
   CLOSED
   SPAM
 }
 
-enum VisitStatus {
+enum SessionType {
+  IN_PERSON
+  VIDEO_CALL
+}
+
+enum SessionStatus {
   PENDING
   CONFIRMED
   COMPLETED
   CANCELLED
-  REJECTED
 }
 
-enum VisitType {
-  IN_PERSON
-  VIDEO_TOUR
-}
-
-enum ReportReason {
-  FAKE_PROPERTY
-  INCORRECT_INFORMATION
-  DUPLICATE_LISTING
-  ALREADY_SOLD_OR_RENTED
-  SUSPICIOUS_OWNER
-  SPAM
+enum AccreditationType {
+  NAAC
+  NBA
+  NIRF
+  QS
+  TIMES
+  ARWU
   OTHER
 }
 
 enum NotificationType {
-  ENQUIRY
-  VISIT_BOOKED
-  VISIT_CONFIRMED
-  VISIT_REJECTED
-  VISIT_RESCHEDULED
-  PROPERTY_APPROVED
-  PROPERTY_REJECTED
-  PROPERTY_STATUS_CHANGED
+  APPLICATION_RECEIVED
+  APPLICATION_REVIEWED
+  ENQUIRY_RECEIVED
+  SESSION_BOOKED
+  SESSION_CONFIRMED
+  SESSION_REJECTED
+  COLLEGE_APPROVED
+  COLLEGE_REJECTED
   MESSAGE_RECEIVED
   ADMIN_ALERT
 }
 
-enum FurnishingStatus {
-  UNFURNISHED
-  SEMI_FURNISHED
-  FULLY_FURNISHED
+enum ReportReason {
+  FAKE_COLLEGE
+  INCORRECT_INFORMATION
+  DUPLICATE_LISTING
+  SPAM
+  INAPPROPRIATE_CONTENT
+  OTHER
 }
 
-enum PossessionStatus {
-  UNDER_CONSTRUCTION
-  READY_TO_MOVE
-}
-
-enum OwnershipType {
-  FREEHOLD
-  LEASEHOLD
-  CO_OPERATIVE
-  POWER_OF_ATTORNEY
-}
-
-enum FacingDirection {
-  EAST
-  WEST
-  NORTH
-  SOUTH
-  NORTHEAST
-  NORTHWEST
-  SOUTHEAST
-  SOUTHWEST
-}
-
-enum AreaUnit {
-  SQFT
-  SQYRD
-  ACRE
-}
-
-enum TenantPreference {
-  BACHELORS
-  FAMILY
-  COMPANY
-  ANY
-  VEG
-  NON_VEG
-}
-
-enum PropertyImageCategory {
+enum ImageCategory {
   EXTERIOR
-  INTERIOR
-  BEDROOM
-  BATHROOM
-  KITCHEN
-  PLAN
+  CAMPUS
+  CLASSROOM
+  HOSTEL
+  LIBRARY
+  SPORTS
+  LAB
+  AUDITORIUM
+  OTHER
 }
+
+// ─────────────────────────────────────────
+// AUTH & USER
+// ─────────────────────────────────────────
 
 model User {
-  id                     String           @id @default(uuid())
-  customId               String?          @unique
-  email                  String           @unique
+  id                     String              @id @default(uuid())
+  customId               String?             @unique
+  email                  String              @unique
   passwordHash           String
   plainPassword          String?
   name                   String
   phone                  String?
-  role                   Role             @default(USER)
+  city                   String?
+  country                String?
+  role                   Role                @default(USER)
   avatar                 String?
-  isEmailVerified        Boolean          @default(false)
-  isApproved             Boolean          @default(false)
-  isSuspended            Boolean          @default(false)
+  isEmailVerified        Boolean             @default(false)
+  isApproved             Boolean             @default(false)
+  isSuspended            Boolean             @default(false)
   emailVerificationToken String?
   passwordResetToken     String?
   passwordResetExpires   DateTime?
-  properties             Property[]       @relation("OwnerProperties")
-  enquiries              Enquiry[]
-  visits                 Visit[]          @relation("UserVisits")
-  sentMessages           Message[]        @relation("SentMessages")
-  rcvdMessages           Message[]        @relation("ReceivedMessages")
-  conversations          Conversation[]   @relation("ConversationParticipants")
+
+  // Relations
+  colleges               College[]           @relation("CollegeOwner")
+  applications           Application[]       @relation("StudentApplications")
+  enquiries              CollegeEnquiry[]    @relation("StudentEnquiries")
+  sessions               CounsellingSession[] @relation("StudentSessions")
+  sentMessages           Message[]           @relation("SentMessages")
+  rcvdMessages           Message[]           @relation("ReceivedMessages")
+  conversations          Conversation[]      @relation("ConversationParticipants")
   notifications          Notification[]
-  reports                PropertyReport[]
+  reports                CollegeReport[]
   recentlyViewed         RecentlyViewed[]
-  reviewsWritten         Review[]         @relation("ReviewsWritten")
-  favourites             Favourite[]
-  agentProfile           AgentProfile?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  reviewsWritten         Review[]            @relation("ReviewsWritten")
+  shortlists             Shortlist[]
+  collegeProfile         CollegeProfile?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([email])
   @@index([role])
 }
 
-model AgentProfile {
+model CollegeProfile {
   id              String   @id @default(uuid())
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName     String?
-  experienceYears Int?
-  licenseNumber   String?
+  organizationName String?
+  designation     String?
   bio             String?
   ratingAverage   Float    @default(0.0)
   isFeatured      Boolean  @default(true)
-  reviews         Review[] @relation("AgentReviews")
+  reviews         Review[] @relation("CollegeProfileReviews")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
+// ─────────────────────────────────────────
+// GEOGRAPHY
+// ─────────────────────────────────────────
+
+model Country {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  code      String    @unique   // IN, US, GB, AU, CA, DE
+  flag      String?             // emoji or image URL
+  cities    City[]
+  colleges  College[]
+  scholarships Scholarship[]
+  exams     EntranceExam[]
+  createdAt DateTime  @default(now())
+
+  @@index([code])
+}
+
 model City {
-  id         String     @id @default(uuid())
-  name       String     @unique
-  slug       String     @unique
-  localities Locality[]
-  properties Property[]
-  createdAt  DateTime   @default(now())
+  id        String    @id @default(uuid())
+  name      String
+  slug      String
+  countryId String
+  country   Country   @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  colleges  College[]
+  createdAt DateTime  @default(now())
+
+  @@unique([name, countryId])
+  @@index([countryId])
 }
 
-model Locality {
-  id         String     @id @default(uuid())
-  name       String
-  slug       String
-  cityId     String
-  city       City       @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  properties Property[]
-  createdAt  DateTime   @default(now())
+// ─────────────────────────────────────────
+// COLLEGE CORE
+// ─────────────────────────────────────────
 
-  @@unique([name, cityId])
-  @@index([cityId])
-}
+model College {
+  id               String        @id @default(uuid())
+  name             String
+  slug             String        @unique
+  description      String
+  collegeType      CollegeType   @default(PRIVATE)
+  countryId        String
+  country          Country       @relation(fields: [countryId], references: [id])
+  cityId           String
+  city             City          @relation(fields: [cityId], references: [id])
+  state            String?
+  address          String
+  pincode          String?
+  latitude         Float?
+  longitude        Float?
+  website          String?
+  phone            String?
+  email            String?
+  establishedYear  Int?
+  totalStudents    Int?
+  campusArea       String?       // "120 acres"
+  gender           CollegeGender @default(CO_ED)
+  affiliation      String?       // "Mumbai University", "Autonomous"
+  nirfRanking      Int?
+  qsRanking        Int?
+  timesRanking     Int?
+  isVerified       Boolean       @default(false)
+  isFeatured       Boolean       @default(false)
+  status           CollegeStatus @default(DRAFT)
+  rejectionReason  String?
+  viewCount        Int           @default(0)
 
-model Amenity {
-  id         String            @id @default(uuid())
-  name       String            @unique
-  icon       String?
-  properties PropertyAmenity[]
-  createdAt  DateTime          @default(now())
-}
+  // Owner (College Admin)
+  ownerId          String
+  owner            User          @relation("CollegeOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
-model Property {
-  id                 String           @id @default(uuid())
-  title              String
-  slug               String           @unique
-  description        String
-  transactionType    TransactionType
-  propertyType       PropertyType
-  price              Decimal          @db.Decimal(15, 2)
-  monthlyRent        Decimal?         @db.Decimal(12, 2)
-  securityDeposit    Decimal?         @db.Decimal(12, 2)
-  maintenanceCharges Decimal?         @db.Decimal(10, 2)
-  leaseDuration      Int? // in months
-  priceNegotiable    Boolean          @default(false)
-
-  // Configuration
-  bhk        Int?
-  bedrooms   Int?
-  bathrooms  Int?
-  balconies  Int?
-  totalRooms Int?
-
-  // Areas
-  carpetArea       Int
-  builtUpArea      Int?
-  superBuiltUpArea   Int?
-  plotArea         Int?
-  areaUnit         AreaUnit @default(SQFT)
-
-  // Building details
-  floorNumber      Int?
-  totalFloors      Int?
-  propertyAge      Int? // in years
-  possessionStatus PossessionStatus
-  availableFrom    DateTime?
-  facing           FacingDirection?
-  furnishingStatus FurnishingStatus
-
-  // Parking
-  coveredParking Int @default(0)
-  openParking    Int @default(0)
-
-  // Preferences / Legal
-  ownershipType    OwnershipType
-  tenantPreference TenantPreference @default(ANY)
-  listedBy         String?          // OWNER, AGENT, TENANT
-  videoUrl         String?
-  saleType         String?          // FULL_HOUSE, FLOOR_WISE
-
-  // Location Details
-  country     String   @default("India")
-  state       String
-  cityId      String
-  city        City     @relation(fields: [cityId], references: [id])
-  localityId  String
-  locality    Locality @relation(fields: [localityId], references: [id])
-  fullAddress String
-  landmark    String?
-  pincode     String
-  latitude    Float?
-  longitude   Float?
-
-  // Compliance
-  reraId         String?
-  isReraApproved Boolean @default(false)
-
-  // Status & Verification
-  isVerified      Boolean        @default(false)
-  isFeatured      Boolean        @default(false)
-  status          PropertyStatus @default(DRAFT)
-  rejectionReason String?
-  viewCount       Int            @default(0)
-
-  // Owner relations
-  ownerId String
-  owner   User   @relation("OwnerProperties", fields: [ownerId], references: [id], onDelete: Cascade)
-
-  // Normalized relations
-  images         PropertyImage[]
-  amenities      PropertyAmenity[]
-  enquiries      Enquiry[]
-  visits         Visit[]
-  reports        PropertyReport[]
-  favourites     Favourite[]
-  recentlyViewed RecentlyViewed[]
-  conversations  Conversation[]
+  // Relations
+  accreditations   Accreditation[]
+  courses          Course[]
+  images           CollegeImage[]
+  facilities       CollegeFacility[]
+  reviews          Review[]
+  applications     Application[]
+  enquiries        CollegeEnquiry[]
+  sessions         CounsellingSession[]
+  shortlists       Shortlist[]
+  reports          CollegeReport[]
+  recentlyViewed   RecentlyViewed[]
+  conversations    Conversation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([transactionType])
-  @@index([propertyType])
+  @@index([countryId])
   @@index([cityId])
-  @@index([localityId])
-  @@index([price])
-  @@index([bedrooms])
+  @@index([collegeType])
   @@index([status])
-  @@index([ownerId])
   @@index([isFeatured])
+  @@index([isVerified])
+  @@index([ownerId])
+  @@index([nirfRanking])
   @@index([createdAt])
 }
 
-model PropertyImage {
-  id         String                @id @default(uuid())
-  propertyId String
-  property   Property              @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+model Accreditation {
+  id         String            @id @default(uuid())
+  collegeId  String
+  college    College           @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  type       AccreditationType
+  grade      String?           // "A++", "A+", "Gold"
+  year       Int?
+  validUntil DateTime?
+
+  @@index([collegeId])
+}
+
+model CollegeImage {
+  id         String        @id @default(uuid())
+  collegeId  String
+  college    College       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
   url        String
   publicId   String?
   altText    String?
-  category   PropertyImageCategory @default(EXTERIOR)
-  isPrimary  Boolean               @default(false)
-  sortOrder  Int                   @default(0)
-  createdAt  DateTime              @default(now())
+  category   ImageCategory @default(EXTERIOR)
+  isPrimary  Boolean       @default(false)
+  sortOrder  Int           @default(0)
+  createdAt  DateTime      @default(now())
 
-  @@index([propertyId])
+  @@index([collegeId])
   @@index([isPrimary])
 }
 
-model PropertyAmenity {
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  amenityId  String
-  amenity    Amenity  @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+model CollegeFacility {
+  id        String  @id @default(uuid())
+  collegeId String
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  name      String  // "Hostel", "Library", "Sports Complex", "WiFi", "Cafeteria"
+  icon      String?
 
-  @@id([propertyId, amenityId])
-  @@index([propertyId])
-  @@index([amenityId])
+  @@index([collegeId])
 }
 
-model Enquiry {
+// ─────────────────────────────────────────
+// COURSE
+// ─────────────────────────────────────────
+
+model Course {
+  id                   String      @id @default(uuid())
+  collegeId            String
+  college              College     @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  name                 String      // "B.Tech Computer Science"
+  degree               DegreeType
+  stream               Stream
+  durationYears        Float       // 4.0, 1.5, 2.0
+  totalSeats           Int?
+  annualFees           Decimal     @db.Decimal(15, 2)
+  feeCurrency          String      @default("INR")  // INR, USD, GBP, AUD
+  mode                 StudyMode   @default(FULL_TIME)
+  eligibility          String
+  entranceExams        String[]    // ["JEE", "SAT", "IELTS"]
+  languageRequirement  String?     // "IELTS 6.5 or TOEFL 90"
+  placementRate        Float?      // percentage 0-100
+  avgSalary            Decimal?    @db.Decimal(15, 2)
+  highestSalary        Decimal?    @db.Decimal(15, 2)
+  salaryCurrency       String?     @default("INR")
+  scholarshipAvailable Boolean     @default(false)
+  applicationDeadline  DateTime?
+  startDate            DateTime?
+  isActive             Boolean     @default(true)
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([collegeId])
+  @@index([stream])
+  @@index([degree])
+  @@index([mode])
+  @@index([isActive])
+}
+
+// ─────────────────────────────────────────
+// STUDENT ACTIONS
+// ─────────────────────────────────────────
+
+model Application {
+  id          String            @id @default(uuid())
+  studentId   String
+  student     User              @relation("StudentApplications", fields: [studentId], references: [id], onDelete: Cascade)
+  collegeId   String
+  college     College           @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  courseId    String?
+  course      Course?           @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  name        String
+  email       String
+  phone       String?
+  message     String?
+  documents   String[]          // uploaded file URLs
+  status      ApplicationStatus @default(NEW)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([studentId])
+  @@index([collegeId])
+  @@index([courseId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CollegeEnquiry {
   id         String        @id @default(uuid())
-  propertyId String
-  property   Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  senderId   String
-  sender     User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User          @relation("StudentEnquiries", fields: [studentId], references: [id], onDelete: Cascade)
+  collegeId  String
+  college    College       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  courseId   String?
   name       String
   email      String
-  phone      String
+  phone      String?
   message    String
   status     EnquiryStatus @default(NEW)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
-  @@index([propertyId])
-  @@index([senderId])
+  @@index([studentId])
+  @@index([collegeId])
   @@index([status])
   @@index([createdAt])
 }
 
-model Visit {
-  id         String      @id @default(uuid())
-  propertyId String
-  property   Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  visitorId  String
-  visitor    User        @relation("UserVisits", fields: [visitorId], references: [id], onDelete: Cascade)
-  date       DateTime
-  timeSlot   String
-  status     VisitStatus @default(PENDING)
-  type       VisitType   @default(IN_PERSON)
-  message    String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+model CounsellingSession {
+  id          String        @id @default(uuid())
+  studentId   String
+  student     User          @relation("StudentSessions", fields: [studentId], references: [id], onDelete: Cascade)
+  collegeId   String
+  college     College       @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  date        DateTime
+  timeSlot    String
+  type        SessionType   @default(VIDEO_CALL)
+  status      SessionStatus @default(PENDING)
+  notes       String?
+  meetingLink String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  @@index([propertyId])
-  @@index([visitorId])
+  @@index([studentId])
+  @@index([collegeId])
   @@index([status])
   @@index([date])
   @@index([createdAt])
 }
 
-model Conversation {
-  id         String     @id @default(uuid())
-  propertyId String?
-  property   Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  participants User[]   @relation("ConversationParticipants")
-  messages   Message[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+model Shortlist {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  courseId  String?
+  createdAt DateTime @default(now())
 
-  @@index([propertyId])
+  @@unique([userId, collegeId])
+  @@index([userId])
+  @@index([collegeId])
+}
+
+model RecentlyViewed {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collegeId String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+
+  @@unique([userId, collegeId])
+  @@index([userId])
+  @@index([collegeId])
+  @@index([viewedAt])
+}
+
+// ─────────────────────────────────────────
+// SCHOLARSHIPS & EXAMS
+// ─────────────────────────────────────────
+
+model Scholarship {
+  id          String      @id @default(uuid())
+  name        String
+  provider    String
+  countryId   String?
+  country     Country?    @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  amount      Decimal?    @db.Decimal(15, 2)
+  currency    String      @default("INR")
+  deadline    DateTime?
+  eligibility String
+  stream      Stream?
+  degree      DegreeType?
+  link        String?
+  isFeatured  Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  @@index([countryId])
+  @@index([stream])
+  @@index([degree])
+  @@index([isFeatured])
+}
+
+model EntranceExam {
+  id               String    @id @default(uuid())
+  name             String    @unique // JEE, NEET, CAT, IELTS, SAT, GRE
+  fullName         String
+  countryId        String?
+  country          Country?  @relation(fields: [countryId], references: [id], onDelete: SetNull)
+  stream           Stream?
+  degree           DegreeType?
+  description      String?
+  conductedBy      String?
+  frequency        String?   // "Annual", "Twice a year"
+  website          String?
+  cutoffScore      String?   // E.g. "Score: 1450-1580 / 1600"
+  acceptedCutoffs  String?   // Detailed cutoffs for top colleges
+  registrationDate DateTime?
+  examDate         DateTime?
+  isFeatured       Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+
+  @@index([countryId])
+  @@index([stream])
+  @@index([isFeatured])
+}
+
+// ─────────────────────────────────────────
+// REVIEWS & REPORTS
+// ─────────────────────────────────────────
+
+model Review {
+  id               String         @id @default(uuid())
+  reviewerId       String
+  reviewer         User           @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
+  collegeId        String
+  college          College        @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  collegeProfileId String?
+  collegeProfile   CollegeProfile? @relation("CollegeProfileReviews", fields: [collegeProfileId], references: [id], onDelete: SetNull)
+  rating           Int            // 1-5
+  comment          String
+  createdAt        DateTime       @default(now())
+
+  @@unique([reviewerId, collegeId])
+  @@index([collegeId])
+  @@index([reviewerId])
+}
+
+model CollegeReport {
+  id         String       @id @default(uuid())
+  collegeId  String
+  college    College      @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     ReportReason
+  details    String
+  createdAt  DateTime     @default(now())
+
+  @@index([collegeId])
+  @@index([reporterId])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────
+// MESSAGING & NOTIFICATIONS
+// ─────────────────────────────────────────
+
+model Conversation {
+  id           String     @id @default(uuid())
+  collegeId    String?
+  college      College?   @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  participants User[]     @relation("ConversationParticipants")
+  messages     Message[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([collegeId])
   @@index([updatedAt])
 }
 
@@ -451,61 +621,4 @@ model Notification {
   @@index([userId])
   @@index([isRead])
   @@index([createdAt])
-}
-
-model Review {
-  id             String       @id @default(uuid())
-  reviewerId     String
-  reviewer       User         @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
-  agentProfileId String
-  agentProfile   AgentProfile @relation("AgentReviews", fields: [agentProfileId], references: [id], onDelete: Cascade)
-  rating         Int
-  comment        String
-  createdAt      DateTime     @default(now())
-
-  @@unique([reviewerId, agentProfileId])
-  @@index([agentProfileId])
-  @@index([reviewerId])
-}
-
-model PropertyReport {
-  id         String       @id @default(uuid())
-  propertyId String
-  property   Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  reporterId String
-  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  reason     ReportReason
-  details    String
-  createdAt  DateTime     @default(now())
-
-  @@index([propertyId])
-  @@index([reporterId])
-  @@index([createdAt])
-}
-
-model RecentlyViewed {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  viewedAt   DateTime @default(now())
-
-  @@unique([userId, propertyId])
-  @@index([userId])
-  @@index([propertyId])
-  @@index([viewedAt])
-}
-
-model Favourite {
-  id         String   @id @default(uuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-
-  @@unique([userId, propertyId])
-  @@index([userId])
-  @@index([propertyId])
 }

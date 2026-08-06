@@ -3,14 +3,16 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const amenities = await prisma.amenity.findMany({
+    const facilities = await prisma.collegeFacility.findMany({
+      distinct: ["name"],
+      select: { name: true, icon: true },
       orderBy: { name: "asc" },
     });
-    return NextResponse.json({ amenities });
+    return NextResponse.json({ amenities: facilities, facilities });
   } catch (error: any) {
-    console.error("Fetch amenities error:", error);
+    console.error("Fetch facilities error:", error);
     return NextResponse.json(
-      { error: "Failed to retrieve amenities list" },
+      { error: "Failed to retrieve facilities list" },
       { status: 500 }
     );
   }

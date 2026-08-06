@@ -14,35 +14,37 @@ export async function GET(req: Request) {
 
     if (user.role === "USER") {
       return NextResponse.json(
-        { error: "Access denied. seeker profiles cannot host listings." },
+        { error: "Access denied. Student profiles cannot host college listings." },
         { status: 403 }
       );
     }
 
-    const properties = await prisma.property.findMany({
+    const colleges = await prisma.college.findMany({
       where: { ownerId: user.id },
       include: {
+        city: true,
+        country: true,
         images: {
           orderBy: { sortOrder: "asc" },
         },
+        courses: { where: { isActive: true } },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    // Format Decimal values
-    const formatted = properties.map(p => ({
-      ...p,
-      price: parseFloat(p.price.toString()),
-      monthlyRent: p.monthlyRent ? parseFloat(p.monthlyRent.toString()) : null,
-      securityDeposit: p.securityDeposit ? parseFloat(p.securityDeposit.toString()) : null,
-      maintenanceCharges: p.maintenanceCharges ? parseFloat(p.maintenanceCharges.toString()) : null,
+    const formatted = colleges.map(c => ({
+      ...c,
+      courses: c.courses.map(course => ({
+        ...course,
+        annualFees: course.annualFees ? Number(course.annualFees) : 0,
+      })),
     }));
 
-    return NextResponse.json({ properties: formatted });
+    return NextResponse.json({ colleges: formatted, properties: formatted });
   } catch (error: any) {
-    console.error("Dashboard properties fetch error:", error);
+    console.error("Dashboard colleges fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch owned listings" },
+      { error: "Failed to fetch owned college listings" },
       { status: 500 }
     );
   }

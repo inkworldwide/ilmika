@@ -7,44 +7,41 @@ export async function GET(req: Request) {
     const idsParam = searchParams.get("ids") || "";
     
     if (!idsParam.trim()) {
-      return NextResponse.json({ properties: [] });
+      return NextResponse.json({ colleges: [], properties: [] });
     }
 
     const ids = idsParam.split(",").filter(Boolean);
 
-    const properties = await prisma.property.findMany({
+    const colleges = await prisma.college.findMany({
       where: {
         id: { in: ids },
       },
       include: {
         city: true,
-        locality: true,
+        country: true,
         images: {
           take: 1,
           orderBy: { sortOrder: "asc" },
         },
-        amenities: {
-          include: {
-            amenity: true,
-          },
-        },
+        courses: { where: { isActive: true } },
+        facilities: true,
+        accreditations: true,
       },
     });
 
-    // Format Decimal values
-    const formatted = properties.map((p) => ({
-      ...p,
-      price: parseFloat(p.price.toString()),
-      monthlyRent: p.monthlyRent ? parseFloat(p.monthlyRent.toString()) : null,
-      securityDeposit: p.securityDeposit ? parseFloat(p.securityDeposit.toString()) : null,
-      maintenanceCharges: p.maintenanceCharges ? parseFloat(p.maintenanceCharges.toString()) : null,
+    const formatted = colleges.map((c) => ({
+      ...c,
+      courses: c.courses.map((course) => ({
+        ...course,
+        annualFees: course.annualFees ? Number(course.annualFees) : 0,
+      })),
     }));
 
-    return NextResponse.json({ properties: formatted });
+    return NextResponse.json({ colleges: formatted, properties: formatted });
   } catch (error: any) {
-    console.error("Comparison API error:", error);
+    console.error("College comparison API error:", error);
     return NextResponse.json(
-      { error: "Failed to load properties for comparison" },
+      { error: "Failed to load colleges for comparison" },
       { status: 500 }
     );
   }

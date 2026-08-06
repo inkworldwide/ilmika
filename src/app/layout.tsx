@@ -3,26 +3,33 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "RE OneStopPage — Premium Real Estate Platform in India",
-    template: "%s | RE OneStopPage",
+    default: "Ink EduVerse — Find Colleges & Courses Worldwide",
+    template: "%s | Ink EduVerse",
   },
-  description: "Browse verified residential apartments, independent villas, builder floors, PGs, and commercial workspaces in India. Lease, buy, or rent with zero brokerage hassles.",
-  metadataBase: new URL("https://rentahouse.in"),
+  description: "Search and compare 12,000+ colleges and 50,000+ courses across 180+ countries. Find Bachelor's, Master's, PhD, and online programmes. Apply directly, book counselling, and discover scholarships on Ink EduVerse.",
+  metadataBase: new URL("https://inkedulverse.com"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "RE OneStopPage — Premium Indian Real Estate Platform",
-    description: "Browse verified apartments, PGs, and workspaces in India. Experience seamless digital leasing and direct landlord messaging.",
-    url: "https://rentahouse.in",
-    siteName: "RE OneStopPage",
-    locale: "en_IN",
+    title: "Ink EduVerse — One Universe. All Knowledge.",
+    description: "The world's premier platform for discovering and comparing colleges & courses across every country. Search, shortlist, apply, and get counselled.",
+    url: "https://inkedulverse.com",
+    siteName: "Ink EduVerse",
+    locale: "en_US",
     type: "website",
   },
   robots: {
     index: true,
     follow: true,
   },
+  keywords: [
+    "college search", "university search", "courses abroad", "study abroad",
+    "scholarships", "entrance exams", "JEE", "NEET", "CAT", "IELTS",
+    "bachelor degree", "master degree", "MBA", "PhD", "online courses",
+    "engineering colleges", "medical colleges", "law colleges",
+    "colleges in India", "universities in USA", "universities in UK",
+  ],
 };
 
 export const viewport: Viewport = {

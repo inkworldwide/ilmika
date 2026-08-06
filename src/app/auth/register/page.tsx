@@ -3,27 +3,14 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Building2, Lock, Mail, User, Phone, ChevronDown, MapPin } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, User, Phone, ChevronDown, MapPin, Globe } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
+import SearchableCountrySelect from "@/components/ui/SearchableCountrySelect";
 
 const ROLES = [
-  { value: "USER", label: "Tenant / Buyer" },
-  { value: "OWNER", label: "Property Owner" },
-  { value: "AGENT", label: "Real Estate Agent" },
-];
-
-const CITIES = [
-  { name: "Kochi", code: "KO" },
-  { name: "Bengaluru", code: "BE" },
-  { name: "Mumbai", code: "MU" },
-  { name: "Delhi NCR", code: "DE" },
-  { name: "Hyderabad", code: "HY" },
-  { name: "Chennai", code: "CH" },
-  { name: "Pune", code: "PU" },
-  { name: "Kolkata", code: "KO" },
-  { name: "Ahmedabad", code: "AH" },
-  { name: "Gurugram", code: "GU" },
-  { name: "Noida", code: "NO" },
-  { name: "Others...", code: "OT" },
+  { value: "USER", label: "Student / Applicant" },
+  { value: "COLLEGE_ADMIN", label: "College Administrator" },
+  { value: "AGENT", label: "Education Advisor / Agent" },
 ];
 
 export default function RegisterPage() {
@@ -32,8 +19,8 @@ export default function RegisterPage() {
     name: "",
     email: "",
     phone: "",
-    city: "Kochi",
-    customCity: "",
+    country: "India",
+    city: "",
     password: "",
     confirmPassword: "",
     role: "USER",
@@ -47,31 +34,38 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (!form.phone || form.phone.length !== 10) {
-      setError("Please enter a valid 10-digit mobile number.");
+    if (!form.phone || form.phone.trim().length < 5) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!form.country) {
+      setError("Please select your country.");
+      return;
+    }
+    if (!form.city || form.city.trim().length < 2) {
+      setError("Please enter your city.");
       return;
     }
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     setLoading(true);
     try {
-      const selectedCity = form.city === "Others..." ? (form.customCity.trim() || "Others") : form.city;
-
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          phone: form.phone || undefined,
-          city: selectedCity,
+          phone: form.phone,
+          country: form.country,
+          city: form.city,
           password: form.password,
           role: form.role,
         }),
@@ -84,8 +78,7 @@ export default function RegisterPage() {
       }
 
       setSuccess(true);
-      // Redirect to login after 3.5 seconds
-      setTimeout(() => router.push("/auth/login"), 3500);
+      setTimeout(() => router.push("/auth/login"), 2000);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -97,14 +90,11 @@ export default function RegisterPage() {
     return (
       <div className="min-h-screen bg-secondary flex items-center justify-center px-4">
         <div className="text-center space-y-4 max-w-sm bg-white p-8 border border-line rounded-2xl shadow-sm">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-            <svg className="w-8 h-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 font-bold text-2xl">
+            ✓
           </div>
-          <h2 className="font-serif text-xl font-bold text-primary">Pending Approval</h2>
-          <p className="text-xs text-slate-500 leading-relaxed">Your registration is successful. You will be able to log in once the admin approves your account.</p>
-          <p className="text-[10px] text-slate-400">Redirecting you to login page…</p>
+          <h2 className="font-serif text-xl font-bold text-primary">Account Created!</h2>
+          <p className="text-xs text-slate-500 leading-relaxed">Welcome to Ink EduVerse. Redirecting you to login...</p>
         </div>
       </div>
     );
@@ -114,18 +104,14 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-secondary flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">RE OneStopPage</span>
-          </Link>
-          <p className="text-xs text-slate-400 mt-2 font-mono">India's Verified Property Marketplace</p>
+        <div className="flex justify-center mb-8">
+          <Logo />
         </div>
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
           <div>
-            <h1 className="font-serif text-xl font-bold text-primary">Create your account</h1>
-            <p className="text-xs text-slate-400 mt-1">Join thousands of property seekers and owners</p>
+            <h1 className="font-serif text-xl font-bold text-primary">Create your Ink EduVerse account</h1>
+            <p className="text-xs text-slate-400 mt-1">Join thousands of students and college administrators worldwide</p>
           </div>
 
           {error && (
@@ -141,12 +127,11 @@ export default function RegisterPage() {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="reg-name"
                   type="text"
                   required
                   value={form.name}
                   onChange={(e) => setForm(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Rahul Sharma"
+                  placeholder="Jane Doe"
                   className="w-full pl-9 pr-4 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
                 />
               </div>
@@ -158,7 +143,6 @@ export default function RegisterPage() {
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="reg-email"
                   type="email"
                   required
                   value={form.email}
@@ -171,52 +155,45 @@ export default function RegisterPage() {
 
             {/* Phone */}
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Mobile Number</label>
+              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Phone Number *</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="reg-phone"
-                  type="text"
+                  type="tel"
                   required
-                  maxLength={10}
                   value={form.phone}
-                  onChange={(e) => setForm(p => ({ ...p, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
-                  placeholder="9876543210"
+                  onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))}
+                  placeholder="+91 98765 43210"
                   className="w-full pl-9 pr-4 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
                 />
               </div>
             </div>
 
-            {/* Primary City */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Primary City</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <select
-                  id="reg-city"
-                  value={form.city}
-                  onChange={(e) => setForm(p => ({ ...p, city: e.target.value }))}
-                  className="w-full pl-9 pr-8 py-2.5 border border-line rounded-xl text-sm bg-secondary appearance-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition cursor-pointer"
-                >
-                  {CITIES.map(c => (
-                    <option key={c.name} value={c.name}>{c.name} ({c.code})</option>
-                  ))}
-                </select>
+            {/* Country & City */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">Country *</label>
+                <SearchableCountrySelect
+                  value={form.country}
+                  onChange={(code) => setForm(p => ({ ...p, country: code }))}
+                  placeholder="Select Country"
+                  className="w-full"
+                />
               </div>
-
-              {form.city === "Others..." && (
-                <div className="mt-2.5 relative animate-fadeIn">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1.5">City *</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
                     required
-                    value={form.customCity}
-                    onChange={(e) => setForm(p => ({ ...p, customCity: e.target.value }))}
-                    placeholder="Type your city name (e.g. Jaipur, Surat, Goa...)"
-                    className="w-full px-4 py-2.5 border border-line rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
+                    value={form.city}
+                    onChange={(e) => setForm(p => ({ ...p, city: e.target.value }))}
+                    placeholder="e.g. Mumbai"
+                    className="w-full pl-9 pr-3 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
                   />
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Role */}
@@ -225,7 +202,6 @@ export default function RegisterPage() {
               <div className="relative">
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <select
-                  id="reg-role"
                   value={form.role}
                   onChange={(e) => setForm(p => ({ ...p, role: e.target.value }))}
                   className="w-full px-4 py-2.5 border border-line rounded-xl text-sm bg-secondary appearance-none focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition cursor-pointer"
@@ -243,12 +219,11 @@ export default function RegisterPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="reg-password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={form.password}
                   onChange={(e) => setForm(p => ({ ...p, password: e.target.value }))}
-                  placeholder="Min. 8 characters"
+                  placeholder="Min. 6 characters"
                   className="w-full pl-9 pr-10 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
                 />
                 <button
@@ -267,7 +242,6 @@ export default function RegisterPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
-                  id="reg-confirm-password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={form.confirmPassword}
@@ -278,14 +252,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 leading-relaxed">
-              By creating an account you agree to our{" "}
-              <span className="text-accent font-semibold">Terms of Service</span> and{" "}
-              <span className="text-accent font-semibold">Privacy Policy</span>.
-            </p>
-
             <button
-              id="reg-submit"
               type="submit"
               disabled={loading}
               className="w-full bg-primary hover:bg-slate-800 text-secondary py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
@@ -303,7 +270,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <p className="text-center text-[10px] text-slate-300 mt-6">
+        <p className="text-center text-[10px] text-slate-400 mt-6">
           <Link href="/" className="hover:text-accent transition">← Back to Homepage</Link>
         </p>
       </div>

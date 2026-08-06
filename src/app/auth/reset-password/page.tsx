@@ -3,7 +3,8 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Building2, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -24,8 +25,8 @@ function ResetPasswordForm() {
       setError("Passwords do not match.");
       return;
     }
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
     if (!token) {
@@ -84,7 +85,7 @@ function ResetPasswordForm() {
     <>
       <div>
         <h1 className="font-serif text-xl font-bold text-primary">Set a new password</h1>
-        <p className="text-xs text-slate-400 mt-1">Must be at least 8 characters.</p>
+        <p className="text-xs text-slate-400 mt-1">Must be at least 6 characters.</p>
       </div>
 
       {error && (
@@ -103,7 +104,7 @@ function ResetPasswordForm() {
               required
               value={form.password}
               onChange={(e) => setForm(p => ({ ...p, password: e.target.value }))}
-              placeholder="Min. 8 characters"
+              placeholder="Min. 6 characters"
               className="w-full pl-9 pr-10 py-2.5 border border-line rounded-xl text-sm bg-secondary focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition"
             />
             <button type="button" onClick={() => setShowPassword(s => !s)}
@@ -145,11 +146,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re One Stop Page</span>
-          </Link>
+        <div className="flex justify-center mb-8">
+          <Logo />
         </div>
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
@@ -158,7 +156,7 @@ export default function ResetPasswordPage() {
           </Suspense>
         </div>
 
-        <p className="text-center text-[10px] text-slate-300 mt-6">
+        <p className="text-center text-[10px] text-slate-400 mt-6">
           <Link href="/" className="hover:text-accent transition">← Back to Homepage</Link>
         </p>
       </div>

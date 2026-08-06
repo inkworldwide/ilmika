@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Loader2, Building2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || null;
@@ -33,7 +34,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirect based on role or redirect param
       const role = data.user?.role;
       if (redirectTo) {
         router.push(redirectTo);
@@ -51,21 +51,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary flex items-center justify-center px-4">
+    <div className="min-h-screen bg-secondary flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">RE OneStopPage</span>
-          </Link>
-          <p className="text-xs text-slate-400 mt-2 font-mono">India's Verified Property Marketplace</p>
+        <div className="flex flex-col items-center mb-8 text-center space-y-2">
+          <Logo />
+          <p className="text-xs text-slate-400 font-mono">One Universe. All Knowledge.</p>
         </div>
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
           <div>
             <h1 className="font-serif text-xl font-bold text-primary">Welcome back</h1>
-            <p className="text-xs text-slate-400 mt-1">Sign in to your RE OneStopPage account</p>
+            <p className="text-xs text-slate-400 mt-1">Sign in to your Ink EduVerse account</p>
           </div>
 
           {error && (
@@ -143,12 +140,12 @@ export default function LoginPage() {
         {/* Demo Credentials */}
         <div className="mt-6 bg-white border border-line rounded-2xl p-5 space-y-3">
           <p className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-wider">Demo Credentials</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
-              { label: "Admin", email: "admin@rentahouse.in", password: "admin123" },
-              { label: "Owner", email: "amit.sharma@gmail.com", password: "owner123" },
-              { label: "Agent", email: "vikram.singh@agent.com", password: "agent123" },
-              { label: "User", email: "arjun.das@gmail.com", password: "user123" },
+              { label: "Super Admin", email: "admin@inkeduverse.com", password: "demo1234" },
+              { label: "College Admin", email: "admissions@iitb.ac.in", password: "demo1234" },
+              { label: "Student", email: "student@inkeduverse.com", password: "demo1234" },
+              { label: "Education Advisor", email: "advisor@inkeduverse.com", password: "demo1234" },
             ].map(({ label, email, password }) => (
               <button
                 key={label}
@@ -157,17 +154,29 @@ export default function LoginPage() {
                 className="text-left bg-secondary border border-line rounded-xl px-3 py-2.5 hover:border-accent/40 transition cursor-pointer"
               >
                 <p className="text-[10px] font-bold text-accent font-mono">{label}</p>
-                <p className="text-[9px] text-slate-400 truncate mt-0.5">{email}</p>
+                <p className="text-[9px] text-slate-500 truncate mt-0.5">{email}</p>
               </button>
             ))}
           </div>
-          <p className="text-[9px] text-slate-300 text-center">Click a card to auto-fill, then Sign In</p>
+          <p className="text-[9px] text-slate-400 text-center">Click a card to auto-fill credentials, then Sign In</p>
         </div>
 
-        <p className="text-center text-[10px] text-slate-300 mt-6">
+        <p className="text-center text-[10px] text-slate-400 mt-6">
           <Link href="/" className="hover:text-accent transition">← Back to Homepage</Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-secondary flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

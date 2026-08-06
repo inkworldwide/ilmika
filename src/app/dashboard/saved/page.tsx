@@ -36,8 +36,8 @@ export default function DashboardSavedPage() {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">Saved Listings</h2>
-        <p className="text-xs text-slate-500 mt-1">Manage and view properties you have shortlisted.</p>
+        <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">Shortlisted Colleges</h2>
+        <p className="text-xs text-slate-500 mt-1">View and compare your saved colleges and degree courses.</p>
       </div>
 
       {properties.length === 0 ? (
@@ -45,14 +45,14 @@ export default function DashboardSavedPage() {
           <Heart className="w-12 h-12 text-accent mx-auto mb-4" />
           <h3 className="font-serif text-lg text-primary font-semibold mb-2">Shortlist is empty</h3>
           <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-            Shortlist properties while browsing to easily compare them and keep track of updates.
+            Save colleges while browsing to easily compare tuition fees, degree streams, and entrance exam cutoffs.
           </p>
           <Link
-            href="/properties"
+            href="/colleges"
             className="bg-primary text-secondary font-semibold px-6 py-2.5 rounded-full hover:bg-slate-800 transition text-xs inline-flex items-center gap-1.5"
           >
             <Search className="w-3.5 h-3.5" />
-            Explore Properties
+            Explore Colleges
           </Link>
         </div>
       ) : (

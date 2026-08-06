@@ -1,655 +1,1023 @@
-import { PrismaClient, Role, TransactionType, PropertyType, PropertyStatus, FurnishingStatus, PossessionStatus, OwnershipType, FacingDirection, AreaUnit, TenantPreference, PropertyImageCategory } from "@prisma/client";
-import * as bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { ALL_COUNTRIES } from "./data/allCountries";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Starting database seeding...");
+  console.log("🌱 Starting Ink EduVerse database seed...");
 
-  // 1. Clean Database in order of dependencies (or skip if not dropping)
-  // Since we want this to be safe, we delete existing data from this project's tables if they exist
-  await prisma.favourite.deleteMany({});
-  await prisma.recentlyViewed.deleteMany({});
-  await prisma.propertyReport.deleteMany({});
-  await prisma.review.deleteMany({});
-  await prisma.message.deleteMany({});
-  await prisma.conversation.deleteMany({});
-  await prisma.visit.deleteMany({});
-  await prisma.enquiry.deleteMany({});
-  await prisma.propertyAmenity.deleteMany({});
-  await prisma.propertyImage.deleteMany({});
-  await prisma.property.deleteMany({});
-  await prisma.amenity.deleteMany({});
-  await prisma.locality.deleteMany({});
-  await prisma.city.deleteMany({});
-  await prisma.agentProfile.deleteMany({});
-  await prisma.user.deleteMany({});
+  // 1. Create Default Users
+  const passwordHash = await bcrypt.hash("demo1234", 10);
 
-  console.log("Cleaned existing project database tables.");
-
-  // 2. Hash Default Passwords
-  const salt = await bcrypt.genSalt(10);
-  const adminPassword = await bcrypt.hash("admin123", salt);
-  const ownerPassword = await bcrypt.hash("owner123", salt);
-  const agentPassword = await bcrypt.hash("agent123", salt);
-  const userPassword = await bcrypt.hash("user123", salt);
-
-  // 3. Seed Users
-  const adminUser = await prisma.user.create({
-    data: {
-      email: "admin@rentahouse.in",
-      passwordHash: adminPassword,
-      name: "Rajesh Kumar",
-      phone: "9876543210",
-      role: Role.ADMIN,
+  const admin = await prisma.user.upsert({
+    where: { email: "admin@inkeduverse.com" },
+    update: { city: "New Delhi", country: "India", phone: "+91 98765 00001" },
+    create: {
+      email: "admin@inkeduverse.com",
+      passwordHash,
+      name: "Super Admin",
+      city: "New Delhi",
+      country: "India",
+      phone: "+91 98765 00001",
+      role: "ADMIN",
       isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&q=80",
+      isApproved: true,
     },
   });
 
-  const owner1 = await prisma.user.create({
-    data: {
-      email: "amit.sharma@gmail.com",
-      passwordHash: ownerPassword,
-      name: "Amit Sharma",
-      phone: "9812345670",
-      role: Role.OWNER,
+  const collegeAdmin = await prisma.user.upsert({
+    where: { email: "admissions@iitb.ac.in" },
+    update: { city: "Mumbai", country: "India", phone: "+91 98765 00002" },
+    create: {
+      email: "admissions@iitb.ac.in",
+      passwordHash,
+      name: "IIT Bombay Admissions",
+      city: "Mumbai",
+      country: "India",
+      phone: "+91 98765 00002",
+      role: "COLLEGE_ADMIN",
       isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80",
+      isApproved: true,
+      collegeProfile: {
+        create: {
+          organizationName: "Indian Institute of Technology Bombay",
+          designation: "Head of Admissions",
+          bio: "Official admissions desk for IIT Bombay.",
+          ratingAverage: 4.9,
+          isFeatured: true,
+        },
+      },
     },
   });
-
-  const owner2 = await prisma.user.create({
-    data: {
-      email: "priya.patel@gmail.com",
-      passwordHash: ownerPassword,
-      name: "Priya Patel",
-      phone: "9823456789",
-      role: Role.OWNER,
+  const student = await prisma.user.upsert({
+    where: { email: "student@inkeduverse.com" },
+    update: { city: "Bengaluru", country: "India", phone: "+91 98765 00003" },
+    create: {
+      email: "student@inkeduverse.com",
+      passwordHash,
+      name: "Alex Student",
+      city: "Bengaluru",
+      country: "India",
+      phone: "+91 98765 00003",
+      role: "USER",
       isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80",
+      isApproved: true,
     },
   });
 
-  const agent1User = await prisma.user.create({
-    data: {
-      email: "vikram.singh@agent.com",
-      passwordHash: agentPassword,
-      name: "Vikram Singh",
-      phone: "9834567890",
-      role: Role.AGENT,
+  const advisor = await prisma.user.upsert({
+    where: { email: "advisor@inkeduverse.com" },
+    update: { city: "Boston", country: "United States", phone: "+1 (555) 234-5678" },
+    create: {
+      email: "advisor@inkeduverse.com",
+      passwordHash,
+      name: "Global Education Advisor",
+      city: "Boston",
+      country: "United States",
+      phone: "+1 (555) 234-5678",
+      role: "AGENT",
       isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80",
+      isApproved: true,
+      collegeProfile: {
+        create: {
+          organizationName: "Ink EduVerse International Advisory",
+          designation: "Senior Counsellor",
+          bio: "Specialist in overseas university applications & scholarships.",
+          ratingAverage: 5.0,
+          isFeatured: true,
+        },
+      },
     },
   });
 
-  const agent2User = await prisma.user.create({
-    data: {
-      email: "kavita.jain@agent.com",
-      passwordHash: agentPassword,
-      name: "Kavita Jain",
-      phone: "9845678901",
-      role: Role.AGENT,
-      isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=100&q=80",
-    },
-  });
+  // 2. Create Countries (195 Countries Worldwide)
+  const countries: Record<string, any> = {};
+  for (const c of ALL_COUNTRIES) {
+    countries[c.code] = await prisma.country.upsert({
+      where: { code: c.code },
+      update: { name: c.name, flag: c.flag },
+      create: c,
+    });
+  }
 
-  const user1 = await prisma.user.create({
-    data: {
-      email: "arjun.das@gmail.com",
-      passwordHash: userPassword,
-      name: "Arjun Das",
-      phone: "9856789012",
-      role: Role.USER,
-      isEmailVerified: true,
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80",
-    },
-  });
-
-  // Seed Agent Profiles
-  const agent1Profile = await prisma.agentProfile.create({
-    data: {
-      userId: agent1User.id,
-      companyName: "Metro Realty Bengaluru",
-      experienceYears: 8,
-      licenseNumber: "PRM/KA/RERA/1251/310/AG/200615/000185",
-      bio: "Specializing in luxury apartments and premium villas in Whitefield and Koramangala.",
-      ratingAverage: 4.8,
-    },
-  });
-
-  const agent2Profile = await prisma.agentProfile.create({
-    data: {
-      userId: agent2User.id,
-      companyName: "Prime Space Advisors",
-      experienceYears: 5,
-      licenseNumber: "PRM/KA/RERA/1251/310/AG/210812/000240",
-      bio: "Helping families and corporate clients find premium commercial offices and high-end residential flats.",
-      ratingAverage: 4.5,
-    },
-  });
-
-  console.log("Seeded users and agent profiles.");
-
-  // 4. Seed Cities & Localities
+  // 3. Create Cities
   const citiesData = [
-    { name: "Bengaluru", slug: "bengaluru" },
-    { name: "Mumbai", slug: "mumbai" },
-    { name: "Delhi", slug: "delhi" },
-    { name: "Hyderabad", slug: "hyderabad" },
-    { name: "Chennai", slug: "chennai" },
-    { name: "Pune", slug: "pune" },
-    { name: "Kolkata", slug: "kolkata" },
-    { name: "Ahmedabad", slug: "ahmedabad" },
-    { name: "Gurugram", slug: "gurugram" },
-    { name: "Noida", slug: "noida" },
-    { name: "Kochi", slug: "kochi" },
+    { name: "Copenhagen", slug: "copenhagen", countryCode: "DK" },
+    { name: "Stockholm", slug: "stockholm", countryCode: "SE" },
+    { name: "Singapore City", slug: "singapore-city", countryCode: "SG" },
+    { name: "Helsinki", slug: "helsinki", countryCode: "FI" },
+    { name: "Seoul", slug: "seoul", countryCode: "KR" },
+    { name: "Tokyo", slug: "tokyo", countryCode: "JP" },
+    { name: "Zurich", slug: "zurich", countryCode: "CH" },
+    { name: "Mumbai", slug: "mumbai", countryCode: "IN" },
+    { name: "New Delhi", slug: "new-delhi", countryCode: "IN" },
+    { name: "Bengaluru", slug: "bengaluru", countryCode: "IN" },
+    { name: "Boston", slug: "boston", countryCode: "US" },
+    { name: "London", slug: "london", countryCode: "GB" },
+    { name: "Melbourne", slug: "melbourne", countryCode: "AU" },
+    { name: "Toronto", slug: "toronto", countryCode: "CA" },
+    { name: "Munich", slug: "munich", countryCode: "DE" },
   ];
 
-  const citiesMap: Record<string, string> = {};
+  const cities: Record<string, any> = {};
   for (const c of citiesData) {
-    const city = await prisma.city.create({ data: c });
-    citiesMap[city.name] = city.id;
-  }
-
-  // Seed Localities for Bengaluru
-  const bengaluruLocalities = [
-    { name: "Whitefield", slug: "whitefield" },
-    { name: "Koramangala", slug: "koramangala" },
-    { name: "Indiranagar", slug: "indiranagar" },
-    { name: "HSR Layout", slug: "hsr-layout" },
-    { name: "Electronic City", slug: "electronic-city" },
-    { name: "Hebbal", slug: "hebbal" },
-    { name: "Yelahanka", slug: "yelahanka" },
-    { name: "Jayanagar", slug: "jayanagar" },
-    { name: "JP Nagar", slug: "jp-nagar" },
-    { name: "BTM Layout", slug: "btm-layout" },
-    { name: "Marathahalli", slug: "marathahalli" },
-    { name: "Sarjapur Road", slug: "sarjapur-road" },
-    { name: "Bellandur", slug: "bellandur" },
-    { name: "Banashankari", slug: "banashankari" },
-    { name: "Kengeri", slug: "kengeri" },
-  ];
-
-  const localitiesMap: Record<string, string> = {};
-  for (const l of bengaluruLocalities) {
-    const loc = await prisma.locality.create({
-      data: {
-        name: l.name,
-        slug: l.slug,
-        cityId: citiesMap["Bengaluru"],
+    cities[c.slug] = await prisma.city.upsert({
+      where: { name_countryId: { name: c.name, countryId: countries[c.countryCode].id } },
+      update: {},
+      create: {
+        name: c.name,
+        slug: c.slug,
+        countryId: countries[c.countryCode].id,
       },
     });
-    localitiesMap[loc.name] = loc.id;
   }
 
-  // Seed Localities for all other cities
-  const extraCities = [
-    "Mumbai", "Delhi", "Hyderabad", "Chennai", "Pune", 
-    "Kolkata", "Ahmedabad", "Gurugram", "Noida", "Kochi"
-  ];
-  
-  for (const cityName of extraCities) {
-    const locs = [
-      { name: `${cityName} Central`, slug: `${cityName.toLowerCase()}-central`, city: cityName },
-      { name: `${cityName} South`, slug: `${cityName.toLowerCase()}-south`, city: cityName }
-    ];
-    for (const item of locs) {
-      const loc = await prisma.locality.create({
-        data: {
-          name: item.name,
-          slug: item.slug,
-          cityId: citiesMap[item.city],
-        },
-      });
-      localitiesMap[item.name] = loc.id;
-    }
-  }
-
-  console.log("Seeded cities and localities.");
-
-  // 5. Seed Amenities
-  const amenitiesList = [
-    { name: "Lift", icon: "arrow-up-down" },
-    { name: "Power Backup", icon: "zap" },
-    { name: "Security", icon: "shield" },
-    { name: "CCTV", icon: "video" },
-    { name: "Gated Community", icon: "fence" },
-    { name: "Gym", icon: "dumbbell" },
-    { name: "Swimming Pool", icon: "waves" },
-    { name: "Club House", icon: "door-open" },
-    { name: "Garden", icon: "flower2" },
-    { name: "Children's Play Area", icon: "smile" },
-    { name: "Visitor Parking", icon: "parking-circle" },
-    { name: "Water Supply", icon: "droplet" },
-    { name: "Gas Pipeline", icon: "flame" },
-    { name: "Internet", icon: "wifi" },
-    { name: "Air Conditioning", icon: "wind" },
-    { name: "Pet Friendly", icon: "dog" },
-    { name: "Wheelchair Access", icon: "accessibility" },
-    { name: "Fire Safety", icon: "flame-kindling" },
-    { name: "Rainwater Harvesting", icon: "cloud-rain" },
-    { name: "Solar Power", icon: "sun" },
-  ];
-
-  const amenitiesMap: Record<string, string> = {};
-  for (const a of amenitiesList) {
-    const dbAmenity = await prisma.amenity.create({ data: a });
-    amenitiesMap[a.name] = dbAmenity.id;
-  }
-
-  console.log("Seeded amenities.");
-
-  // 6. Seed Properties (25 Properties)
-  const propertiesData = [
+  // 4. Create Entrance Exams
+  const examsData = [
     {
-      title: "Elegant 2 BHK Apartment in Whitefield",
-      slug: "elegant-2-bhk-apartment-whitefield-bengaluru",
-      description: "A beautiful, well-ventilated 2 BHK flat located in the heart of Whitefield. Close to major IT parks (ITPB), malls, and metro stations. Complete with semi-furnished wardrobes, modular kitchen, and power backup.",
-      transactionType: TransactionType.RENT,
-      propertyType: PropertyType.APARTMENT,
-      price: 32000.0,
-      monthlyRent: 32000.0,
-      securityDeposit: 150000.0,
-      maintenanceCharges: 3500.0,
-      bhk: 2,
-      bedrooms: 2,
-      bathrooms: 2,
-      balconies: 1,
-      totalRooms: 4,
-      carpetArea: 950,
-      builtUpArea: 1100,
-      superBuiltUpArea: 1250,
-      possessionStatus: PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.EAST,
-      furnishingStatus: FurnishingStatus.SEMI_FURNISHED,
-      coveredParking: 1,
-      ownershipType: OwnershipType.FREEHOLD,
-      tenantPreference: TenantPreference.ANY,
-      state: "Karnataka",
-      cityId: citiesMap["Bengaluru"],
-      localityId: localitiesMap["Whitefield"],
-      fullAddress: "Flat 304, Prestige Shantiniketan, Whitefield Main Road",
-      landmark: "Near ITPB",
-      pincode: "560066",
-      latitude: 12.9845,
-      longitude: 77.7374,
-      reraId: "PRM/KA/RERA/1251/446/PR/171015/000210",
-      isReraApproved: true,
-      isVerified: true,
+      name: "JEE Advanced",
+      fullName: "Joint Entrance Examination Advanced",
+      countryCode: "IN",
+      stream: "ENGINEERING" as const,
+      conductedBy: "IITs (Rotational)",
+      frequency: "Annual (May)",
+      website: "https://jeeadv.ac.in",
+      cutoffScore: "AIR 1 - 15,000 Rank (Qualifying Marks: 120-180 / 360)",
+      acceptedCutoffs: "IIT Bombay CS: AIR 1-65 | IIT Delhi EE: AIR 50-400 | IIT Madras Mech: AIR 300-1200",
       isFeatured: true,
-      status: PropertyStatus.ACTIVE,
-      ownerId: owner1.id,
-      images: [
-        { url: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.EXTERIOR },
-        { url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80", isPrimary: false, category: PropertyImageCategory.INTERIOR },
-      ],
-      amenities: ["Power Backup", "Lift", "Security", "CCTV", "Gym", "Internet", "Water Supply"],
     },
     {
-      title: "Luxurious 3 BHK Villa in Sarjapur Road",
-      slug: "luxurious-3-bhk-villa-sarjapur-road-bengaluru",
-      description: "Premium independent 3 BHK villa in a luxury gated community. Private garden, modular kitchen with chimney, spacious bedrooms with attached bathrooms, and wooden flooring in the master suite.",
-      transactionType: TransactionType.SALE,
-      propertyType: PropertyType.VILLA,
-      price: 18000000.0, // 1.8 Crore
-      bhk: 3,
-      bedrooms: 3,
-      bathrooms: 4,
-      balconies: 2,
-      totalRooms: 6,
-      carpetArea: 2100,
-      builtUpArea: 2400,
-      superBuiltUpArea: 2800,
-      possessionStatus: PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.NORTHEAST,
-      furnishingStatus: FurnishingStatus.SEMI_FURNISHED,
-      coveredParking: 2,
-      openParking: 1,
-      ownershipType: OwnershipType.FREEHOLD,
-      tenantPreference: TenantPreference.ANY,
-      state: "Karnataka",
-      cityId: citiesMap["Bengaluru"],
-      localityId: localitiesMap["Sarjapur Road"],
-      fullAddress: "Villa 42, Sobha Royal Pavilion, Sarjapur Road",
-      pincode: "560035",
-      latitude: 12.9102,
-      longitude: 77.6892,
-      reraId: "PRM/KA/RERA/1251/446/PR/180601/001948",
-      isReraApproved: true,
-      isVerified: true,
+      name: "NEET UG",
+      fullName: "National Eligibility cum Entrance Test",
+      countryCode: "IN",
+      stream: "MEDICAL" as const,
+      conductedBy: "National Testing Agency (NTA)",
+      frequency: "Annual (May)",
+      website: "https://neet.nta.nic.in",
+      cutoffScore: "650 - 720 / 720 Marks (99.2+ Percentile for Govt Seats)",
+      acceptedCutoffs: "AIIMS New Delhi: 705+ Marks | Maulana Azad Medical College: 690+ Marks | KGMU Lucknow: 665+ Marks",
       isFeatured: true,
-      status: PropertyStatus.ACTIVE,
-      ownerId: agent1User.id,
-      images: [
-        { url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.EXTERIOR },
-        { url: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80", isPrimary: false, category: PropertyImageCategory.INTERIOR },
-      ],
-      amenities: ["Gated Community", "Security", "Swimming Pool", "Gym", "Club House", "Garden", "Solar Power", "Rainwater Harvesting"],
     },
     {
-      title: "Cozy 1 BHK Flat near Koramangala",
-      slug: "cozy-1-bhk-flat-koramangala-bengaluru",
-      description: "Charming 1 BHK flat perfect for working professionals or couples. Located in a quiet lane just off the bustling Koramangala 80 Feet Road. Fully furnished with AC, TV, bed, and sofa.",
-      transactionType: TransactionType.RENT,
-      propertyType: PropertyType.APARTMENT,
-      price: 25000.0,
-      monthlyRent: 25000.0,
-      securityDeposit: 100000.0,
-      maintenanceCharges: 2000.0,
-      bhk: 1,
-      bedrooms: 1,
-      bathrooms: 1,
-      balconies: 1,
-      totalRooms: 2,
-      carpetArea: 550,
-      builtUpArea: 620,
-      superBuiltUpArea: 680,
-      possessionStatus: PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.EAST,
-      furnishingStatus: FurnishingStatus.FULLY_FURNISHED,
-      coveredParking: 0,
-      openParking: 1,
-      ownershipType: OwnershipType.FREEHOLD,
-      tenantPreference: TenantPreference.BACHELORS,
-      state: "Karnataka",
-      cityId: citiesMap["Bengaluru"],
-      localityId: localitiesMap["Koramangala"],
-      fullAddress: "Flat 102, Green Glen Heights, Koramangala 4th Block",
-      landmark: "Near Maharaja Restaurant",
-      pincode: "560034",
-      latitude: 12.9348,
-      longitude: 77.6189,
-      isVerified: true,
-      status: PropertyStatus.ACTIVE,
-      ownerId: owner2.id,
-      images: [
-        { url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.INTERIOR },
-        { url: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=800&q=80", isPrimary: false, category: PropertyImageCategory.BEDROOM },
-      ],
-      amenities: ["Power Backup", "Security", "CCTV", "Internet", "Air Conditioning", "Water Supply"],
-    },
-    {
-      title: "Premium Commercial Office in Hitech City",
-      slug: "premium-commercial-office-hitech-city-hyderabad",
-      description: "Fully-furnished dynamic coworking space/office floor in the core of Hyderabad's IT corridor. Features 50 workstations, 3 meeting rooms, high-speed fiber internet, and pantry facilities.",
-      transactionType: TransactionType.LEASE,
-      propertyType: PropertyType.OFFICE_SPACE,
-      price: 150000.0, // 1.5 Lakh/month
-      monthlyRent: 150000.0,
-      securityDeposit: 600000.0,
-      maintenanceCharges: 12000.0,
-      bedrooms: 0,
-      bathrooms: 4,
-      totalRooms: 10,
-      carpetArea: 3200,
-      builtUpArea: 3500,
-      possessionStatus: PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.WEST,
-      furnishingStatus: FurnishingStatus.FULLY_FURNISHED,
-      coveredParking: 3,
-      openParking: 2,
-      ownershipType: OwnershipType.LEASEHOLD,
-      tenantPreference: TenantPreference.COMPANY,
-      state: "Telangana",
-      cityId: citiesMap["Hyderabad"],
-      localityId: localitiesMap["Hyderabad Central"], // Mock location mapping
-      fullAddress: "Level 6, Cyber Towers, Hitech City, Madhapur",
-      pincode: "500081",
-      latitude: 17.4504,
-      longitude: 78.3809,
-      isVerified: true,
+      name: "CAT",
+      fullName: "Common Admission Test",
+      countryCode: "IN",
+      stream: "MANAGEMENT" as const,
+      conductedBy: "Indian Institutes of Management (IIMs)",
+      frequency: "Annual (November)",
+      website: "https://iimcat.ac.in",
+      cutoffScore: "95.0 - 99.8 Percentile",
+      acceptedCutoffs: "IIM Ahmedabad: 99.5+ Percentile | IIM Bangalore: 99.0+ Percentile | IIM Calcutta: 99.2+ Percentile",
       isFeatured: true,
-      status: PropertyStatus.ACTIVE,
-      ownerId: agent2User.id,
-      images: [
-        { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.EXTERIOR },
-      ],
-      amenities: ["Lift", "Power Backup", "Security", "CCTV", "Internet", "Air Conditioning", "Fire Safety", "Water Supply"],
     },
     {
-      title: "Co-Living PG Room in HSR Layout",
-      slug: "co-living-pg-room-hsr-layout-bengaluru",
-      description: "Premium single-sharing PG room in a modern co-living space. Rent includes 3 meals daily, weekly housekeeping, high-speed WiFi, laundry, and access to a common lounge.",
-      transactionType: TransactionType.RENT,
-      propertyType: PropertyType.CO_LIVING,
-      price: 18000.0,
-      monthlyRent: 18000.0,
-      securityDeposit: 36000.0,
-      maintenanceCharges: 0.0,
-      bhk: 1,
-      bedrooms: 1,
-      bathrooms: 1,
-      totalRooms: 1,
-      carpetArea: 250,
-      possessionStatus: PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.SOUTH,
-      furnishingStatus: FurnishingStatus.FULLY_FURNISHED,
-      openParking: 1,
-      ownershipType: OwnershipType.FREEHOLD,
-      tenantPreference: TenantPreference.BACHELORS,
-      state: "Karnataka",
-      cityId: citiesMap["Bengaluru"],
-      localityId: localitiesMap["HSR Layout"],
-      fullAddress: "Building 128, Sector 3, HSR Layout",
-      pincode: "560102",
-      latitude: 12.9103,
-      longitude: 77.6409,
-      isVerified: true,
-      status: PropertyStatus.ACTIVE,
-      ownerId: owner1.id,
-      images: [
-        { url: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.BEDROOM },
-      ],
-      amenities: ["Power Backup", "Security", "CCTV", "Internet", "Air Conditioning", "Water Supply"],
+      name: "GATE",
+      fullName: "Graduate Aptitude Test in Engineering",
+      countryCode: "IN",
+      stream: "ENGINEERING" as const,
+      conductedBy: "IITs & IISc",
+      frequency: "Annual (February)",
+      website: "https://gate2025.iitr.ac.in",
+      cutoffScore: "650 - 850 / 1000 GATE Score",
+      acceptedCutoffs: "IIT Bombay M.Tech AI: 780+ Score | IISc M.Tech CS: 800+ Score | IIT Madras M.Tech: 720+ Score",
+      isFeatured: true,
+    },
+    {
+      name: "CLAT",
+      fullName: "Common Law Admission Test",
+      countryCode: "IN",
+      stream: "LAW" as const,
+      conductedBy: "Consortium of NLUs",
+      frequency: "Annual (December)",
+      website: "https://consortiumofnlus.ac.in",
+      cutoffScore: "AIR 1 - 2,500 Rank (Score: 85 - 110 / 120)",
+      acceptedCutoffs: "NLSIU Bengaluru: AIR 1-100 | NALSAR Hyderabad: AIR 101-250 | WBNUJS Kolkata: AIR 251-450",
+      isFeatured: true,
+    },
+    {
+      name: "SAT",
+      fullName: "Scholastic Assessment Test",
+      countryCode: "US",
+      stream: "OTHER" as const,
+      conductedBy: "College Board (USA)",
+      frequency: "7 times a year",
+      website: "https://satsuite.collegeboard.org",
+      cutoffScore: "1450 - 1580 / 1600 Score",
+      acceptedCutoffs: "Harvard University: 1540-1580 | Stanford University: 1520-1570 | MIT: 1550-1580 | Yale: 1510-1570",
+      isFeatured: true,
+    },
+    {
+      name: "GRE",
+      fullName: "Graduate Record Examinations",
+      countryCode: "US",
+      stream: "SCIENCE" as const,
+      conductedBy: "Educational Testing Service (ETS)",
+      frequency: "Year-Round",
+      website: "https://ets.org/gre",
+      cutoffScore: "320 - 335 / 340 (Quant: 165+, Verbal: 155+)",
+      acceptedCutoffs: "Stanford CS: 328+ | Carnegie Mellon Robotics: 325+ | UC Berkeley EECS: 324+ | Harvard MS: 322+",
+      isFeatured: true,
+    },
+    {
+      name: "GMAT",
+      fullName: "Graduate Management Admission Test",
+      countryCode: "US",
+      stream: "MANAGEMENT" as const,
+      conductedBy: "GMAC (USA)",
+      frequency: "Year-Round",
+      website: "https://mba.com",
+      cutoffScore: "700 - 760 / 800 Score",
+      acceptedCutoffs: "Harvard Business School: 730+ | Stanford GSB: 738+ | Wharton UPenn: 733+ | INSEAD: 710+",
+      isFeatured: true,
+    },
+    {
+      name: "MCAT",
+      fullName: "Medical College Admission Test",
+      countryCode: "US",
+      stream: "MEDICAL" as const,
+      conductedBy: "AAMC (USA & Canada)",
+      frequency: "Multiple times per year",
+      website: "https://aamc.org/mcat",
+      cutoffScore: "512 - 523 / 528 Score (Percentile 85+)",
+      acceptedCutoffs: "Johns Hopkins Medicine: 521+ | Harvard Medical: 520+ | NYU Grossman: 522+",
+      isFeatured: true,
+    },
+    {
+      name: "UCAT",
+      fullName: "University Clinical Aptitude Test",
+      countryCode: "GB",
+      stream: "MEDICAL" as const,
+      conductedBy: "UCAT Consortium (UK & ANZ)",
+      frequency: "Annual (July - Sept)",
+      website: "https://ucat.ac.uk",
+      cutoffScore: "2800 - 3050 / 3600 Score",
+      acceptedCutoffs: "Imperial College London: 2900+ | King's College London: 2850+ | Newcastle University: 2800+",
+      isFeatured: true,
+    },
+    {
+      name: "LNAT",
+      fullName: "National Admissions Test for Law",
+      countryCode: "GB",
+      stream: "LAW" as const,
+      conductedBy: "LNAT Consortium (UK)",
+      frequency: "Annual (Sept - Jan)",
+      website: "https://lnat.ac.uk",
+      cutoffScore: "27 - 35 / 42 Score",
+      acceptedCutoffs: "Oxford University Law: 29+ | UCL Faculty of Laws: 28+ | LSE Law: 28+ | KCL Law: 27+",
+      isFeatured: true,
+    },
+    {
+      name: "IELTS Academic",
+      fullName: "International English Language Testing System",
+      countryCode: "GB",
+      stream: "OTHER" as const,
+      conductedBy: "IDP & British Council",
+      frequency: "48 dates per year",
+      website: "https://ielts.org",
+      cutoffScore: "6.5 - 7.5 Overall Band (Min 6.0 in each module)",
+      acceptedCutoffs: "Oxford & Cambridge: 7.5 Band | Imperial & UCL: 7.0 Band | Toronto & Melbourne: 6.5 - 7.0 Band",
+      isFeatured: true,
+    },
+    {
+      name: "ATAR",
+      fullName: "Australian Tertiary Admission Rank",
+      countryCode: "AU",
+      stream: "OTHER" as const,
+      conductedBy: "Tertiary Admissions Centres (Australia)",
+      frequency: "Annual (December)",
+      website: "https://vtac.edu.au",
+      cutoffScore: "85.00 - 99.90 Rank",
+      acceptedCutoffs: "Uni of Melbourne Commerce: 93.00 | Uni of Sydney Law: 99.50 | UNSW Engineering: 90.00",
+      isFeatured: true,
+    },
+    {
+      name: "TOEFL iBT",
+      fullName: "Test of English as a Foreign Language",
+      countryCode: "CA",
+      stream: "OTHER" as const,
+      conductedBy: "ETS (USA / Global)",
+      frequency: "Weekly",
+      website: "https://ets.org/toefl",
+      cutoffScore: "90 - 110 / 120 Score",
+      acceptedCutoffs: "University of Toronto: 100+ | McGill University: 90+ | UBC: 90+ | Harvard & MIT: 100+",
+      isFeatured: true,
+    },
+    {
+      name: "TestAS",
+      fullName: "Test for Academic Studies (Studienkolleg & Universities)",
+      countryCode: "DE",
+      stream: "ENGINEERING" as const,
+      conductedBy: "ITB Consulting & TestDaF Institute (Germany)",
+      frequency: "Twice a year",
+      website: "https://testas.de",
+      cutoffScore: "Standard Score 100 - 120+ (Percentile 80+)",
+      acceptedCutoffs: "TUM Munich CS: 110+ | RWTH Aachen Engg: 105+ | Heidelberg Med Prep: 115+",
+      isFeatured: true,
+    },
+    {
+      name: "EJU",
+      fullName: "Examination for Japanese University Admission for International Students",
+      countryCode: "JP",
+      stream: "OTHER" as const,
+      conductedBy: "JASSO (Japan)",
+      frequency: "June & November",
+      website: "https://jasso.go.jp/eju",
+      cutoffScore: "280 - 350 / 400 Score (Japanese + Math/Science)",
+      acceptedCutoffs: "University of Tokyo: 340+ | Kyoto University: 330+ | Waseda University: 300+",
+      isFeatured: true,
+    },
+    {
+      name: "NTU Entrance Exam",
+      fullName: "Nanyang Technological University Entrance Examination (UEE)",
+      countryCode: "SG",
+      stream: "ENGINEERING" as const,
+      conductedBy: "NTU Singapore",
+      frequency: "Annual (February)",
+      website: "https://ntu.edu.sg",
+      cutoffScore: "85%+ Aggregate in Mathematics, Physics & English",
+      acceptedCutoffs: "NTU Computer Science: 90%+ | NTU Electrical Engg: 86%+ | NUS Computing: 92%+",
+      isFeatured: true,
+    },
+    {
+      name: "NCEA Level 3",
+      fullName: "National Certificate of Educational Achievement",
+      countryCode: "NZ",
+      stream: "OTHER" as const,
+      conductedBy: "NZQA (New Zealand)",
+      frequency: "Annual (November)",
+      website: "https://nzqa.govt.nz",
+      cutoffScore: "250 - 320 Rank Score",
+      acceptedCutoffs: "University of Auckland Engg: 280 Rank Score | Uni of Otago Health: 310 Rank Score",
+      isFeatured: true,
+    },
+    {
+      name: "TCF / DELF B2",
+      fullName: "Test de Connaissance du Français / DELF",
+      countryCode: "FR",
+      stream: "OTHER" as const,
+      conductedBy: "France Éducation International",
+      frequency: "Monthly",
+      website: "https://france-education-international.fr",
+      cutoffScore: "B2 / C1 Proficiency Level (Score 400 - 550)",
+      acceptedCutoffs: "Sorbonne University: C1 Level | PSL University: B2 Level | Sciences Po: C1 Level",
+      isFeatured: true,
+    },
+    {
+      name: "Gaokao",
+      fullName: "National College Entrance Examination (NCEE)",
+      countryCode: "CN",
+      stream: "OTHER" as const,
+      conductedBy: "Ministry of Education (China)",
+      frequency: "Annual (June)",
+      website: "http://moe.gov.cn",
+      cutoffScore: "600 - 690 / 750 Total Score",
+      acceptedCutoffs: "Tsinghua University: 685+ | Peking University: 680+ | Fudan University: 650+",
+      isFeatured: true,
+    },
+    {
+      name: "CSAT / Suneung",
+      fullName: "College Scholastic Ability Test",
+      countryCode: "KR",
+      stream: "OTHER" as const,
+      conductedBy: "KICE (South Korea)",
+      frequency: "Annual (November)",
+      website: "https://suneung.re.kr",
+      cutoffScore: "Stanine Grade 1 (Top 4% Percentile)",
+      acceptedCutoffs: "Seoul National University (SNU): Grade 1 | KAIST: Grade 1 | Yonsei University: Grade 1-2",
+      isFeatured: true,
+    },
+    {
+      name: "EGE / USE",
+      fullName: "Unified State Exam (Единый государственный экзамен)",
+      countryCode: "RU",
+      stream: "SCIENCE" as const,
+      conductedBy: "Rosobrnadzor (Russia)",
+      frequency: "Annual (May - June)",
+      website: "https://ege.edu.ru",
+      cutoffScore: "80 - 95 / 100 per Subject",
+      acceptedCutoffs: "Lomonosov Moscow State Univ: 88+ | Saint Petersburg State Univ: 85+ | HSE Moscow: 85+",
+      isFeatured: true,
+    },
+    {
+      name: "IMAT",
+      fullName: "International Medical Admissions Test",
+      countryCode: "IT",
+      stream: "MEDICAL" as const,
+      conductedBy: "Italian Ministry of University and Research (MUR)",
+      frequency: "Annual (September)",
+      website: "https://universitaly.it",
+      cutoffScore: "45 - 65 / 90 Score",
+      acceptedCutoffs: "University of Milan Medicine: 52+ | Sapienza University of Rome: 48+ | Uni of Bologna: 49+",
+      isFeatured: true,
+    },
+    {
+      name: "Selectividad / EvAU",
+      fullName: "Evaluación de Bachillerato para el Acceso a la Universidad",
+      countryCode: "ES",
+      stream: "OTHER" as const,
+      conductedBy: "Spanish Autonomous Communities",
+      frequency: "June & July",
+      website: "https://educacionyfp.gob.es",
+      cutoffScore: "11.5 - 13.8 / 14 Cutoff Score",
+      acceptedCutoffs: "Universidad Complutense de Madrid: 12.8+ | Universidad Autónoma de Barcelona: 12.2+",
+      isFeatured: true,
+    },
+    {
+      name: "ENEM",
+      fullName: "Exame Nacional do Ensino Médio",
+      countryCode: "BR",
+      stream: "OTHER" as const,
+      conductedBy: "INEP (Brazil)",
+      frequency: "Annual (November)",
+      website: "https://enem.inep.gov.br",
+      cutoffScore: "720 - 810 / 1000 Average Score",
+      acceptedCutoffs: "University of São Paulo (USP): 780+ | UNICAMP: 750+ | UFRJ: 740+",
+      isFeatured: true,
+    },
+    {
+      name: "NBT",
+      fullName: "National Benchmark Tests",
+      countryCode: "ZA",
+      stream: "OTHER" as const,
+      conductedBy: "CETAP (University of Cape Town)",
+      frequency: "May - January",
+      website: "https://nbt.ac.za",
+      cutoffScore: "Proficient Level (AQL 65%+, MAT 70%+)",
+      acceptedCutoffs: "University of Cape Town (UCT) Medicine: 80%+ | Wits University Engg: 75%+",
+      isFeatured: true,
+    },
+    {
+      name: "EmSAT",
+      fullName: "Emirates Standardized Test",
+      countryCode: "AE",
+      stream: "OTHER" as const,
+      conductedBy: "Ministry of Education (UAE)",
+      frequency: "Year-Round",
+      website: "https://emsat.moe.gov.ae",
+      cutoffScore: "English 1400+, Math 1200+, Physics 1100+",
+      acceptedCutoffs: "United Arab Emirates University (UAEU): 1400+ | Khalifa University: 1550+ | AUS: 1400+",
+      isFeatured: true,
+    },
+    {
+      name: "CAO Points",
+      fullName: "Central Applications Office Leaving Certificate Points",
+      countryCode: "IE",
+      stream: "OTHER" as const,
+      conductedBy: "State Examinations Commission (Ireland)",
+      frequency: "Annual (June)",
+      website: "https://cao.ie",
+      cutoffScore: "500 - 625 CAO Points",
+      acceptedCutoffs: "Trinity College Dublin CS: 555 Points | University College Dublin Medicine: 601 Points",
+      isFeatured: true,
+    },
+    {
+      name: "MDCAT",
+      fullName: "Medical and Dental College Admission Test",
+      countryCode: "PK",
+      stream: "MEDICAL" as const,
+      conductedBy: "PMDC / Provincial Universities",
+      frequency: "Annual (September)",
+      website: "https://pmdc.pk",
+      cutoffScore: "160 - 185 / 200 Marks (80%+ Aggregate)",
+      acceptedCutoffs: "King Edward Medical University: 91.5% Aggregate | Aga Khan University: 88% Aggregate",
+      isFeatured: true,
+    },
+    {
+      name: "BUET Admission Test",
+      fullName: "Bangladesh University of Engineering and Technology Entrance",
+      countryCode: "BD",
+      stream: "ENGINEERING" as const,
+      conductedBy: "BUET (Bangladesh)",
+      frequency: "Annual (October)",
+      website: "https://buet.ac.bd",
+      cutoffScore: "Merit Rank 1 - 1,200",
+      acceptedCutoffs: "BUET CSE: Merit Rank 1 - 120 | BUET EEE: Merit Rank 121 - 350",
+      isFeatured: true,
+    },
+    {
+      name: "SNBT / UTBK",
+      fullName: "Ujian Tulis Berbasis Komputer - Seleksi Nasional Berbasis Tes",
+      countryCode: "ID",
+      stream: "OTHER" as const,
+      conductedBy: "SNPMB (Indonesia)",
+      frequency: "Annual (May)",
+      website: "https://snpmb.bppp.kemdikbud.go.id",
+      cutoffScore: "650 - 780 / 1000 Average UTBK Score",
+      acceptedCutoffs: "Universitas Indonesia (UI) CS: 710+ | Institut Teknologi Bandung (ITB): 690+",
+      isFeatured: true,
+    },
+    {
+      name: "UPCAT",
+      fullName: "University of the Philippines College Admission Test",
+      countryCode: "PH",
+      stream: "OTHER" as const,
+      conductedBy: "University of the Philippines (UP System)",
+      frequency: "Annual (August)",
+      website: "https://upcat.up.edu.ph",
+      cutoffScore: "UPG 2.100 or better (Percentile Top 5%)",
+      acceptedCutoffs: "UP Diliman CS & Engg: UPG 1.950+ | UP Manila Medicine: UPG 1.850+",
+      isFeatured: true,
     },
   ];
 
-  // Dynamically pad properties to reach 25 items
-  const propertyTypes = [
-    PropertyType.APARTMENT, PropertyType.INDEPENDENT_HOUSE, PropertyType.VILLA, PropertyType.STUDIO_APARTMENT,
-    PropertyType.PENTHOUSE, PropertyType.BUILDER_FLOOR, PropertyType.PG, PropertyType.CO_LIVING, PropertyType.OFFICE_SPACE
-  ];
-  
-  const transTypes = [TransactionType.RENT, TransactionType.SALE, TransactionType.LEASE];
-  const localities = Object.keys(localitiesMap);
-  const furnishStatuses = [FurnishingStatus.UNFURNISHED, FurnishingStatus.SEMI_FURNISHED, FurnishingStatus.FULLY_FURNISHED];
-  const owners = [owner1.id, owner2.id, agent1User.id, agent2User.id];
-
-  // Base list of 5 properties already made, add 20 more realistic ones
-  for (let i = 1; i <= 20; i++) {
-    const locName = localities[i % localities.length];
-    const pType = propertyTypes[i % propertyTypes.length];
-    const tType = transTypes[i % transTypes.length];
-    const isRent = tType === TransactionType.RENT || tType === TransactionType.LEASE;
-    const price = isRent ? (15000 + (i * 3500)) : (4500000 + (i * 900000));
-    const bhk = pType === PropertyType.OFFICE_SPACE ? null : (1 + (i % 4));
-    
-    propertiesData.push({
-      title: `${bhk ? `${bhk} BHK ` : ""}${pType.replace("_", " ")} in ${locName}`,
-      slug: `${bhk ? `${bhk}-bhk-` : ""}${pType.toLowerCase().replace("_", "-")}-${locName.toLowerCase().replace(" ", "-")}-${i}`,
-      description: `A prime real estate option offering convenient access to local conveniences, highly suitable for modern urban lifestyles. Premium amenities, complete ventilation, and solid structure.`,
-      transactionType: tType,
-      propertyType: pType,
-      price: price,
-      monthlyRent: isRent ? price : null,
-      securityDeposit: isRent ? (price * 3) : null,
-      maintenanceCharges: 2000 + (i * 200),
-      bhk: bhk,
-      bedrooms: bhk || 0,
-      bathrooms: bhk ? (bhk + (i % 2 === 0 ? 0 : 1)) : 2,
-      balconies: bhk ? (1 + (i % 2)) : 0,
-      totalRooms: bhk ? (bhk + 2) : 5,
-      carpetArea: 500 + (i * 90),
-      builtUpArea: 600 + (i * 100),
-      superBuiltUpArea: 750 + (i * 120),
-      possessionStatus: i % 3 === 0 ? PossessionStatus.UNDER_CONSTRUCTION : PossessionStatus.READY_TO_MOVE,
-      facing: FacingDirection.EAST,
-      furnishingStatus: furnishStatuses[i % furnishStatuses.length],
-      coveredParking: i % 2,
-      ownershipType: OwnershipType.FREEHOLD,
-      tenantPreference: TenantPreference.ANY,
-      state: "Karnataka",
-      cityId: citiesMap["Bengaluru"],
-      localityId: localitiesMap[locName],
-      fullAddress: `No. ${i * 14}, ${locName} Main Road, Bengaluru`,
-      pincode: `5600${10 + i}`,
-      latitude: 12.92 + (i * 0.005),
-      longitude: 77.62 + (i * 0.006),
-      isVerified: i % 2 === 0,
-      isFeatured: i % 5 === 0,
-      status: PropertyStatus.ACTIVE,
-      ownerId: owners[i % owners.length],
-      images: [
-        { url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.EXTERIOR },
-        { url: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80", isPrimary: false, category: PropertyImageCategory.INTERIOR },
-      ],
-      amenities: ["Power Backup", "Security", "CCTV", "Visitor Parking", "Water Supply"],
+  for (const exam of examsData) {
+    const { countryCode, ...examFields } = exam;
+    await prisma.entranceExam.upsert({
+      where: { name: exam.name },
+      update: {
+        cutoffScore: exam.cutoffScore,
+        acceptedCutoffs: exam.acceptedCutoffs,
+        countryId: countries[countryCode]?.id || null,
+      },
+      create: {
+        ...examFields,
+        countryId: countries[countryCode]?.id || null,
+      },
     });
   }
 
-  // Add 2 properties for each extra city
-  for (const cityName of extraCities) {
-    for (let i = 1; i <= 2; i++) {
-      const locName = i === 1 ? `${cityName} Central` : `${cityName} South`;
-      const pType = propertyTypes[i % propertyTypes.length];
-      const tType = transTypes[i % transTypes.length];
-      const isRent = tType === TransactionType.RENT || tType === TransactionType.LEASE;
-      const price = isRent ? (20000 + (i * 5000)) : (5000000 + (i * 1000000));
-      const bhk = 2;
+  // 5. Create Scholarships
+  const scholarshipsData = [
+    { name: "Fulbright-Nehru Master's Fellowships", provider: "USIEF", amount: 45000, currency: "USD", eligibility: "Indian citizens with outstanding academic records applying for Master's in USA.", isFeatured: true, link: "https://usief.org.in" },
+    { name: "Chevening Scholarships", provider: "UK Government", amount: 35000, currency: "GBP", eligibility: "Outstanding professionals from all countries pursuing 1-year Master's in UK.", isFeatured: true, link: "https://chevening.org" },
+    { name: "IIT Bombay Merit-cum-Means Scholarship", provider: "IIT Bombay", amount: 100000, currency: "INR", eligibility: "Undergraduate students with parental annual income under 5 Lakhs.", isFeatured: true, link: "https://iitb.ac.in" },
+  ];
 
-      const cityCenters: Record<string, [number, number]> = {
-        bengaluru: [12.9716, 77.5946],
-        mumbai: [19.0760, 72.8777],
-        delhi: [28.6139, 77.2090],
-        hyderabad: [17.3850, 78.4867],
-        chennai: [13.0827, 80.2707],
-        pune: [18.5204, 73.8567],
-        kolkata: [22.5726, 88.3639],
-        ahmedabad: [23.0225, 72.5714],
-        gurugram: [28.4595, 77.0266],
-        noida: [28.5355, 77.3910],
-        kochi: [9.9312, 76.2673],
-      };
-      
-      const center = cityCenters[cityName.toLowerCase()] || [19.0760, 72.8777];
-
-      propertiesData.push({
-        title: `${bhk} BHK ${pType.replace("_", " ")} in ${locName}`,
-        slug: `${bhk}-bhk-${pType.toLowerCase().replace("_", "-")}-${locName.toLowerCase().replace(" ", "-")}-${cityName.toLowerCase()}-${i}-${Date.now()}`,
-        description: `A prime real estate option offering convenient access to local conveniences in ${cityName}. Premium amenities, complete ventilation, and solid structure.`,
-        transactionType: tType,
-        propertyType: pType,
-        price: price,
-        monthlyRent: isRent ? price : null,
-        securityDeposit: isRent ? (price * 3) : null,
-        maintenanceCharges: 2500,
-        bhk: bhk,
-        bedrooms: bhk,
-        bathrooms: 2,
-        balconies: 1,
-        totalRooms: 4,
-        carpetArea: 800,
-        builtUpArea: 1000,
-        superBuiltUpArea: 1200,
-        possessionStatus: PossessionStatus.READY_TO_MOVE,
-        facing: FacingDirection.NORTH,
-        furnishingStatus: FurnishingStatus.SEMI_FURNISHED,
-        coveredParking: 1,
-        ownershipType: OwnershipType.FREEHOLD,
-        tenantPreference: TenantPreference.ANY,
-        state: cityName,
-        cityId: citiesMap[cityName],
-        localityId: localitiesMap[locName],
-        fullAddress: `No. ${i * 10}, ${locName} Main Road, ${cityName}`,
-        pincode: `${(cityName.length % 9 + 1)}0000${i}`,
-        latitude: center[0] + (i * 0.01),
-        longitude: center[1] + (i * 0.01),
-        isVerified: true,
-        isFeatured: false,
-        status: PropertyStatus.ACTIVE,
-        ownerId: owners[i % owners.length],
-        images: [
-          { url: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=800&q=80", isPrimary: true, category: PropertyImageCategory.EXTERIOR },
-          { url: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80", isPrimary: false, category: PropertyImageCategory.INTERIOR },
-        ],
-        amenities: ["Power Backup", "Security", "CCTV", "Visitor Parking", "Water Supply"],
-      });
-    }
+  for (const s of scholarshipsData) {
+    await prisma.scholarship.create({
+      data: s,
+    });
   }
 
-  // Create Properties with Images and Amenities linked
-  for (const prop of propertiesData) {
-    const createdProp = await prisma.property.create({
-      data: {
-        title: prop.title,
-        slug: prop.slug,
-        description: prop.description,
-        transactionType: prop.transactionType,
-        propertyType: prop.propertyType,
-        price: prop.price,
-        monthlyRent: prop.monthlyRent,
-        securityDeposit: prop.securityDeposit,
-        maintenanceCharges: prop.maintenanceCharges,
-        bhk: prop.bhk,
-        bedrooms: prop.bedrooms,
-        bathrooms: prop.bathrooms,
-        balconies: prop.balconies,
-        totalRooms: prop.totalRooms,
-        carpetArea: prop.carpetArea,
-        builtUpArea: prop.builtUpArea,
-        superBuiltUpArea: prop.superBuiltUpArea,
-        possessionStatus: prop.possessionStatus,
-        facing: prop.facing,
-        furnishingStatus: prop.furnishingStatus,
-        coveredParking: prop.coveredParking,
-        ownershipType: prop.ownershipType,
-        tenantPreference: prop.tenantPreference,
-        state: prop.state,
-        cityId: prop.cityId,
-        localityId: prop.localityId,
-        fullAddress: prop.fullAddress,
-        landmark: prop.landmark,
-        pincode: prop.pincode,
-        latitude: prop.latitude,
-        longitude: prop.longitude,
-        reraId: prop.reraId,
-        isReraApproved: prop.isReraApproved,
-        isVerified: prop.isVerified,
-        isFeatured: prop.isFeatured,
-        status: prop.status,
-        ownerId: prop.ownerId,
+  // 6. Create Colleges & Courses
+  const collegesData = [
+    {
+      name: "University of Copenhagen",
+      slug: "university-of-copenhagen",
+      description: "The University of Copenhagen is the oldest university and research institution in Denmark and World Rank #1 Education System. Founded in 1479, it is globally renowned for science, medicine, and sustainability.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["DK"].id,
+      cityId: cities["copenhagen"].id,
+      address: "Nørregade 10, 1165 København, Denmark",
+      establishedYear: 1479,
+      totalStudents: 37000,
+      campusArea: "4 City Campuses",
+      gender: "CO_ED" as const,
+      affiliation: "International Alliance of Research Universities",
+      qsRanking: 107,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank #1 Education System" }],
+      facilities: ["Copenhagen University Library", "Science Campus", "Niels Bohr Institute"],
+      courses: [
+        { name: "M.Sc. in Computer Science", degree: "MASTER" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 2, annualFees: 14500, feeCurrency: "EUR", eligibility: "B.Sc. in CS + IELTS 6.5+", entranceExams: ["IELTS Academic"], placementRate: 97, avgSalary: 56000, highestSalary: 120000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "KTH Royal Institute of Technology",
+      slug: "kth-royal-institute",
+      description: "KTH Royal Institute of Technology in Stockholm is Sweden's largest and oldest technical university, ranked World Rank #2 Education System and famous for engineering innovation.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["SE"].id,
+      cityId: cities["stockholm"].id,
+      address: "Brinellvägen 8, 114 28 Stockholm, Sweden",
+      establishedYear: 1827,
+      totalStudents: 13500,
+      campusArea: "Main Campus Valhallavägen",
+      gender: "CO_ED" as const,
+      affiliation: "Nordic Five Tech",
+      qsRanking: 73,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1509356843151-3e7d96241e11?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank 73 Worldwide" }],
+      facilities: ["KTH Innovation Hub", "Electrum Cleanroom", "Supercomputing Center"],
+      courses: [
+        { name: "M.Sc. in Software Engineering of Distributed Systems", degree: "MASTER" as const, stream: "ENGINEERING" as const, durationYears: 2, annualFees: 310000, feeCurrency: "SEK", eligibility: "B.Sc in CS or EE + TOEFL", entranceExams: ["TOEFL iBT"], placementRate: 98, avgSalary: 480000, highestSalary: 950000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "National University of Singapore (NUS)",
+      slug: "nus-singapore",
+      description: "National University of Singapore (NUS) is Singapore's flagship university and World Rank #1 education destination. Ranked 8th globally by QS, NUS offers global education in AI, technology, business, and medicine.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["SG"].id,
+      cityId: cities["singapore-city"].id,
+      address: "21 Lower Kent Ridge Rd, Singapore 119077",
+      establishedYear: 1905,
+      totalStudents: 38000,
+      campusArea: "370 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Autonomous Flagship University",
+      qsRanking: 8,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank 8 Worldwide" }],
+      facilities: ["University Town", "Central Library", "Supercomputing Center", "Incubation Hub"],
+      courses: [
+        { name: "Bachelor of Computing in Computer Science", degree: "BACHELOR" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 4, annualFees: 38000, feeCurrency: "SGD", eligibility: "A-Levels / High School 90%+", entranceExams: ["NTU Entrance Exam"], placementRate: 98, avgSalary: 72000, highestSalary: 180000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "University of Helsinki",
+      slug: "university-of-helsinki",
+      description: "The University of Helsinki is Finland's oldest and largest institution of academic education, world-renowned for innovation, research, and educational excellence.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["FI"].id,
+      cityId: cities["helsinki"].id,
+      address: "Yliopistonkatu 4, 00100 Helsinki, Finland",
+      establishedYear: 1640,
+      totalStudents: 31000,
+      campusArea: "Urban Campuses",
+      gender: "CO_ED" as const,
+      affiliation: "League of European Research Universities",
+      qsRanking: 115,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1538332576228-eb5b4c4de6f5?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Top 120 Worldwide" }],
+      facilities: ["Helsinki University Library", "Kumpula Science Campus", "Meilahti Medical Campus"],
+      courses: [
+        { name: "Master's in Data Science", degree: "MASTER" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 2, annualFees: 15000, feeCurrency: "EUR", eligibility: "B.Sc in CS or Mathematics + IELTS", entranceExams: ["IELTS Academic"], placementRate: 94, avgSalary: 52000, highestSalary: 110000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Seoul National University (SNU)",
+      slug: "snu-seoul",
+      description: "Seoul National University is South Korea's premier national research university. Located in Seoul, SNU is widely considered the most prestigious university in South Korea.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["KR"].id,
+      cityId: cities["seoul"].id,
+      address: "1 Gwanak-ro, Gwanak-gu, Seoul, South Korea",
+      establishedYear: 1946,
+      totalStudents: 28000,
+      campusArea: "Gwanak Campus",
+      gender: "CO_ED" as const,
+      affiliation: "Flagship Korean National University",
+      qsRanking: 41,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1538485199708-07d744a67b8d?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank 41 Worldwide" }],
+      facilities: ["SNU Main Library", "AI Research Institute", "Semiconductor Cleanrooms"],
+      courses: [
+        { name: "B.S. in Electrical and Computer Engineering", degree: "BACHELOR" as const, stream: "ENGINEERING" as const, durationYears: 4, annualFees: 6000000, feeCurrency: "KRW", eligibility: "High School Diploma + CSAT/TOEFL", entranceExams: ["CSAT / Suneung"], placementRate: 96, avgSalary: 55000000, highestSalary: 120000000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "The University of Tokyo",
+      slug: "university-of-tokyo",
+      description: "The University of Tokyo is a premier public research university in Tokyo, Japan. Known as Todai, it is the top-ranked university in Japan and Asia's foremost institute for science and technology.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["JP"].id,
+      cityId: cities["tokyo"].id,
+      address: "7-3-1 Hongo, Bunkyo-ku, Tokyo, Japan",
+      establishedYear: 1877,
+      totalStudents: 28000,
+      campusArea: "Hongo Campus",
+      gender: "CO_ED" as const,
+      affiliation: "National University Corporation",
+      qsRanking: 28,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank 28 Worldwide" }],
+      facilities: ["Hongo Central Library", "Institute for Cosmic Ray Research", "Todai Innovation Park"],
+      courses: [
+        { name: "International Master of Science in Information Technology", degree: "MASTER" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 2, annualFees: 535800, feeCurrency: "JPY", eligibility: "B.S. degree + EJU/GRE", entranceExams: ["EJU", "GRE"], placementRate: 97, avgSalary: 6500000, highestSalary: 15000000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "ETH Zurich",
+      slug: "eth-zurich",
+      description: "ETH Zurich is a public research university in Zürich, Switzerland. Consistently ranked among the top 10 universities in the world, ETH Zurich is world-famous for engineering and natural sciences.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["CH"].id,
+      cityId: cities["zurich"].id,
+      address: "Rämistrasse 101, 8092 Zürich, Switzerland",
+      establishedYear: 1855,
+      totalStudents: 24000,
+      campusArea: "Zentrum & Hönggerberg",
+      gender: "CO_ED" as const,
+      affiliation: "ETH Domain",
+      qsRanking: 7,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [{ type: "QS" as const, grade: "Rank 7 Worldwide" }],
+      facilities: ["ETH Library", "CS Quantum Lab", "AI Center"],
+      courses: [
+        { name: "Master of Science in Robotics, Systems and Control", degree: "MASTER" as const, stream: "ENGINEERING" as const, durationYears: 2, annualFees: 1500, feeCurrency: "CHF", eligibility: "B.Sc in Engineering + GRE", entranceExams: ["GRE", "IELTS"], placementRate: 98, avgSalary: 95000, highestSalary: 210000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Indian Institute of Technology Bombay (IIT Bombay)",
+      slug: "iit-bombay",
+      description: "Indian Institute of Technology Bombay is a premier public technical research university located in Powai, Mumbai. Recognized as an Institute of Eminence, IIT Bombay is globally acclaimed for engineering, technology, and computer science education.",
+      collegeType: "GOVERNMENT" as const,
+      countryId: countries["IN"].id,
+      cityId: cities["mumbai"].id,
+      address: "Powai, Mumbai, Maharashtra 400076",
+      establishedYear: 1958,
+      totalStudents: 13000,
+      campusArea: "550 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Autonomous Institute of Eminence",
+      nirfRanking: 1,
+      qsRanking: 118,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: collegeAdmin.id,
+      images: [
+        "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80",
+      ],
+      accreditations: [
+        { type: "NAAC" as const, grade: "A++" },
+        { type: "NIRF" as const, grade: "Rank 1 Engineering" },
+      ],
+      facilities: ["Hostels & Dining", "Central Library", "Sports Complex", "High-Performance Computing Lab", "Incubation Center"],
+      courses: [
+        { name: "B.Tech Computer Science & Engineering", degree: "BACHELOR" as const, stream: "ENGINEERING" as const, durationYears: 4, annualFees: 220000, feeCurrency: "INR", eligibility: "12th PCM + JEE Advanced qualified", entranceExams: ["JEE Advanced"], placementRate: 98, avgSalary: 2400000, highestSalary: 12000000, scholarshipAvailable: true },
+        { name: "M.Tech Artificial Intelligence", degree: "MASTER" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 2, annualFees: 180000, feeCurrency: "INR", eligibility: "B.Tech in CS/IT + GATE score", entranceExams: ["GATE"], placementRate: 95, avgSalary: 2100000, highestSalary: 8500000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Harvard University",
+      slug: "harvard-university",
+      description: "Harvard University is a private Ivy League research university in Cambridge, Massachusetts. Founded in 1636, Harvard is the oldest institution of higher learning in the United States and among the most prestigious in the world.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["US"].id,
+      cityId: cities["boston"].id,
+      address: "Cambridge, MA 02138, United States",
+      establishedYear: 1636,
+      totalStudents: 23000,
+      campusArea: "5090 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Ivy League",
+      qsRanking: 4,
+      timesRanking: 2,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+        "https://images.unsplash.com/photo-1607237138185-eedd9c632b0b?auto=format&fit=crop&w=800&q=80",
+      ],
+      accreditations: [
+        { type: "QS" as const, grade: "Top 5 Worldwide" },
+      ],
+      facilities: ["Widener Library", "Harvard Innovation Lab", "Athletic Facilities", "Harvard Art Museums"],
+      courses: [
+        { name: "Bachelor of Arts in Economics", degree: "BACHELOR" as const, stream: "COMMERCE" as const, durationYears: 4, annualFees: 54000, feeCurrency: "USD", eligibility: "High School Diploma + SAT/ACT + Essays", entranceExams: ["SAT", "IELTS"], placementRate: 96, avgSalary: 95000, highestSalary: 250000, scholarshipAvailable: true },
+        { name: "Master of Business Administration (MBA)", degree: "MASTER" as const, stream: "MANAGEMENT" as const, durationYears: 2, annualFees: 73440, feeCurrency: "USD", eligibility: "Bachelor's degree + GMAT/GRE + Work Experience", entranceExams: ["GRE", "IELTS"], placementRate: 99, avgSalary: 175000, highestSalary: 450000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Imperial College London",
+      slug: "imperial-college-london",
+      description: "Imperial College London is a world-class university focusing exclusively on science, engineering, medicine and business. Known for groundbreaking research and innovation in STEM fields.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["GB"].id,
+      cityId: cities["london"].id,
+      address: "South Kensington, London SW7 2AZ, UK",
+      establishedYear: 1907,
+      totalStudents: 20000,
+      campusArea: "120 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Russell Group",
+      qsRanking: 6,
+      timesRanking: 8,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "TIMES" as const, grade: "Top 10 Global" },
+      ],
+      facilities: ["Advanced Engineering Labs", "Medical Training Center", "Library", "Enterprise Lab"],
+      courses: [
+        { name: "BEng Biomedical Engineering", degree: "BACHELOR" as const, stream: "ENGINEERING" as const, durationYears: 3, annualFees: 36500, feeCurrency: "GBP", eligibility: "A-Levels AAA or equivalent + IELTS 7.0", entranceExams: ["IELTS"], placementRate: 94, avgSalary: 45000, highestSalary: 95000, scholarshipAvailable: true },
+        { name: "MSc Innovation, Entrepreneurship & Management", degree: "MASTER" as const, stream: "MANAGEMENT" as const, durationYears: 1, annualFees: 39500, feeCurrency: "GBP", eligibility: "Undergraduate degree 2:1 honours", entranceExams: ["IELTS"], placementRate: 96, avgSalary: 55000, highestSalary: 120000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Indian Institute of Technology Delhi (IIT Delhi)",
+      slug: "iit-delhi",
+      description: "Indian Institute of Technology Delhi is a public technical university located in Hauz Khas, New Delhi. Declared as an Institute of Eminence, it is renowned for cutting-edge engineering research, technology, and science.",
+      collegeType: "GOVERNMENT" as const,
+      countryId: countries["IN"].id,
+      cityId: cities["new-delhi"].id,
+      address: "Hauz Khas, New Delhi 110016, India",
+      establishedYear: 1961,
+      totalStudents: 11000,
+      campusArea: "320 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Autonomous Institute of Eminence",
+      nirfRanking: 2,
+      qsRanking: 150,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "NAAC" as const, grade: "A++" },
+      ],
+      facilities: ["Supercomputing Center", "Central Library", "Research Park", "Hostels"],
+      courses: [
+        { name: "B.Tech Electrical Engineering", degree: "BACHELOR" as const, stream: "ENGINEERING" as const, durationYears: 4, annualFees: 225000, feeCurrency: "INR", eligibility: "12th PCM + JEE Advanced", entranceExams: ["JEE Advanced"], placementRate: 97, avgSalary: 2200000, highestSalary: 11000000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Indian Institute of Science (IISc)",
+      slug: "iisc-bengaluru",
+      description: "Indian Institute of Science is a premier public university for scientific research and higher education located in Bengaluru, Karnataka.",
+      collegeType: "GOVERNMENT" as const,
+      countryId: countries["IN"].id,
+      cityId: cities["bengaluru"].id,
+      address: "CV Raman Rd, Bengaluru, Karnataka 560012",
+      establishedYear: 1909,
+      totalStudents: 4500,
+      campusArea: "440 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Deemed University",
+      nirfRanking: 1,
+      qsRanking: 225,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "NAAC" as const, grade: "A++" },
+      ],
+      facilities: ["Biological Sciences Labs", "Nanotechnology Center", "Main Library"],
+      courses: [
+        { name: "Bachelor of Science (Research)", degree: "BACHELOR" as const, stream: "SCIENCE" as const, durationYears: 4, annualFees: 35000, feeCurrency: "INR", eligibility: "12th PCM/PCB + JEE/NEET", entranceExams: ["JEE Advanced", "NEET UG"], placementRate: 92, avgSalary: 1800000, highestSalary: 6000000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "The University of Melbourne",
+      slug: "university-of-melbourne",
+      description: "The University of Melbourne is a public research university located in Melbourne, Australia. Founded in 1853, it is Australia's second oldest university.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["AU"].id,
+      cityId: cities["melbourne"].id,
+      address: "Parkville VIC 3010, Australia",
+      establishedYear: 1853,
+      totalStudents: 52000,
+      campusArea: "200 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "Group of Eight",
+      qsRanking: 14,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "QS" as const, grade: "Top 15 Global" },
+      ],
+      facilities: ["Baillieu Library", "Melbourne BioDesign Lab", "Sports Center"],
+      courses: [
+        { name: "Bachelor of Commerce", degree: "BACHELOR" as const, stream: "COMMERCE" as const, durationYears: 3, annualFees: 45000, feeCurrency: "AUD", eligibility: "High School Diploma + IELTS 6.5", entranceExams: ["IELTS"], placementRate: 95, avgSalary: 75000, highestSalary: 160000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "University of Toronto",
+      slug: "university-of-toronto",
+      description: "The University of Toronto is a public research university in Toronto, Ontario, Canada, surrounding Queen's Park. Renowned for artificial intelligence and medical advancements.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["CA"].id,
+      cityId: cities["toronto"].id,
+      address: "27 King's College Cir, Toronto, ON M5S 1A1, Canada",
+      establishedYear: 1827,
+      totalStudents: 64000,
+      campusArea: "180 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "U15 Association of Canadian Universities",
+      qsRanking: 21,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "QS" as const, grade: "Rank 1 in Canada" },
+      ],
+      facilities: ["Robarts Library", "MaRS Innovation Hub", "Athletic Complex"],
+      courses: [
+        { name: "Honours Bachelor of Science in Computer Science", degree: "BACHELOR" as const, stream: "INFORMATION_TECHNOLOGY" as const, durationYears: 4, annualFees: 58000, feeCurrency: "CAD", eligibility: "High School Senior Math + IELTS 7.0", entranceExams: ["IELTS"], placementRate: 98, avgSalary: 90000, highestSalary: 210000, scholarshipAvailable: true },
+      ],
+    },
+    {
+      name: "Technical University of Munich (TUM)",
+      slug: "tum-munich",
+      description: "Technical University of Munich is one of Europe's top universities. It is committed to excellence in research and teaching, interdisciplinary education and active promotion of promising young scientists.",
+      collegeType: "INTERNATIONAL" as const,
+      countryId: countries["DE"].id,
+      cityId: cities["munich"].id,
+      address: "Arcisstraße 21, 80333 München, Germany",
+      establishedYear: 1868,
+      totalStudents: 50000,
+      campusArea: "150 Acres",
+      gender: "CO_ED" as const,
+      affiliation: "TU9 Universities",
+      qsRanking: 37,
+      isVerified: true,
+      isFeatured: true,
+      status: "ACTIVE" as const,
+      ownerId: admin.id,
+      images: [
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80",
+      ],
+      accreditations: [
+        { type: "QS" as const, grade: "Rank 1 in Germany" },
+      ],
+      facilities: ["Garching Research Center", "TUM Venture Labs", "Library"],
+      courses: [
+        { name: "MSc Robotics, Cognition, Intelligence", degree: "MASTER" as const, stream: "ENGINEERING" as const, durationYears: 2, annualFees: 6000, feeCurrency: "EUR", eligibility: "B.Sc in Engineering/CS + IELTS/German", entranceExams: ["IELTS"], placementRate: 97, avgSalary: 65000, highestSalary: 140000, scholarshipAvailable: true },
+      ],
+    },
+  ];
+
+  for (const cData of collegesData) {
+    const { images: imgUrls, accreditations: accs, facilities: facs, courses: crsData, ...collegeFields } = cData;
+
+    const college = await prisma.college.upsert({
+      where: { slug: collegeFields.slug },
+      update: {},
+      create: {
+        ...collegeFields,
         images: {
-          create: prop.images.map((img) => ({
-            url: img.url,
-            isPrimary: img.isPrimary,
-            category: img.category,
-          })),
+          create: imgUrls.map((url, i) => ({ url, isPrimary: i === 0, sortOrder: i })),
+        },
+        accreditations: {
+          create: accs,
+        },
+        facilities: {
+          create: facs.map(name => ({ name })),
+        },
+        courses: {
+          create: crsData,
         },
       },
     });
 
-    // Create PropertyAmenity relations
-    for (const amName of prop.amenities) {
-      if (amenitiesMap[amName]) {
-        await prisma.propertyAmenity.create({
-          data: {
-            propertyId: createdProp.id,
-            amenityId: amenitiesMap[amName],
-          },
-        });
-      }
-    }
+    console.log(`  ✓ Created College: ${college.name}`);
   }
 
-  console.log(`Successfully seeded ${propertiesData.length} properties!`);
-  console.log("Database seeding completed.");
+  console.log("🎉 Ink EduVerse Database Seeding Completed Successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seed error:", e);
     process.exit(1);
   })
   .finally(async () => {

@@ -1,110 +1,68 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth";
-import { PropertyStatus } from "@prisma/client";
-
-export const dynamic = "force-dynamic";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const ownerId = searchParams.get("ownerId");
-
-    const whereClause: any = {};
-    if (ownerId) {
-      whereClause.ownerId = ownerId;
-    }
-
-    const properties = await prisma.property.findMany({
-      where: whereClause,
+    const colleges = await prisma.college.findMany({
       include: {
-        images: { take: 1 },
-        city: { select: { name: true } },
-        locality: { select: { name: true } },
-        owner: { select: { customId: true, name: true, role: true } }
+        city: true,
+        country: true,
+        images: { take: 1, orderBy: { sortOrder: "asc" } },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { createdAt: "desc" },
     });
 
-    const active = properties.filter(p => p.status !== PropertyStatus.ARCHIVED).map(p => ({
-      ...p,
-      price: parseFloat(p.price.toString()),
-    }));
+    const active = colleges.filter((c) => c.status !== "ARCHIVED");
+    const archived = colleges.filter((c) => c.status === "ARCHIVED");
 
-    const archived = properties.filter(p => p.status === PropertyStatus.ARCHIVED).map(p => ({
-      ...p,
-      price: parseFloat(p.price.toString()),
-    }));
-
-    return NextResponse.json({ active, archived });
-  } catch (error: any) {
-    console.error("Admin fetch properties error:", error);
-    return NextResponse.json({ error: "Failed to fetch admin properties" }, { status: 500 });
+    return NextResponse.json({ colleges, active, archived });
+  } catch (error) {
+    console.error("Admin colleges fetch error:", error);
+    return NextResponse.json({ error: "Failed to fetch colleges" }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   try {
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
-    const { id, action, reason } = await req.json();
+    const body = await req.json();
+    const { collegeId, action, isFeatured } = body;
 
-    if (!id) {
-      return NextResponse.json({ error: "Property ID is required" }, { status: 400 });
+    if (!collegeId) {
+      return NextResponse.json({ error: "College ID is required" }, { status: 400 });
     }
 
     if (action === "archive") {
-      const updated = await prisma.property.update({
-        where: { id },
-        data: {
-          status: PropertyStatus.ARCHIVED,
-          rejectionReason: reason || "Archived by Admin",
-        },
+      const updated = await prisma.college.update({
+        where: { id: collegeId },
+        data: { status: "ARCHIVED" },
       });
-      return NextResponse.json({ message: "Property archived successfully", property: updated });
-    }
-
-    if (action === "restore") {
-      const updated = await prisma.property.update({
-        where: { id },
-        data: {
-          status: PropertyStatus.ACTIVE,
-          rejectionReason: null,
-        },
-      });
-      return NextResponse.json({ message: "Property restored successfully", property: updated });
-    }
-
-    if (action === "delete") {
-      await prisma.property.delete({
-        where: { id },
-      });
-      return NextResponse.json({ message: "Property permanently deleted" });
+      return NextResponse.json({ message: "College archived successfully", college: updated });
     }
 
     if (action === "toggleFeatured") {
-      const prop = await prisma.property.findUnique({ where: { id } });
-      if (!prop) return NextResponse.json({ error: "Property not found" }, { status: 404 });
-      const updated = await prisma.property.update({
-        where: { id },
-        data: {
-          isFeatured: !prop.isFeatured,
-        },
+      const col = await prisma.college.findUnique({ where: { id: collegeId } });
+      if (!col) return NextResponse.json({ error: "College not found" }, { status: 404 });
+      const updated = await prisma.college.update({
+        where: { id: collegeId },
+        data: { isFeatured: !col.isFeatured },
       });
-      return NextResponse.json({ message: "Featured status updated", property: updated });
+      return NextResponse.json({ message: "Featured status updated", college: updated });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (error: any) {
-    console.error("Admin action properties error:", error);
-    return NextResponse.json({ error: "Action failed" }, { status: 500 });
+  } catch (error) {
+    console.error("Admin college update error:", error);
+    return NextResponse.json({ error: "Failed to update college" }, { status: 500 });
   }
 }

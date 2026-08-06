@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Building2, Mail, Loader2 } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
+import { Logo } from "@/components/ui/Logo";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -38,11 +39,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-secondary flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <Building2 className="w-8 h-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-primary tracking-tight">Re One Stop Page</span>
-          </Link>
+        <div className="flex justify-center mb-8">
+          <Logo />
         </div>
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">
@@ -108,7 +106,7 @@ export default function ForgotPasswordPage() {
           )}
         </div>
 
-        <p className="text-center text-[10px] text-slate-300 mt-6">
+        <p className="text-center text-[10px] text-slate-400 mt-6">
           <Link href="/" className="hover:text-accent transition">← Back to Homepage</Link>
         </p>
       </div>

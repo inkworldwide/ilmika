@@ -163,8 +163,8 @@ export default function AdminDatabaseManager() {
 
           {/* List display */}
           <div className="h-40 overflow-y-auto no-scrollbar border border-line bg-white rounded divide-y divide-line/60 text-xs">
-            {cities.map(c => (
-              <div key={c.id} className="p-2 flex justify-between font-medium">
+            {cities.map((c, idx) => (
+              <div key={c.id || `city-${idx}`} className="p-2 flex justify-between font-medium">
                 <span className="text-primary">{c.name}</span>
                 <span className="text-slate-400 font-mono text-[10px]">{c.state}</span>
               </div>
@@ -199,8 +199,8 @@ export default function AdminDatabaseManager() {
                 className="w-full border border-line rounded px-2.5 py-1.5 bg-white text-slate-700"
               >
                 <option value="">Select City</option>
-                {cities.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                {cities.map((c, idx) => (
+                  <option key={c.id || `city-opt-${idx}`} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
@@ -213,8 +213,8 @@ export default function AdminDatabaseManager() {
           </form>
 
           <div className="h-40 overflow-y-auto no-scrollbar border border-line bg-white rounded divide-y divide-line/60 text-xs">
-            {localities.map(l => (
-              <div key={l.id} className="p-2 flex justify-between font-medium">
+            {localities.map((l, idx) => (
+              <div key={l.id || `loc-${idx}`} className="p-2 flex justify-between font-medium">
                 <span className="text-primary">{l.name}</span>
                 <span className="text-slate-400 font-mono text-[10px]">{l.cityId}</span>
               </div>
@@ -259,8 +259,8 @@ export default function AdminDatabaseManager() {
           </form>
 
           <div className="h-40 overflow-y-auto no-scrollbar border border-line bg-white rounded divide-y divide-line/60 text-xs">
-            {amenities.map(a => (
-              <div key={a.id} className="p-2 flex justify-between font-medium">
+            {amenities.map((a, idx) => (
+              <div key={a.id || `amenity-${idx}`} className="p-2 flex justify-between font-medium">
                 <span className="text-primary">{a.name}</span>
                 <span className="text-slate-400 font-mono text-[10px]">{a.icon}</span>
               </div>

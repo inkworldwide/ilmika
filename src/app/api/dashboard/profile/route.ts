@@ -5,12 +5,10 @@ import { getAuthenticatedUser } from "@/lib/auth";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian phone number").optional().nullable(),
+  phone: z.string().optional().nullable(),
   avatar: z.string().optional().nullable(),
-  
-  // Agent Profile details (only for agents)
-  companyName: z.string().optional().nullable(),
-  experienceYears: z.number().int().min(0).optional().nullable(),
+  organizationName: z.string().optional().nullable(),
+  designation: z.string().optional().nullable(),
   bio: z.string().optional().nullable(),
 });
 
@@ -28,7 +26,7 @@ export async function GET(req: Request) {
     const profile = await prisma.user.findUnique({
       where: { id: user.id },
       include: {
-        agentProfile: true,
+        collegeProfile: true,
       },
     });
 
@@ -54,7 +52,6 @@ export async function PUT(req: Request) {
 
     const body = await req.json();
 
-    // Validate inputs
     const parsed = profileSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -63,11 +60,9 @@ export async function PUT(req: Request) {
       );
     }
 
-    const { name, phone, avatar, companyName, experienceYears, bio } = parsed.data;
+    const { name, phone, avatar, organizationName, designation, bio } = parsed.data;
 
-    // Update User model inside a transaction
     const updatedUser = await prisma.$transaction(async (tx) => {
-      // 1. Update primary user fields
       const usr = await tx.user.update({
         where: { id: user.id },
         data: {
@@ -77,19 +72,18 @@ export async function PUT(req: Request) {
         },
       });
 
-      // 2. If user is an AGENT, upsert their AgentProfile
-      if (user.role === "AGENT") {
-        await tx.agentProfile.upsert({
+      if (user.role === "COLLEGE_ADMIN" || user.role === "AGENT") {
+        await tx.collegeProfile.upsert({
           where: { userId: user.id },
           create: {
             userId: user.id,
-            companyName: companyName || "",
-            experienceYears: experienceYears || 0,
+            organizationName: organizationName || "",
+            designation: designation || "",
             bio: bio || "",
           },
           update: {
-            companyName: companyName || "",
-            experienceYears: experienceYears || 0,
+            organizationName: organizationName || "",
+            designation: designation || "",
             bio: bio || "",
           },
         });

@@ -148,8 +148,8 @@ function ContactFormContent() {
   };
 
   const successMsg = isFeedbackMode
-    ? "Your thoughts have reached our team! We genuinely read every word — your feedback directly shapes how we improve RE OneStopPage for thousands of users."
-    : "Your message has landed safely with us. Our support team will reach out to you within 24 hours. We look forward to connecting with you!";
+    ? "Your thoughts have reached our team! We genuinely read every word — your feedback directly shapes how we improve Ink EduVerse for thousands of students."
+    : "Your message has landed safely with us. Our education advisors will reach out to you within 24 hours. We look forward to guiding your academic journey!";
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -185,8 +185,8 @@ function ContactFormContent() {
             </h1>
             <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
               {isFeedbackMode
-                ? "Help us improve RE Onestoppage. Share your ideas, suggestions, or user experience feedback."
-                : "Whether you're looking for your dream home or a lucrative investment, our team of experts is ready to guide you every step of the way."}
+                ? "Help us improve Ink EduVerse. Share your ideas, suggestions, or user experience feedback."
+                : "Whether you're looking for admissions advice, course recommendations, or scholarship guidance, our team of education advisors is ready to assist you every step of the way."}
             </p>
           </div>
         </div>

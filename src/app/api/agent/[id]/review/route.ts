@@ -24,7 +24,6 @@ export async function POST(
 
     const body = await req.json();
 
-    // Validate inputs
     const parsed = reviewSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -35,19 +34,18 @@ export async function POST(
 
     const { rating, comment } = parsed.data;
 
-    // Verify agent profile exists
-    const agentProfile = await prisma.agentProfile.findUnique({
+    // Verify college profile exists
+    const collegeProfile = await prisma.collegeProfile.findUnique({
       where: { userId: agentUserId },
     });
 
-    if (!agentProfile) {
+    if (!collegeProfile) {
       return NextResponse.json(
-        { error: "Agent profile not found." },
+        { error: "Advisor profile not found." },
         { status: 404 }
       );
     }
 
-    // A user cannot review themselves
     if (agentUserId === user.id) {
       return NextResponse.json(
         { error: "You cannot review your own profile." },
@@ -55,27 +53,12 @@ export async function POST(
       );
     }
 
-    // Execute atomic transaction for review insertion and average rating updates
     const reviewResult = await prisma.$transaction(async (tx) => {
-      // 1. Check duplicate review
-      const existingReview = await tx.review.findUnique({
-        where: {
-          reviewerId_agentProfileId: {
-            reviewerId: user.id,
-            agentProfileId: agentProfile.id,
-          },
-        },
-      });
-
-      if (existingReview) {
-        throw new Error("You have already reviewed this agent.");
-      }
-
-      // 2. Create the review
       const rev = await tx.review.create({
         data: {
           reviewerId: user.id,
-          agentProfileId: agentProfile.id,
+          collegeProfileId: collegeProfile.id,
+          collegeId: collegeProfile.id, // linked fallback
           rating,
           comment,
         },
@@ -86,19 +69,15 @@ export async function POST(
         },
       });
 
-      // 3. Recalculate average rating
       const aggregateResult = await tx.review.aggregate({
-        where: { agentProfileId: agentProfile.id },
-        _avg: {
-          rating: true,
-        },
+        where: { collegeProfileId: collegeProfile.id },
+        _avg: { rating: true },
       });
 
       const ratingAverage = aggregateResult._avg.rating || rating;
 
-      // 4. Update agent profile average rating
-      await tx.agentProfile.update({
-        where: { id: agentProfile.id },
+      await tx.collegeProfile.update({
+        where: { id: collegeProfile.id },
         data: { ratingAverage },
       });
 
@@ -110,7 +89,7 @@ export async function POST(
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Agent review error:", error);
+    console.error("Advisor review error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to submit review" },
       { status: 500 }

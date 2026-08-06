@@ -74,3 +74,5 @@ export async function getAuthenticatedUser(req: Request) {
 
   return user;
 }
+
+export const getAuthUser = getAuthenticatedUser;

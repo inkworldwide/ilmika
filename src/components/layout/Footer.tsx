@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Mail, Send, ArrowRight } from "lucide-react";
 import { Logo } from "../ui/Logo";
 
-// Custom inline SVG icons to prevent lucide-react brand icon compile warnings under Turbopack
+// Custom inline SVG icons
 const InstagramIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
@@ -46,16 +46,16 @@ export default function Footer() {
         <div className="space-y-6">
           <Logo theme="dark" />
           <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed tracking-wide">
-            India's premier real estate platform for verified property listings, transparent rentals, and seamless digitized transactions.
+            The world's premier platform for discovering and comparing colleges &amp; courses across every country. One Universe. All Knowledge.
           </p>
 
           <div className="space-y-3 pt-2">
             <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-accent" /> Get Weekly Property Alerts
+              <Mail className="w-3.5 h-3.5 text-accent" /> Get Weekly College Alerts
             </h4>
             {submitted ? (
-              <p className="text-xs text-emerald-400 font-medium bg-emerald-950/50 border border-emerald-800/60 px-3.5 py-2.5 rounded-xl animate-fadeIn">
-                ✓ Thank you! You have been subscribed to weekly property alerts.
+              <p className="text-xs text-emerald-400 font-medium bg-emerald-950/50 border border-emerald-800/60 px-3.5 py-2.5 rounded-xl">
+                ✓ Thank you! You have been subscribed to weekly college alerts.
               </p>
             ) : (
               <form onSubmit={handleSubscribe} className="relative flex items-center max-w-sm">
@@ -88,27 +88,28 @@ export default function Footer() {
               <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span> Explore
             </h4>
             <ul className="space-y-2.5 text-[13px] text-slate-400">
-              <li><Link href="/properties?transactionType=RENT" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Rent Properties</Link></li>
-              <li><Link href="/properties?transactionType=SALE" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Buy Properties</Link></li>
-              <li><Link href="/properties?transactionType=LEASE" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Commercial Lease</Link></li>
-              <li><Link href="/properties?propertyType=OFFICE_SPACE" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Office Spaces</Link></li>
-              <li><Link href="/properties?propertyType=PG" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">PG & Co-Living</Link></li>
+              <li><Link href="/colleges?degree=BACHELOR" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Bachelor's Programmes</Link></li>
+              <li><Link href="/colleges?degree=MASTER" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Master's Programmes</Link></li>
+              <li><Link href="/colleges?degree=PHD" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">PhD / Doctorate</Link></li>
+              <li><Link href="/colleges?mode=ONLINE" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Online & Distance</Link></li>
+              <li><Link href="/scholarships" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Scholarships</Link></li>
+              <li><Link href="/exams" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Entrance Exams</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-widest flex items-center gap-2 mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span> Top Cities
+              <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span> Top Countries
             </h4>
             <ul className="space-y-2.5 text-[13px] text-slate-400">
-              <li><Link href="/properties?citySearch=bengaluru" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Bengaluru</Link></li>
-              <li><Link href="/properties?citySearch=mumbai" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Mumbai</Link></li>
-              <li><Link href="/properties?citySearch=delhi" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Delhi NCR</Link></li>
-              <li><Link href="/properties?citySearch=hyderabad" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Hyderabad</Link></li>
-              <li><Link href="/properties?citySearch=gurugram" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Gurugram</Link></li>
+              <li><Link href="/colleges?country=IN" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">🇮🇳 India</Link></li>
+              <li><Link href="/colleges?country=US" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">🇺🇸 United States</Link></li>
+              <li><Link href="/colleges?country=GB" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">🇬🇧 United Kingdom</Link></li>
+              <li><Link href="/colleges?country=AU" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">🇦🇺 Australia</Link></li>
+              <li><Link href="/colleges?country=CA" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">🇨🇦 Canada</Link></li>
               <li>
-                <Link href="/properties" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:text-accent-hover tracking-wide pt-1.5 hover:translate-x-1 transition-all transform group">
-                  <span>Explore All Cities</span>
+                <Link href="/colleges" className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:text-accent-hover tracking-wide pt-1.5 hover:translate-x-1 transition-all transform group">
+                  <span>All Countries</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </li>
@@ -120,10 +121,10 @@ export default function Footer() {
               <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span> Support
             </h4>
             <ul className="space-y-2.5 text-[13px] text-slate-400">
-              <li><Link href="#" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Privacy Policy</Link></li>
-              <li><Link href="#" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">RERA Guidelines</Link></li>
+              <li><Link href="/guide" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Student Guide</Link></li>
+              <li><Link href="/help" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Help Center</Link></li>
+              <li><Link href="/terms" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Privacy Policy</Link></li>
               <li><Link href="/contact?type=feedback" className="hover:text-white hover:translate-x-1 transition-all transform duration-150 inline-block">Submit Feedback</Link></li>
             </ul>
           </div>
@@ -133,7 +134,7 @@ export default function Footer() {
       {/* Copyright Strip */}
       <div className="border-t border-slate-800/80 bg-slate-950/90 py-6">
         <div className="max-w-7xl mx-auto px-6 md:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} <span className="text-slate-300 font-semibold">RE OneStopPage</span>. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} <span className="text-slate-300 font-semibold">Ink EduVerse</span>. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <a href="#" aria-label="Instagram" className="hover:text-accent hover:scale-110 transition-all transform"><InstagramIcon className="w-4 h-4" /></a>
             <a href="#" aria-label="Twitter" className="hover:text-accent hover:scale-110 transition-all transform"><TwitterIcon className="w-4 h-4" /></a>

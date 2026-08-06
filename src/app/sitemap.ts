@@ -2,17 +2,17 @@ import { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://rentahouse.in";
+  const baseUrl = "https://inkeduverse.com";
 
-  // Fetch all active property listings
-  const activeProperties = await prisma.property.findMany({
+  // Fetch active colleges
+  const activeColleges = await prisma.college.findMany({
     where: { status: "ACTIVE" },
     select: { id: true, updatedAt: true },
   });
 
-  // Fetch all active agent user IDs
-  const agents = await prisma.user.findMany({
-    where: { role: "AGENT", isApproved: true, isSuspended: false },
+  // Fetch college advisors
+  const advisors = await prisma.user.findMany({
+    where: { role: { in: ["COLLEGE_ADMIN", "AGENT"] }, isApproved: true, isSuspended: false },
     select: { id: true, updatedAt: true },
   });
 
@@ -25,10 +25,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/properties`,
+      url: `${baseUrl}/colleges`,
       lastModified: new Date(),
       changeFrequency: "hourly" as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/scholarships`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/exams`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/inquire`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/auth/login`,
@@ -44,21 +62,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Dynamic Property URLs
-  const propertyUrls = activeProperties.map((prop) => ({
-    url: `${baseUrl}/properties/${prop.id}`,
-    lastModified: prop.updatedAt,
+  // Dynamic College URLs
+  const collegeUrls = activeColleges.map((col) => ({
+    url: `${baseUrl}/colleges/${col.id}`,
+    lastModified: col.updatedAt,
     changeFrequency: "weekly" as const,
-    priority: 0.7,
+    priority: 0.8,
   }));
 
-  // Dynamic Agent Profile URLs
-  const agentUrls = agents.map((agent) => ({
-    url: `${baseUrl}/agent/${agent.id}`,
-    lastModified: agent.updatedAt,
+  // Dynamic Advisor URLs
+  const advisorUrls = advisors.map((advisor) => ({
+    url: `${baseUrl}/agent/${advisor.id}`,
+    lastModified: advisor.updatedAt,
     changeFrequency: "weekly" as const,
     priority: 0.5,
   }));
 
-  return [...staticUrls, ...propertyUrls, ...agentUrls];
+  return [...staticUrls, ...collegeUrls, ...advisorUrls];
 }

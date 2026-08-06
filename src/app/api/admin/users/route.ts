@@ -21,13 +21,15 @@ export async function GET(req: Request) {
         name: true,
         email: true,
         phone: true,
+        city: true,
+        country: true,
         role: true,
         isEmailVerified: true,
         isApproved: true,
         isSuspended: true,
         createdAt: true,
         plainPassword: true,
-        properties: {
+        colleges: {
           select: {
             city: {
               select: { name: true }
@@ -35,11 +37,11 @@ export async function GET(req: Request) {
           },
           take: 1
         },
-        agentProfile: {
+        collegeProfile: {
           select: {
             id: true,
-            companyName: true,
-            experienceYears: true,
+            organizationName: true,
+            designation: true,
             ratingAverage: true,
             isFeatured: true,
           },
@@ -106,18 +108,18 @@ export async function PUT(req: Request) {
         data: updateData,
       });
 
-      // If approving an AGENT or OWNER, ensure AgentProfile exists
+      // If approving an COLLEGE_ADMIN or AGENT, ensure CollegeProfile exists
       const targetUserRole = role || user.role;
-      if (isApproved && (targetUserRole === "AGENT" || targetUserRole === "OWNER")) {
-        const existing = await tx.agentProfile.findUnique({
+      if (isApproved && (targetUserRole === "COLLEGE_ADMIN" || targetUserRole === "AGENT")) {
+        const existing = await tx.collegeProfile.findUnique({
           where: { userId: targetUserId },
         });
         if (!existing) {
-          await tx.agentProfile.create({
+          await tx.collegeProfile.create({
             data: {
               userId: targetUserId,
-              companyName: `${targetUserRole === "AGENT" ? "Re Onestop Page Agent" : "Property Owner"}`,
-              experienceYears: 1,
+              organizationName: "College Admissions Desk",
+              designation: "Advisor",
               isFeatured: true,
             },
           });
@@ -125,20 +127,20 @@ export async function PUT(req: Request) {
       }
 
       if (isAgentFeatured !== undefined) {
-        const profile = await tx.agentProfile.findUnique({
+        const profile = await tx.collegeProfile.findUnique({
           where: { userId: targetUserId },
         });
         if (profile) {
-          await tx.agentProfile.update({
+          await tx.collegeProfile.update({
             where: { userId: targetUserId },
             data: { isFeatured: isAgentFeatured },
           });
         } else if (isAgentFeatured) {
-          await tx.agentProfile.create({
+          await tx.collegeProfile.create({
             data: {
               userId: targetUserId,
-              companyName: "Re Onestop Page Agent",
-              experienceYears: 1,
+              organizationName: "Ink EduVerse Advisor",
+              designation: "College Advisor",
               isFeatured: true,
             },
           });

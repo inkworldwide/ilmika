@@ -12,7 +12,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Fetch conversations where user is a participant
     const conversations = await prisma.conversation.findMany({
       where: {
         participants: {
@@ -21,12 +20,11 @@ export async function GET(req: Request) {
       },
       orderBy: { updatedAt: "desc" },
       include: {
-        property: {
+        college: {
           select: {
             id: true,
-            title: true,
-            price: true,
-            transactionType: true,
+            name: true,
+            slug: true,
             images: {
               take: 1,
               select: { url: true },
@@ -48,13 +46,10 @@ export async function GET(req: Request) {
       },
     });
 
-    // Formulate a clean serialized response
     const formattedConversations = await Promise.all(
       conversations.map(async (conv) => {
-        // Find other participant
         const counterpart = conv.participants.find(p => p.id !== user.id) || null;
 
-        // Calculate unread count (messages sent to user that are not read)
         const unreadCount = await prisma.message.count({
           where: {
             conversationId: conv.id,
@@ -67,10 +62,7 @@ export async function GET(req: Request) {
 
         return {
           id: conv.id,
-          property: conv.property ? {
-            ...conv.property,
-            price: parseFloat(conv.property.price.toString()),
-          } : null,
+          college: conv.college || null,
           counterpart,
           lastMessage,
           unreadCount,

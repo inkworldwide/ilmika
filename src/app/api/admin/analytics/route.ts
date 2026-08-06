@@ -1,54 +1,45 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthUser(req);
     if (!user || user.role !== "ADMIN") {
-      return NextResponse.json(
-        { error: "Access denied. Administrator privileges required." },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
     const [
       totalUsers,
-      totalProperties,
-      draftCount,
-      pendingCount,
-      activeCount,
-      enquiriesCount,
-      visitsCount,
-      reportsCount,
+      totalColleges,
+      pendingVerifications,
+      activeColleges,
+      totalApplications,
+      totalEnquiries,
+      totalReports,
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.property.count(),
-      prisma.property.count({ where: { status: "DRAFT" } }),
-      prisma.property.count({ where: { status: "PENDING_VERIFICATION" } }),
-      prisma.property.count({ where: { status: "ACTIVE" } }),
-      prisma.enquiry.count(),
-      prisma.visit.count(),
-      prisma.propertyReport.count(),
+      prisma.college.count(),
+      prisma.college.count({ where: { status: "PENDING_VERIFICATION" } }),
+      prisma.college.count({ where: { status: "ACTIVE" } }),
+      prisma.application.count(),
+      prisma.collegeEnquiry.count(),
+      prisma.collegeReport.count(),
     ]);
 
     return NextResponse.json({
-      metrics: {
+      summary: {
         totalUsers,
-        totalProperties,
-        draftCount,
-        pendingCount,
-        activeCount,
-        enquiriesCount,
-        visitsCount,
-        reportsCount,
+        totalColleges,
+        pendingVerifications,
+        activeColleges,
+        totalApplications,
+        totalEnquiries,
+        totalReports,
       },
     });
-  } catch (error: any) {
-    console.error("Fetch admin analytics error:", error);
-    return NextResponse.json(
-      { error: "Failed to retrieve analytics metrics" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Admin analytics error:", error);
+    return NextResponse.json({ error: "Failed to load admin analytics" }, { status: 500 });
   }
 }

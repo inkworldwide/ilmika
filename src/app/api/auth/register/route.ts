@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, signToken } from "@/lib/auth";
+import { hashPassword } from "@/lib/auth";
 import { Role } from "@prisma/client";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
@@ -10,8 +10,10 @@ const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  phone: z.string().regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
-  role: z.enum(["USER", "OWNER", "AGENT"], {
+  phone: z.string().min(5, "Phone number is required"),
+  country: z.string().min(2, "Country is required"),
+  city: z.string().min(2, "City is required"),
+  role: z.enum(["USER", "COLLEGE_ADMIN", "AGENT"], {
     message: "Invalid role selected",
   }),
 });
@@ -20,7 +22,7 @@ export async function POST(req: Request) {
   try {
     // Rate Limiting: max 3 registration requests per minute per IP
     const ip = getClientIp(req);
-    const limitCheck = checkRateLimit(`register_${ip}`, 3, 60000);
+    const limitCheck = checkRateLimit(`register_${ip}`, 5, 60000);
     if (!limitCheck.success) {
       return NextResponse.json(
         { error: "Too many registration attempts. Please try again after a minute." },
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, password, phone, role } = parsed.data;
+    const { name, email, password, phone, country, city, role } = parsed.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -57,28 +59,10 @@ export async function POST(req: Request) {
     const passwordHash = await hashPassword(password);
     const verificationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    const getPrefix = (cityName?: string) => {
-      if (!cityName) return "KO";
-      const clean = cityName.trim().toUpperCase();
-      if (clean.startsWith("BENGALURU") || clean.startsWith("BANGALORE")) return "BE";
-      if (clean.startsWith("KOCHI") || clean.startsWith("COCHIN")) return "KO";
-      if (clean.startsWith("MUMBAI") || clean.startsWith("BOMBAY")) return "MU";
-      if (clean.startsWith("DELHI")) return "DE";
-      if (clean.startsWith("HYDERABAD")) return "HY";
-      if (clean.startsWith("CHENNAI")) return "CH";
-      if (clean.startsWith("PUNE")) return "PU";
-      if (clean.startsWith("KOLKATA")) return "KO";
-      if (clean.startsWith("AHMEDABAD")) return "AH";
-      if (clean.startsWith("GURUGRAM") || clean.startsWith("GURGAON")) return "GU";
-      if (clean.startsWith("NOIDA")) return "NO";
-      return clean.substring(0, 2);
-    };
-
-    const cityPrefix = getPrefix(body.city);
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    const customId = `${cityPrefix}${randomDigits}`;
+    const customId = `EDU${randomDigits}`;
 
-    // In dev: auto-verify email so user can login immediately without email link
+    // In dev: auto-verify email
     const isDev = process.env.NODE_ENV !== "production";
 
     // Create the User in the database
@@ -88,18 +72,32 @@ export async function POST(req: Request) {
         email: email.toLowerCase(),
         passwordHash,
         plainPassword: password,
-        phone: phone || null,
-        role,
+        phone,
+        country,
+        city,
+        role: role as Role,
         customId,
-        isEmailVerified: isDev ? true : false, // auto-verify in dev
+        isEmailVerified: isDev ? true : false,
+        isApproved: true, // auto-approve for seamless onboarding
         emailVerificationToken: isDev ? null : verificationToken,
       },
     });
 
-    // Create Response
-    const response = NextResponse.json(
+    // If College Admin or Agent, create profile
+    if (role === "COLLEGE_ADMIN" || role === "AGENT") {
+      await prisma.collegeProfile.create({
+        data: {
+          userId: user.id,
+          organizationName: `${name}'s Institution`,
+          designation: "Admissions Officer",
+          isFeatured: true,
+        },
+      });
+    }
+
+    return NextResponse.json(
       {
-        message: "Registration successful. Your account is pending admin approval. You can log in once approved.",
+        message: "Registration successful. You can now log in.",
         user: {
           id: user.id,
           name: user.name,
@@ -108,13 +106,10 @@ export async function POST(req: Request) {
           phone: user.phone,
           isEmailVerified: user.isEmailVerified,
         },
-        // We output the verification token in development so we can mock verify it easily
         verificationToken: process.env.NODE_ENV !== "production" ? verificationToken : undefined,
       },
       { status: 201 }
     );
-
-    return response;
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(

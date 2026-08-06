@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { 
   LayoutDashboard, User, Heart, Clock, Mail, CalendarRange, 
-  MessageSquare, Bell, Building2, BarChart3, ChevronRight, Menu, ShieldAlert 
+  MessageSquare, Bell, Building2, BarChart3, ChevronRight, Menu, ShieldAlert, GraduationCap
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin"></div>
-          <p className="font-serif text-lg text-primary">Loading your dashboard...</p>
+          <p className="font-serif text-lg text-primary">Loading your Ink EduVerse dashboard...</p>
         </div>
       </div>
     );
@@ -57,22 +57,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) return null;
 
-  // Sidebar link items
+  // Sidebar link items for Ink EduVerse
   const menuItems = [
-    { name: "Overview", path: "/dashboard", icon: LayoutDashboard, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
-    { name: "My Profile", path: "/dashboard/profile", icon: User, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
-    { name: "Saved Listings", path: "/dashboard/saved", icon: Heart, roles: ["USER"] },
-    { name: "Recently Viewed", path: "/dashboard/recently-viewed", icon: Clock, roles: ["USER"] },
+    { name: "Overview", path: "/dashboard", icon: LayoutDashboard, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "My Profile", path: "/dashboard/profile", icon: User, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "My Shortlist", path: "/dashboard/saved", icon: Heart, roles: ["USER"] },
     
-    // Owner / Agent Specific
-    { name: "My Properties", path: "/dashboard/properties", icon: Building2, roles: ["OWNER", "AGENT", "ADMIN"] },
-    { name: "Leads Analytics", path: "/dashboard/analytics", icon: BarChart3, roles: ["OWNER", "AGENT", "ADMIN"] },
+    // College Admin Specific
+    { name: "My Colleges", path: "/colleges/add", icon: GraduationCap, roles: ["COLLEGE_ADMIN", "AGENT", "ADMIN"] },
     
-    // Joint items with roles context
-    { name: "Enquiries", path: "/dashboard/enquiries", icon: Mail, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
-    { name: "Tours & Visits", path: "/dashboard/visits", icon: CalendarRange, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
-    { name: "Inbox Messages", path: "/dashboard/messages", icon: MessageSquare, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
-    { name: "Notifications", path: "/dashboard/notifications", icon: Bell, roles: ["USER", "OWNER", "AGENT", "ADMIN"] },
+    // Joint items
+    { name: "Applications & Enquiries", path: "/dashboard/enquiries", icon: Mail, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "Counselling Sessions", path: "/dashboard/visits", icon: CalendarRange, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "Inbox Messages", path: "/dashboard/messages", icon: MessageSquare, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "Notifications", path: "/dashboard/notifications", icon: Bell, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => item.roles.includes(user.role));
@@ -81,10 +79,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen flex flex-col bg-secondary">
       <Navbar />
 
-      <div className="flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full px-4 md:px-8 py-8 gap-6">
+      <div className="flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full px-4 md:px-6 py-6 gap-6 items-start">
         
         {/* Mobile menu toggle bar */}
-        <div className="md:hidden flex items-center justify-between bg-white border border-line p-4 rounded-xl shadow-xs">
+        <div className="md:hidden flex items-center justify-between bg-white border border-line p-4 rounded-xl shadow-xs w-full">
           <span className="font-serif text-md font-semibold text-primary">Dashboard Menu</span>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -96,13 +94,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* Sidebar Navigation */}
-        <aside className={`w-full md:w-64 bg-primary border border-slate-800 rounded-2xl p-4 shadow-sm md:flex flex-col shrink-0 ${sidebarOpen ? "flex" : "hidden"}`}>
-          <div className="px-3 py-2 border-b border-slate-800 mb-4 text-left">
-            <h3 className="font-semibold text-white leading-snug">{user.name}</h3>
-            <p className="text-[10px] font-mono text-slate-400 capitalize">{user.role.toLowerCase()} panel</p>
+        <aside className={`w-full md:w-64 bg-[#0B132B] text-slate-200 border border-slate-800 rounded-3xl p-5 shadow-xl md:flex flex-col shrink-0 md:sticky md:top-24 ${sidebarOpen ? "flex" : "hidden"}`}>
+          <div className="px-2 py-1 border-b border-slate-800 pb-4 mb-4 text-left">
+            <h3 className="font-serif font-bold text-white text-base leading-snug">{user.name}</h3>
+            <p className="text-[10px] font-mono font-bold text-accent uppercase tracking-widest mt-0.5">{user.role.toLowerCase().replace("_", " ")} panel</p>
           </div>
 
-          <nav className="space-y-1 flex-1">
+          <nav className="space-y-1.5 flex-1">
             {filteredMenuItems.map((item) => {
               const isCurrent = pathname === item.path;
               const Icon = item.icon;
@@ -111,17 +109,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   key={item.path}
                   href={item.path}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition font-medium text-sm ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 text-xs font-semibold group ${
                     isCurrent 
-                      ? "bg-accent text-primary font-bold shadow-md" 
-                      : "text-slate-300 hover:bg-white/10 hover:text-white"
+                      ? "bg-accent text-primary font-bold shadow-lg shadow-accent/20 scale-[1.02]" 
+                      : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4.5 h-4.5 ${isCurrent ? "text-primary" : "text-slate-400"}`} />
+                    <Icon className={`w-4 h-4 ${isCurrent ? "text-primary" : "text-slate-400 group-hover:text-accent"}`} />
                     <span>{item.name}</span>
                   </div>
-                  <ChevronRight className={`w-3.5 h-3.5 ${isCurrent ? "text-primary" : "text-slate-500"}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 ${isCurrent ? "text-primary" : "text-slate-500 group-hover:text-white"}`} />
                 </Link>
               );
             })}
@@ -131,9 +129,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="pt-4 mt-6 border-t border-slate-800">
               <Link
                 href="/admin"
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-accent text-primary hover:bg-yellow-500 transition font-bold text-sm shadow-md"
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-accent text-primary hover:bg-yellow-500 transition font-bold text-xs shadow-md"
               >
-                <ShieldAlert className="w-4.5 h-4.5" />
+                <ShieldAlert className="w-4 h-4" />
                 <span>Admin Portal</span>
               </Link>
             </div>
@@ -141,7 +139,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </aside>
 
         {/* Main Content Pane */}
-        <div className="flex-1 min-w-0 bg-white border border-line rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+        <div className="flex-1 min-w-0 w-full bg-white border border-line rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
           {children}
         </div>
 

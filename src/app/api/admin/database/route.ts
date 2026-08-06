@@ -4,15 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth";
 
 const databaseSchema = z.object({
-  type: z.enum(["city", "locality", "amenity"]),
-  // City values
+  type: z.enum(["city", "country", "facility"]),
   cityName: z.string().optional(),
-  state: z.string().optional(),
-  // Locality values
-  localityName: z.string().optional(),
-  cityId: z.string().optional(),
-  // Amenity values
-  amenityName: z.string().optional(),
+  countryId: z.string().optional(),
+  countryName: z.string().optional(),
+  countryCode: z.string().optional(),
+  flag: z.string().optional(),
+  facilityName: z.string().optional(),
   icon: z.string().optional(),
 });
 
@@ -28,7 +26,6 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    // Validate inputs
     const parsed = databaseSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -37,58 +34,49 @@ export async function POST(req: Request) {
       );
     }
 
-    const { type, cityName, state, localityName, cityId, amenityName, icon } = parsed.data;
+    const { type, cityName, countryId, countryName, countryCode, flag, facilityName, icon } = parsed.data;
+
+    if (type === "country") {
+      if (!countryName || !countryCode) {
+        return NextResponse.json({ error: "Country name and code required" }, { status: 400 });
+      }
+      const country = await prisma.country.create({
+        data: {
+          name: countryName,
+          code: countryCode.toUpperCase(),
+          flag: flag || "🌍",
+        },
+      });
+      return NextResponse.json({ message: "Country created successfully", country }, { status: 201 });
+    }
 
     if (type === "city") {
       if (!cityName) return NextResponse.json({ error: "City name is required" }, { status: 400 });
+      let targetCountryId = countryId;
+      if (!targetCountryId) {
+        const defaultCountry = await prisma.country.findFirst();
+        targetCountryId = defaultCountry?.id;
+      }
+      if (!targetCountryId) {
+        return NextResponse.json({ error: "Country required" }, { status: 400 });
+      }
       const id = cityName.toLowerCase().replace(/\s+/g, "-");
       
       const city = await prisma.city.create({
         data: {
-          id,
           name: cityName,
           slug: id,
+          countryId: targetCountryId,
         },
       });
       return NextResponse.json({ message: "City created successfully", city }, { status: 201 });
-    }
-
-    if (type === "locality") {
-      if (!localityName || !cityId) {
-        return NextResponse.json({ error: "Locality name and City ID are required" }, { status: 400 });
-      }
-      const id = localityName.toLowerCase().replace(/\s+/g, "-");
-      
-      const locality = await prisma.locality.create({
-        data: {
-          id,
-          name: localityName,
-          slug: id,
-          cityId,
-        },
-      });
-      return NextResponse.json({ message: "Locality created successfully", locality }, { status: 201 });
-    }
-
-    if (type === "amenity") {
-      if (!amenityName) return NextResponse.json({ error: "Amenity name is required" }, { status: 400 });
-      const id = amenityName.toLowerCase().replace(/\s+/g, "-");
-      
-      const amenity = await prisma.amenity.create({
-        data: {
-          id,
-          name: amenityName,
-          icon: icon || "Check",
-        },
-      });
-      return NextResponse.json({ message: "Amenity created successfully", amenity }, { status: 201 });
     }
 
     return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
   } catch (error: any) {
     console.error("Admin database post error:", error);
     return NextResponse.json(
-      { error: "Failed to create database entry. Record might already exist." },
+      { error: "Failed to create database entry." },
       { status: 500 }
     );
   }

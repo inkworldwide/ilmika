@@ -24,7 +24,6 @@ export async function GET(
       );
     }
 
-    // Verify conversation exists and user is a participant
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -39,10 +38,10 @@ export async function GET(
             role: true,
           },
         },
-        property: {
+        college: {
           select: {
             id: true,
-            title: true,
+            name: true,
           },
         },
       },
@@ -55,7 +54,6 @@ export async function GET(
       );
     }
 
-    // Mark incoming messages as read in this thread
     await prisma.message.updateMany({
       where: {
         conversationId,
@@ -65,7 +63,6 @@ export async function GET(
       data: { isRead: true },
     });
 
-    // Fetch all messages in the thread
     const messages = await prisma.message.findMany({
       where: { conversationId },
       orderBy: { createdAt: "asc" },
@@ -84,7 +81,7 @@ export async function GET(
   }
 }
 
-// POST - Reply to conversation thread (Atomic Transaction)
+// POST - Reply to conversation thread
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -100,7 +97,6 @@ export async function POST(
       );
     }
 
-    // Verify conversation and get participants
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: conversationId,
@@ -108,7 +104,7 @@ export async function POST(
       },
       include: {
         participants: true,
-        property: { select: { title: true } },
+        college: { select: { name: true } },
       },
     });
 
@@ -121,7 +117,6 @@ export async function POST(
 
     const body = await req.json();
 
-    // Validate inputs
     const parsed = replySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
@@ -132,7 +127,6 @@ export async function POST(
 
     const { content } = parsed.data;
 
-    // Find the receiver (the other participant)
     const receiver = conversation.participants.find(p => p.id !== user.id);
     if (!receiver) {
       return NextResponse.json(
@@ -141,9 +135,7 @@ export async function POST(
       );
     }
 
-    // Execute database writes inside a transaction
     const message = await prisma.$transaction(async (tx) => {
-      // 1. Create the reply Message
       const msg = await tx.message.create({
         data: {
           conversationId,
@@ -153,19 +145,17 @@ export async function POST(
         },
       });
 
-      // 2. Update conversation updatedAt timestamp
       await tx.conversation.update({
         where: { id: conversationId },
         data: { updatedAt: new Date() },
       });
 
-      // 3. Create Notification for receiver
-      const propTitle = conversation.property ? ` regarding "${conversation.property.title}"` : "";
+      const colTitle = conversation.college ? ` regarding "${conversation.college.name}"` : "";
       await tx.notification.create({
         data: {
           userId: receiver.id,
           type: NotificationType.MESSAGE_RECEIVED,
-          message: `New message from ${user.name}${propTitle}`,
+          message: `New message from ${user.name}${colTitle}`,
         },
       });
 

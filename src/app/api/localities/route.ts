@@ -3,19 +3,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const cityId = searchParams.get("cityId");
-
-    const where: any = {};
-    if (cityId) {
-      where.cityId = cityId;
-    }
-
-    const localities = await prisma.locality.findMany({
-      where,
+    const countries = await prisma.country.findMany({
       orderBy: { name: "asc" },
     });
-    return NextResponse.json({ localities });
+    return NextResponse.json({ localities: countries, countries });
   } catch (error) {
     console.error("Fetch localities API error:", error);
     return NextResponse.json(

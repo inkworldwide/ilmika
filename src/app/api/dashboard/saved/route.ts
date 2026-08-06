@@ -1,48 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET(req: Request) {
   try {
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthUser(req);
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized. Please log in." },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const favourites = await prisma.favourite.findMany({
+    const shortlists = await prisma.shortlist.findMany({
       where: { userId: user.id },
       include: {
-        property: {
+        college: {
           include: {
             city: true,
-            locality: true,
-            images: {
-              take: 1,
-              orderBy: { sortOrder: "asc" },
-            },
+            country: true,
+            images: { take: 1, orderBy: { sortOrder: "asc" } },
+            courses: { where: { isActive: true }, take: 2 },
           },
         },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    const properties = favourites.map(f => ({
-      ...f.property,
-      price: parseFloat(f.property.price.toString()),
-      monthlyRent: f.property.monthlyRent ? parseFloat(f.property.monthlyRent.toString()) : null,
-      securityDeposit: f.property.securityDeposit ? parseFloat(f.property.securityDeposit.toString()) : null,
-      maintenanceCharges: f.property.maintenanceCharges ? parseFloat(f.property.maintenanceCharges.toString()) : null,
+    const colleges = shortlists.map((s) => ({
+      ...s.college,
+      courses: s.college.courses.map((c) => ({
+        ...c,
+        annualFees: c.annualFees ? Number(c.annualFees) : 0,
+      })),
     }));
 
-    return NextResponse.json({ properties });
-  } catch (error: any) {
-    console.error("Dashboard saved listings fetch error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch saved listings" },
-      { status: 500 }
-    );
+    return NextResponse.json({ colleges });
+  } catch (error) {
+    console.error("Fetch shortlist error:", error);
+    return NextResponse.json({ error: "Failed to fetch shortlisted colleges" }, { status: 500 });
   }
 }

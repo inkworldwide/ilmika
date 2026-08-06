@@ -150,7 +150,7 @@ export default function Navbar() {
                       >
                         <div className="px-4 py-2 border-b border-line mb-1">
                           <p className="font-semibold text-primary truncate">{user.name}</p>
-                          <p className="text-[11px] font-mono text-slate-400 capitalize">{user.role.toLowerCase()}</p>
+                          <p className="text-[11px] font-mono text-slate-400 capitalize">{user.role.toLowerCase().replace("_", " ")}</p>
                           {!user.isEmailVerified && (
                             <span className="inline-block mt-1 text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                               Email Unverified
@@ -168,31 +168,31 @@ export default function Navbar() {
                         </Link>
                         
                         <Link 
-                          href="/dashboard/saved" 
+                          href="/dashboard/shortlist" 
                           onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-2.5 px-4 py-2.5 text-slate-700 hover:bg-secondary transition"
                         >
                           <Heart className="w-4 h-4 text-slate-400" />
-                          Saved Homes
+                          My Shortlist
                         </Link>
 
                         <Link 
-                          href="/dashboard/visits" 
+                          href="/dashboard/sessions" 
                           onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-2.5 px-4 py-2.5 text-slate-700 hover:bg-secondary transition"
                         >
                           <CalendarRange className="w-4 h-4 text-slate-400" />
-                          My Visits
+                          Counselling Sessions
                         </Link>
 
-                        {user.role !== "USER" && (
+                        {(user.role === "COLLEGE_ADMIN" || user.role === "AGENT") && (
                           <Link 
-                            href="/properties/add" 
+                            href="/colleges/add" 
                             onClick={() => setProfileDropdownOpen(false)}
                             className="flex items-center gap-2.5 px-4 py-2.5 text-accent hover:bg-secondary font-medium transition"
                           >
                             <Plus className="w-4 h-4 text-accent" />
-                            List Property
+                            List Your College
                           </Link>
                         )}
 
@@ -295,7 +295,7 @@ export default function Navbar() {
       </AnimatePresence>
 
       {/* Conditionally rendered Back to Home button below Navbar */}
-      {pathname !== "/" && (
+      {pathname !== "/" && !pathname.startsWith("/admin") && !pathname.startsWith("/dashboard") && (
         <div className="bg-white border-b border-line px-5 md:px-8 py-2">
           <div className="max-w-7xl mx-auto flex items-center">
             <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-accent transition-colors">

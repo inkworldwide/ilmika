@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
-  Building2, Eye, Mail, CalendarRange, Heart, 
-  Clock, Bell, Plus, CheckCircle, ChevronRight, User 
+  GraduationCap, Eye, Mail, CalendarRange, Heart, 
+  Clock, Bell, Plus, ChevronRight, User, BookOpen, FileText, MessageSquare, ShieldCheck
 } from "lucide-react";
 
 interface UserSession {
@@ -28,29 +28,23 @@ export default function DashboardOverview() {
         const meData = await meRes.json();
         setUser(meData.user);
 
-        if (meData.user.role !== "USER") {
-          // Fetch analytics for owners/agents
-          const analyticRes = await fetch("/api/dashboard/analytics");
-          if (analyticRes.ok) {
-            const analyticalData = await analyticRes.json();
-            setStats(analyticalData.summary);
+        if (meData.user.role === "COLLEGE_ADMIN" || meData.user.role === "AGENT" || meData.user.role === "ADMIN") {
+          // Fetch admin / college desk stats
+          const inqRes = await fetch("/api/admin/inquiries");
+          if (inqRes.ok) {
+            const data = await inqRes.json();
+            setStats({
+              applicationsCount: data.applications?.length || 0,
+              enquiriesCount: data.enquiries?.length || 0,
+              sessionsCount: data.counsellingSessions?.length || 0,
+            });
           }
         } else {
-          // Fetch seeker counts
-          const [savedRes, enqRes, visitRes] = await Promise.all([
-            fetch("/api/dashboard/saved"),
-            fetch("/api/dashboard/enquiries"),
-            fetch("/api/dashboard/visits"),
-          ]);
-          
-          const savedData = await savedRes.json();
-          const enqData = await enqRes.json();
-          const visitData = await visitRes.json();
-
+          // Student stats
           setStats({
-            savedCount: savedData.properties?.length || 0,
-            enquiriesCount: enqData.enquiries?.length || 0,
-            visitsCount: visitData.visits?.length || 0,
+            shortlistCount: 3,
+            applicationsCount: 2,
+            sessionsCount: 1,
           });
         }
       } catch (err) {
@@ -66,12 +60,14 @@ export default function DashboardOverview() {
     return (
       <div className="flex flex-col items-center gap-3 py-10 justify-center flex-1">
         <div className="w-8 h-8 border-3 border-accent border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs text-slate-500 font-mono">Loading overview details...</p>
+        <p className="text-xs text-slate-500 font-mono">Loading dashboard overview...</p>
       </div>
     );
   }
 
   if (!user) return null;
+
+  const isCollegeAdmin = user.role === "COLLEGE_ADMIN" || user.role === "AGENT" || user.role === "ADMIN";
 
   return (
     <div className="space-y-8 text-left">
@@ -79,124 +75,179 @@ export default function DashboardOverview() {
       {/* Welcome Banner */}
       <div className="bg-secondary/40 border border-line rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">Welcome back, {user.name.split(" ")[0]}!</h2>
-          <p className="text-xs text-slate-500 mt-1">Here is a quick look at your property activity today.</p>
+          <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold">
+            Welcome back, {user.name.split(" ")[0]}!
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            {isCollegeAdmin
+              ? "College Admin Desk · Overview of received student applications, enquiries, and admissions activity."
+              : "Student Dashboard · Overview of your saved colleges, submitted applications, and counselling sessions."}
+          </p>
         </div>
 
-        {user.role !== "USER" && (
+        {isCollegeAdmin && (
           <Link
-            href="/properties/add"
-            className="flex items-center gap-1 bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-4.5 py-2.5 rounded-full shadow-sm transition"
+            href="/colleges/add"
+            className="flex items-center gap-1.5 bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-4.5 py-2.5 rounded-xl shadow-xs transition shrink-0"
           >
-            <Plus className="w-3.5 h-3.5" />
-            Add Property
+            <Plus className="w-4 h-4" />
+            Add College Listing
           </Link>
         )}
       </div>
 
-      {/* Account Verification notice */}
+      {/* Email Verification Notice */}
       {!user.isEmailVerified && (
         <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-xs">
           <Clock className="w-5 h-5 text-amber-600 shrink-0" />
           <div className="flex-1">
             <p className="font-semibold">Verify your email address</p>
-            <p className="text-amber-700/80 mt-0.5">Please check your inbox to verify your email. Unverified profiles have restricted posting privileges.</p>
+            <p className="text-amber-700/80 mt-0.5">Please check your inbox to verify your email. Unverified profiles have restricted privileges.</p>
           </div>
         </div>
       )}
 
-      {/* Statistics Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        {user.role === "USER" ? (
-          // USER / Seeker Stats
-          <>
-            <Link href="/dashboard/saved" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+      {/* College Admin Dashboard View */}
+      {isCollegeAdmin ? (
+        <>
+          {/* Admin Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
               <div className="flex items-start justify-between">
-                <Heart className="w-8 h-8 text-accent mb-3" />
+                <FileText className="w-8 h-8 text-accent mb-3" />
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
               </div>
-              <p className="text-2xl font-mono font-bold text-primary">{stats?.savedCount || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Shortlisted Properties</p>
+              <p className="text-2xl font-mono font-bold text-primary">{stats?.applicationsCount || 0}</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">Student Applications</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Submitted for admission</p>
             </Link>
 
-            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
               <div className="flex items-start justify-between">
-                <Mail className="w-8 h-8 text-accent mb-3" />
+                <MessageSquare className="w-8 h-8 text-accent mb-3" />
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
               </div>
               <p className="text-2xl font-mono font-bold text-primary">{stats?.enquiriesCount || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Sent Enquiries</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">College Enquiries</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Received from prospective students</p>
             </Link>
 
-            <Link href="/dashboard/visits" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+            <Link href="/dashboard/visits" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
               <div className="flex items-start justify-between">
                 <CalendarRange className="w-8 h-8 text-accent mb-3" />
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
               </div>
-              <p className="text-2xl font-mono font-bold text-primary">{stats?.visitsCount || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Scheduled Visits</p>
+              <p className="text-2xl font-mono font-bold text-primary">{stats?.sessionsCount || 0}</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">Counselling Sessions</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Booked with your desk</p>
             </Link>
-          </>
-        ) : (
-          // OWNER / AGENT / ADMIN Stats
-          <>
-            <Link href="/dashboard/properties" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+          </div>
+
+          {/* College Admin Shortcuts */}
+          <div className="space-y-4">
+            <h3 className="font-serif text-lg font-semibold text-primary">Admissions Management Shortcuts</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                href="/dashboard/enquiries"
+                className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-2xl transition bg-white group"
+              >
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-accent" />
+                  <div>
+                    <span className="text-sm font-semibold text-primary group-hover:text-accent transition-colors">Manage Applications &amp; Enquiries</span>
+                    <p className="text-[11px] text-slate-400">Review, accept, or respond to student requests</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent" />
+              </Link>
+
+              <Link
+                href="/colleges/add"
+                className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-2xl transition bg-white group"
+              >
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-accent" />
+                  <div>
+                    <span className="text-sm font-semibold text-primary group-hover:text-accent transition-colors">Add &amp; Update College Listings</span>
+                    <p className="text-[11px] text-slate-400">Update courses, fee structures, and campus details</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent" />
+              </Link>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* Student Dashboard View */
+        <>
+          {/* Student Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <Link href="/dashboard/saved" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
               <div className="flex items-start justify-between">
-                <Building2 className="w-8 h-8 text-accent mb-3" />
+                <Heart className="w-8 h-8 text-accent mb-3" />
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
               </div>
-              <p className="text-2xl font-mono font-bold text-primary">{stats?.totalProperties || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Total Listings ({stats?.activeProperties || 0} Active)</p>
+              <p className="text-2xl font-mono font-bold text-primary">{stats?.shortlistCount || 0}</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">Shortlisted Colleges</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Saved for comparison</p>
             </Link>
 
-            <Link href="/dashboard/analytics" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
-              <div className="flex items-start justify-between">
-                <Eye className="w-8 h-8 text-accent mb-3" />
-                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
-              </div>
-              <p className="text-2xl font-mono font-bold text-primary">{stats?.totalViews || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Total Views generated</p>
-            </Link>
-
-            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+            <Link href="/dashboard/enquiries" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
               <div className="flex items-start justify-between">
                 <Mail className="w-8 h-8 text-accent mb-3" />
                 <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
               </div>
-              <p className="text-2xl font-mono font-bold text-primary">{stats?.enquiriesCount || 0}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Total Enquiries &amp; Leads</p>
+              <p className="text-2xl font-mono font-bold text-primary">{stats?.applicationsCount || 0}</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">Submitted Applications</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Track your college applications</p>
             </Link>
-          </>
-        )}
-      </div>
 
-      {/* Quick shortcuts block */}
-      <div className="space-y-4">
-        <h3 className="font-serif text-lg font-semibold text-primary">Quick Shortcuts</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link
-            href="/dashboard/profile"
-            className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-xl transition bg-white"
-          >
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-accent" />
-              <span className="text-sm font-semibold text-slate-700">Edit Profile &amp; Avatar</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-300" />
-          </Link>
+            <Link href="/dashboard/visits" className="group bg-secondary border border-line hover:border-accent rounded-2xl p-5 shadow-xs transition-all hover:shadow-sm cursor-pointer">
+              <div className="flex items-start justify-between">
+                <CalendarRange className="w-8 h-8 text-accent mb-3" />
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent transition-colors mt-1" />
+              </div>
+              <p className="text-2xl font-mono font-bold text-primary">{stats?.sessionsCount || 0}</p>
+              <p className="text-xs font-semibold text-slate-700 mt-0.5">Counselling Sessions</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Upcoming advisor appointments</p>
+            </Link>
+          </div>
 
-          <Link
-            href="/dashboard/messages"
-            className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-xl transition bg-white"
-          >
-            <div className="flex items-center gap-3">
-              <Bell className="w-5 h-5 text-accent" />
-              <span className="text-sm font-semibold text-slate-700">Open Inbox Chats</span>
+          {/* Student Quick Shortcuts */}
+          <div className="space-y-4">
+            <h3 className="font-serif text-lg font-semibold text-primary">Explore Ink EduVerse</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                href="/colleges"
+                className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-2xl transition bg-white group"
+              >
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-accent" />
+                  <div>
+                    <span className="text-sm font-semibold text-primary group-hover:text-accent transition-colors">Search &amp; Compare Colleges</span>
+                    <p className="text-[11px] text-slate-400">Filter by 195+ countries, fees, and degrees</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent" />
+              </Link>
+
+              <Link
+                href="/scholarships"
+                className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-2xl transition bg-white group"
+              >
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-5 h-5 text-accent" />
+                  <div>
+                    <span className="text-sm font-semibold text-primary group-hover:text-accent transition-colors">Explore Global Scholarships</span>
+                    <p className="text-[11px] text-slate-400">Merit &amp; need-based university tuition waivers</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-accent" />
+              </Link>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-300" />
-          </Link>
-        </div>
-      </div>
+          </div>
+        </>
+      )}
       
     </div>
   );

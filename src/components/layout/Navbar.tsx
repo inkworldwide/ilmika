@@ -58,11 +58,13 @@ export default function Navbar() {
         const res = await fetch("/api/notifications");
         if (res.ok) {
           const data = await res.json();
-          const count = data.notifications.filter((n: any) => !n.isRead).length;
-          setUnreadCount(count);
+          if (Array.isArray(data.notifications)) {
+            const count = data.notifications.filter((n: any) => !n.isRead).length;
+            setUnreadCount(count);
+          }
         }
       } catch (err) {
-        console.error("Fetch unread count error:", err);
+        // Ignore network / dev server restart errors silently
       }
     }
     fetchUnreadCount();

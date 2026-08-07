@@ -31,11 +31,31 @@ export async function GET(req: Request) {
         plainPassword: true,
         colleges: {
           select: {
+            id: true,
+            name: true,
+            slug: true,
+            collegeType: true,
+            status: true,
             city: {
+              select: { name: true }
+            },
+            country: {
               select: { name: true }
             }
           },
-          take: 1
+          orderBy: { createdAt: "desc" }
+        },
+        shortlists: {
+          select: {
+            college: {
+              select: {
+                id: true,
+                name: true,
+                city: { select: { name: true } },
+                country: { select: { name: true } }
+              }
+            }
+          }
         },
         collegeProfile: {
           select: {

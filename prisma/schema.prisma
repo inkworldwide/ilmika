@@ -277,6 +277,10 @@ model College {
   status           CollegeStatus @default(DRAFT)
   rejectionReason  String?
   viewCount        Int           @default(0)
+  hasScholarship       Boolean       @default(false)
+  scholarshipDetails   String?
+  hasEntranceExam      Boolean       @default(false)
+  entranceExamDetails  String?
 
   // Owner (College Admin)
   ownerId          String

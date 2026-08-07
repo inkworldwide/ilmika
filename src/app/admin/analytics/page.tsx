@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   BarChart3,
+  LayoutDashboard,
   Users,
   GraduationCap,
   AlertTriangle,
@@ -105,7 +106,7 @@ export default function AdminAnalyticsPage() {
       color: "bg-teal-50 text-teal-600 border-teal-100",
     },
     {
-      title: "College Reports",
+            title: "Flagged Colleges",
       value: summary.totalReports,
       desc: "Flagged colleges for review",
       icon: AlertTriangle,
@@ -130,10 +131,10 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6 text-left">
       <div>
         <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-accent" /> Platform Analytics
+          <LayoutDashboard className="w-6 h-6 text-accent" /> Dashboard
         </h2>
         <p className="text-xs text-slate-500 mt-1">
-          Overview of colleges, students, applications, and engagement across Ink EduVerse.
+          Overview of colleges, students, applications, and engagement across ILMIKA.
         </p>
       </div>
 
@@ -189,7 +190,7 @@ export default function AdminAnalyticsPage() {
             link: "/admin/inquiries",
           },
           {
-            title: "College Reports",
+                  title: "Flagged Colleges",
             value: summary.totalReports,
             desc: "Flagged colleges for review",
             icon: AlertTriangle,

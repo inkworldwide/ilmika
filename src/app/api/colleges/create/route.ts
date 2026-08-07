@@ -24,6 +24,10 @@ export async function POST(req: Request) {
       nirfRanking,
       qsRanking,
       imageUrl,
+      hasScholarship,
+      scholarshipDetails,
+      hasEntranceExam,
+      entranceExamDetails,
     } = body;
 
     if (!name || !description || !cityName) {
@@ -76,6 +80,10 @@ export async function POST(req: Request) {
         gender: gender || "CO_ED",
         nirfRanking: nirfRanking || null,
         qsRanking: qsRanking || null,
+        hasScholarship: Boolean(hasScholarship),
+        scholarshipDetails: scholarshipDetails || null,
+        hasEntranceExam: Boolean(hasEntranceExam),
+        entranceExamDetails: entranceExamDetails || null,
         status: "ACTIVE", // auto-activate for demo
         isVerified: true,
         ownerId: user?.id || "demo-admin-id",

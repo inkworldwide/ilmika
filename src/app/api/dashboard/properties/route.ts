@@ -19,8 +19,9 @@ export async function GET(req: Request) {
       );
     }
 
-    const colleges = await prisma.college.findMany({
-      where: { ownerId: user.id },
+    // Fetch colleges owned by user, or all if ADMIN and no personal owned colleges
+    let colleges = await prisma.college.findMany({
+      where: user.role === "ADMIN" ? {} : { ownerId: user.id },
       include: {
         city: true,
         country: true,

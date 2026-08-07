@@ -16,6 +16,11 @@ import {
   Info,
   X,
   Calendar,
+  GraduationCap,
+  ExternalLink,
+  Building,
+  Bookmark,
+  Heart,
 } from "lucide-react";
 
 interface User {
@@ -33,8 +38,20 @@ interface User {
   createdAt: string;
   plainPassword?: string;
   colleges?: {
-    city?: {
+    id: string;
+    name: string;
+    slug?: string;
+    collegeType?: string;
+    status?: string;
+    city?: { name: string };
+    country?: { name: string };
+  }[];
+  shortlists?: {
+    college?: {
+      id: string;
       name: string;
+      city?: { name: string };
+      country?: { name: string };
     };
   }[];
   collegeProfile?: {
@@ -58,6 +75,9 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [pendingRoleFilter, setPendingRoleFilter] = useState<"ALL" | "USER" | "AGENT" | "COLLEGE_ADMIN" | "ADMIN">("ALL");
+  const [approvedRoleFilter, setApprovedRoleFilter] = useState<"ALL" | "USER" | "AGENT" | "COLLEGE_ADMIN" | "ADMIN">("ALL");
+  const [suspendedRoleFilter, setSuspendedRoleFilter] = useState<"ALL" | "USER" | "AGENT" | "COLLEGE_ADMIN" | "ADMIN">("ALL");
 
   // Modals
   const [viewingUser, setViewingUser] = useState<User | null>(null);
@@ -215,8 +235,46 @@ export default function AdminUsersPage() {
   );
 
   const pendingUsers = filtered.filter(u => !u.isApproved && !u.isSuspended);
+  const pendingStudentCount = pendingUsers.filter(u => u.role === "USER").length;
+  const pendingAdvisorCount = pendingUsers.filter(u => u.role === "AGENT").length;
+  const pendingCollegeAdminCount = pendingUsers.filter(u => u.role === "COLLEGE_ADMIN" || u.role === "OWNER").length;
+  const pendingAdminCount = pendingUsers.filter(u => u.role === "ADMIN").length;
+
+  const displayedPendingUsers = pendingUsers.filter(u => {
+    if (pendingRoleFilter === "USER") return u.role === "USER";
+    if (pendingRoleFilter === "AGENT") return u.role === "AGENT";
+    if (pendingRoleFilter === "COLLEGE_ADMIN") return u.role === "COLLEGE_ADMIN" || u.role === "OWNER";
+    if (pendingRoleFilter === "ADMIN") return u.role === "ADMIN";
+    return true;
+  });
+
   const approvedUsers = filtered.filter(u => u.isApproved && !u.isSuspended);
+  const approvedStudentCount = approvedUsers.filter(u => u.role === "USER").length;
+  const approvedAdvisorCount = approvedUsers.filter(u => u.role === "AGENT").length;
+  const approvedCollegeAdminCount = approvedUsers.filter(u => u.role === "COLLEGE_ADMIN" || u.role === "OWNER").length;
+  const approvedAdminCount = approvedUsers.filter(u => u.role === "ADMIN").length;
+
+  const displayedApprovedUsers = approvedUsers.filter(u => {
+    if (approvedRoleFilter === "USER") return u.role === "USER";
+    if (approvedRoleFilter === "AGENT") return u.role === "AGENT";
+    if (approvedRoleFilter === "COLLEGE_ADMIN") return u.role === "COLLEGE_ADMIN" || u.role === "OWNER";
+    if (approvedRoleFilter === "ADMIN") return u.role === "ADMIN";
+    return true;
+  });
+
   const suspendedUsers = filtered.filter(u => u.isSuspended);
+  const suspendedStudentCount = suspendedUsers.filter(u => u.role === "USER").length;
+  const suspendedAdvisorCount = suspendedUsers.filter(u => u.role === "AGENT").length;
+  const suspendedCollegeAdminCount = suspendedUsers.filter(u => u.role === "COLLEGE_ADMIN" || u.role === "OWNER").length;
+  const suspendedAdminCount = suspendedUsers.filter(u => u.role === "ADMIN").length;
+
+  const displayedSuspendedUsers = suspendedUsers.filter(u => {
+    if (suspendedRoleFilter === "USER") return u.role === "USER";
+    if (suspendedRoleFilter === "AGENT") return u.role === "AGENT";
+    if (suspendedRoleFilter === "COLLEGE_ADMIN") return u.role === "COLLEGE_ADMIN" || u.role === "OWNER";
+    if (suspendedRoleFilter === "ADMIN") return u.role === "ADMIN";
+    return true;
+  });
 
   if (loading) {
     return (
@@ -363,9 +421,99 @@ export default function AdminUsersPage() {
 
       {pendingUsers.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-serif text-base text-primary font-bold flex items-center gap-2 border-b border-slate-200 pb-2">
-            <ShieldAlert className="w-5 h-5 text-red-500" /> Pending Approval ({pendingUsers.length})
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+            <button
+              onClick={() => setPendingRoleFilter("ALL")}
+              className="font-serif text-base text-primary font-bold flex items-center gap-2 hover:opacity-80 transition cursor-pointer text-left"
+              title="Click to show all pending users"
+            >
+              <ShieldAlert className="w-5 h-5 text-red-500" /> Pending Approval ({pendingUsers.length})
+            </button>
+
+            {/* Clickable Role Filter Badges on Right Side */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+              <button
+                onClick={() => setPendingRoleFilter(prev => prev === "USER" ? "ALL" : "USER")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  pendingRoleFilter === "USER"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                }`}
+                title="Filter pending students"
+              >
+                <span className="flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Students</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  pendingRoleFilter === "USER" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-slate-200 text-slate-700"
+                }`}>
+                  {pendingStudentCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setPendingRoleFilter(prev => prev === "AGENT" ? "ALL" : "AGENT")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  pendingRoleFilter === "AGENT"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-[#FFFBEB] text-amber-800 hover:bg-amber-100/70 border border-amber-200/80"
+                }`}
+                title="Filter pending advisors"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Advisors</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  pendingRoleFilter === "AGENT" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-amber-200/80 text-amber-900"
+                }`}>
+                  {pendingAdvisorCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setPendingRoleFilter(prev => prev === "COLLEGE_ADMIN" ? "ALL" : "COLLEGE_ADMIN")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  pendingRoleFilter === "COLLEGE_ADMIN"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-blue-50/80 text-blue-800 hover:bg-blue-100/70 border border-blue-200/80"
+                }`}
+                title="Filter pending college admins"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-blue-600" />
+                  <span>College Admins</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  pendingRoleFilter === "COLLEGE_ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-blue-200/80 text-blue-900"
+                }`}>
+                  {pendingCollegeAdminCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setPendingRoleFilter(prev => prev === "ADMIN" ? "ALL" : "ADMIN")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  pendingRoleFilter === "ADMIN"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-purple-50/80 text-purple-800 hover:bg-purple-100/70 border border-purple-200/80"
+                }`}
+                title="Filter pending platform admins"
+              >
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Admins</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  pendingRoleFilter === "ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-purple-200/80 text-purple-900"
+                }`}>
+                  {pendingAdminCount}
+                </span>
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-xs">
             <table className="w-full border-collapse text-xs text-left min-w-[700px]">
               <thead>
@@ -379,7 +527,15 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {pendingUsers.map(renderUserRow)}
+                {displayedPendingUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-400 font-mono text-xs">
+                      No pending users found for this role filter.
+                    </td>
+                  </tr>
+                ) : (
+                  displayedPendingUsers.map(renderUserRow)
+                )}
               </tbody>
             </table>
           </div>
@@ -387,9 +543,99 @@ export default function AdminUsersPage() {
       )}
 
       <div className="space-y-3">
-        <h3 className="font-serif text-base text-primary font-bold flex items-center gap-2 border-b border-slate-200 pb-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" /> Approved Users ({approvedUsers.length})
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+          <button
+            onClick={() => setApprovedRoleFilter("ALL")}
+            className="font-serif text-base text-primary font-bold flex items-center gap-2 hover:opacity-80 transition cursor-pointer text-left"
+            title="Click to show all approved users"
+          >
+            <ShieldCheck className="w-5 h-5 text-emerald-600" /> Approved Users ({approvedUsers.length})
+          </button>
+
+          {/* Clickable Role Filter Badges on Right Side */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <button
+              onClick={() => setApprovedRoleFilter(prev => prev === "USER" ? "ALL" : "USER")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                approvedRoleFilter === "USER"
+                  ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+              }`}
+              title="Filter approved students"
+            >
+              <span className="flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-[#D4AF37]" />
+                <span>Students</span>
+              </span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                approvedRoleFilter === "USER" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-slate-200 text-slate-700"
+              }`}>
+                {approvedStudentCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setApprovedRoleFilter(prev => prev === "AGENT" ? "ALL" : "AGENT")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                approvedRoleFilter === "AGENT"
+                  ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                  : "bg-[#FFFBEB] text-amber-800 hover:bg-amber-100/70 border border-amber-200/80"
+              }`}
+              title="Filter approved advisors"
+            >
+              <span className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-amber-600" />
+                <span>Advisors</span>
+              </span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                approvedRoleFilter === "AGENT" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-amber-200/80 text-amber-900"
+              }`}>
+                {approvedAdvisorCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setApprovedRoleFilter(prev => prev === "COLLEGE_ADMIN" ? "ALL" : "COLLEGE_ADMIN")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                approvedRoleFilter === "COLLEGE_ADMIN"
+                  ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                  : "bg-blue-50/80 text-blue-800 hover:bg-blue-100/70 border border-blue-200/80"
+              }`}
+              title="Filter approved college admins"
+            >
+              <span className="flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-blue-600" />
+                <span>College Admins</span>
+              </span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                approvedRoleFilter === "COLLEGE_ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-blue-200/80 text-blue-900"
+              }`}>
+                {approvedCollegeAdminCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setApprovedRoleFilter(prev => prev === "ADMIN" ? "ALL" : "ADMIN")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                approvedRoleFilter === "ADMIN"
+                  ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                  : "bg-purple-50/80 text-purple-800 hover:bg-purple-100/70 border border-purple-200/80"
+              }`}
+              title="Filter platform admins"
+            >
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                <span>Admins</span>
+              </span>
+              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                approvedRoleFilter === "ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-purple-200/80 text-purple-900"
+              }`}>
+                {approvedAdminCount}
+              </span>
+            </button>
+          </div>
+        </div>
+
         <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-xs">
           <table className="w-full border-collapse text-xs text-left min-w-[700px]">
             <thead>
@@ -403,17 +649,115 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {approvedUsers.map(renderUserRow)}
+              {displayedApprovedUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-slate-400 font-mono text-xs">
+                    No approved users found for this role filter.
+                  </td>
+                </tr>
+              ) : (
+                displayedApprovedUsers.map(renderUserRow)
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
       {suspendedUsers.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="font-serif text-base text-primary font-bold flex items-center gap-2 border-b border-slate-200 pb-2 pt-4">
-            <UserX className="w-5 h-5 text-amber-600" /> Suspended Accounts ({suspendedUsers.length})
-          </h3>
+        <div className="space-y-3 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+            <button
+              onClick={() => setSuspendedRoleFilter("ALL")}
+              className="font-serif text-base text-primary font-bold flex items-center gap-2 hover:opacity-80 transition cursor-pointer text-left"
+              title="Click to show all suspended accounts"
+            >
+              <UserX className="w-5 h-5 text-amber-600" /> Suspended Accounts ({suspendedUsers.length})
+            </button>
+
+            {/* Clickable Role Filter Badges on Right Side */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+              <button
+                onClick={() => setSuspendedRoleFilter(prev => prev === "USER" ? "ALL" : "USER")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  suspendedRoleFilter === "USER"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
+                }`}
+                title="Filter suspended students"
+              >
+                <span className="flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#D4AF37]" />
+                  <span>Students</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  suspendedRoleFilter === "USER" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-slate-200 text-slate-700"
+                }`}>
+                  {suspendedStudentCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setSuspendedRoleFilter(prev => prev === "AGENT" ? "ALL" : "AGENT")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  suspendedRoleFilter === "AGENT"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-[#FFFBEB] text-amber-800 hover:bg-amber-100/70 border border-amber-200/80"
+                }`}
+                title="Filter suspended advisors"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Advisors</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  suspendedRoleFilter === "AGENT" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-amber-200/80 text-amber-900"
+                }`}>
+                  {suspendedAdvisorCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setSuspendedRoleFilter(prev => prev === "COLLEGE_ADMIN" ? "ALL" : "COLLEGE_ADMIN")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  suspendedRoleFilter === "COLLEGE_ADMIN"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-blue-50/80 text-blue-800 hover:bg-blue-100/70 border border-blue-200/80"
+                }`}
+                title="Filter suspended college admins"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Building className="w-3.5 h-3.5 text-blue-600" />
+                  <span>College Admins</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  suspendedRoleFilter === "COLLEGE_ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-blue-200/80 text-blue-900"
+                }`}>
+                  {suspendedCollegeAdminCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => setSuspendedRoleFilter(prev => prev === "ADMIN" ? "ALL" : "ADMIN")}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                  suspendedRoleFilter === "ADMIN"
+                    ? "bg-[#0F172A] text-white shadow-xs ring-2 ring-[#D4AF37]/40"
+                    : "bg-purple-50/80 text-purple-800 hover:bg-purple-100/70 border border-purple-200/80"
+                }`}
+                title="Filter suspended platform admins"
+              >
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Admins</span>
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  suspendedRoleFilter === "ADMIN" ? "bg-[#D4AF37] text-[#0F172A]" : "bg-purple-200/80 text-purple-900"
+                }`}>
+                  {suspendedAdminCount}
+                </span>
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-xs">
             <table className="w-full border-collapse text-xs text-left min-w-[700px]">
               <thead>
@@ -427,7 +771,15 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {suspendedUsers.map(renderUserRow)}
+                {displayedSuspendedUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-6 text-center text-slate-400 font-mono text-xs">
+                      No suspended accounts found for this role filter.
+                    </td>
+                  </tr>
+                ) : (
+                  displayedSuspendedUsers.map(renderUserRow)
+                )}
               </tbody>
             </table>
           </div>
@@ -507,6 +859,95 @@ export default function AdminUsersPage() {
                   {new Date(viewingUser.createdAt).toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
                 </p>
               </div>
+
+              {/* Student Shortlisted Colleges vs Admin Colleges Added Section */}
+              {viewingUser.role === "USER" ? (
+                <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 col-span-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-mono uppercase font-bold text-slate-400 flex items-center gap-1.5">
+                      <Bookmark className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Shortlisted Colleges</span>
+                    </p>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-[#D4AF37] border border-amber-200/60">
+                      {(viewingUser.shortlists || []).length} Saved
+                    </span>
+                  </div>
+
+                  {viewingUser.shortlists && viewingUser.shortlists.length > 0 ? (
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto pt-1 pr-1 custom-scrollbar">
+                      {viewingUser.shortlists.map((s, idx) => (
+                        s.college && (
+                          <div key={s.college.id || `shortlist-${idx}`} className="p-2 bg-white rounded-xl border border-slate-200/70 flex items-center justify-between hover:border-[#D4AF37] transition">
+                            <div>
+                              <p className="font-bold text-[#0F172A] text-xs leading-tight">{s.college.name}</p>
+                              <p className="text-[10px] text-slate-400 font-medium">
+                                {s.college.city?.name || "Global"}{s.college.country?.name ? `, ${s.college.country.name}` : ""}
+                              </p>
+                            </div>
+                            <Link
+                              href={`/colleges/${s.college.id}`}
+                              target="_blank"
+                              className="p-1 text-slate-400 hover:text-[#D4AF37] transition flex items-center gap-1 text-[10px] font-bold"
+                              title="View College Page"
+                            >
+                              <span>View</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </Link>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic py-1 font-mono">No colleges shortlisted by this student yet.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 col-span-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-mono uppercase font-bold text-slate-400 flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>Colleges Added / Managed</span>
+                    </p>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 text-[#D4AF37] border border-amber-200/60">
+                      {(viewingUser.colleges || []).length} Colleges
+                    </span>
+                  </div>
+
+                  {viewingUser.colleges && viewingUser.colleges.length > 0 ? (
+                    <div className="space-y-1.5 max-h-36 overflow-y-auto pt-1 pr-1 custom-scrollbar">
+                      {viewingUser.colleges.map((c) => (
+                        <div key={c.id} className="p-2 bg-white rounded-xl border border-slate-200/70 flex items-center justify-between hover:border-[#D4AF37] transition">
+                          <div>
+                            <p className="font-bold text-[#0F172A] text-xs leading-tight">{c.name}</p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              {c.city?.name || "Global"}{c.country?.name ? `, ${c.country.name}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
+                              c.status === "ACTIVE" 
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}>
+                              {c.status || "ACTIVE"}
+                            </span>
+                            <Link
+                              href={`/colleges/${c.id}`}
+                              target="_blank"
+                              className="p-1 text-slate-400 hover:text-[#D4AF37] transition"
+                              title="View College Page"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic py-1 font-mono">No colleges added or managed by this user yet.</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-2">

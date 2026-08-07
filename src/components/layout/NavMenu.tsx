@@ -199,7 +199,28 @@ export default function NavMenu() {
   const [activeProgramme, setActiveProgramme] = useState<string>("Undergraduate");
   const [activeStreamParam, setActiveStreamParam] = useState<string>("ENGINEERING");
   const [branchSearchQuery, setBranchSearchQuery] = useState<string>("");
+  const [hiddenStreamParams, setHiddenStreamParams] = useState<string[]>([]);
   const pathname = usePathname();
+
+  useEffect(() => {
+    async function loadCourseConfig() {
+      try {
+        const res = await fetch("/api/admin/courses");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.streams)) {
+            const hidden = data.streams
+              .filter((s: any) => s.isVisible === false)
+              .map((s: any) => s.streamParam);
+            setHiddenStreamParams(hidden);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    loadCourseConfig();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -212,7 +233,14 @@ export default function NavMenu() {
     }
   }, [pathname]);
 
-  const current = PROGRAMMES.find(p => p.name === activeProgramme);
+  const currentRaw = PROGRAMMES.find(p => p.name === activeProgramme);
+  const current = useMemo(() => {
+    if (!currentRaw) return undefined;
+    return {
+      ...currentRaw,
+      streams: currentRaw.streams.filter(st => !hiddenStreamParams.includes(st.streamParam))
+    };
+  }, [currentRaw, hiddenStreamParams]);
 
   // Compute filtered branches
   const filteredBranches = useMemo(() => {

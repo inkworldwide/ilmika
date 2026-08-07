@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Globe, ShieldCheck, Star, Heart, Share2, BookOpen, GraduationCap,
   Award, Users, Calendar, Phone, Mail, CheckCircle2, MessageSquare, Send,
-  Building, Check, ArrowRight, X, Video, UserCheck, Sparkles, DollarSign
+  Building, Check, ArrowRight, X, Video, UserCheck, Sparkles, DollarSign, ExternalLink
 } from "lucide-react";
 
 interface CollegeDetailClientProps {
@@ -196,10 +196,37 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
               )}
             </div>
             <h1 className="font-serif text-2xl md:text-4xl font-bold text-primary">{college.name}</h1>
-            <p className="flex items-center gap-1.5 text-sm text-slate-500 font-medium">
-              <MapPin className="w-4 h-4 text-accent" />
-              <span>{flag} {college.address}, {college.city.name}, {college.country.name}</span>
-            </p>
+            
+            {/* Clickable Google Maps Location Link */}
+            {(() => {
+              const fullLoc = `${college.name}, ${college.address}, ${college.city.name}, ${college.country.name}`;
+              const mapsSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullLoc)}`;
+              
+              // Clean up duplicate strings if address already includes city/country
+              let formattedAddr = college.address;
+              if (!formattedAddr.toLowerCase().includes(college.city.name.toLowerCase())) {
+                formattedAddr += `, ${college.city.name}`;
+              }
+              if (!formattedAddr.toLowerCase().includes(college.country.name.toLowerCase())) {
+                formattedAddr += `, ${college.country.name}`;
+              }
+
+              return (
+                <a
+                  href={mapsSearchUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 hover:text-accent font-medium group transition duration-200 cursor-pointer pt-0.5"
+                  title="Click to view campus location & get directions on Google Maps"
+                >
+                  <MapPin className="w-4 h-4 text-accent group-hover:scale-110 transition duration-200 shrink-0" />
+                  <span className="group-hover:underline">
+                    {flag} {formattedAddr}
+                  </span>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-accent shrink-0 ml-0.5" />
+                </a>
+              );
+            })()}
           </div>
 
           <div className="flex items-center gap-3">
@@ -295,23 +322,46 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
                 </div>
               </div>
 
-              {/* Accreditations */}
-              {college.accreditations && college.accreditations.length > 0 && (
-                <div>
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 mb-3 font-mono">Accreditations &amp; Ratings</h4>
-                  <div className="flex flex-wrap gap-3">
-                    {college.accreditations.map((acc: any) => (
-                      <div key={acc.id} className="bg-paper border border-line rounded-xl px-4 py-2 flex items-center gap-2">
-                        <Award className="w-4 h-4 text-accent" />
-                        <div>
-                          <p className="text-xs font-bold text-primary">{acc.type}</p>
-                          {acc.grade && <p className="text-[10px] text-slate-500">Grade: {acc.grade}</p>}
-                        </div>
+              {/* Campus Location & Navigation Map */}
+              {(() => {
+                const mapQuery = `${college.name}, ${college.address}, ${college.city.name}, ${college.country.name}`;
+                const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+                const mapsDirectUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+
+                return (
+                  <div className="pt-2 space-y-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 text-accent" /> Campus Location &amp; Navigation
+                        </h4>
+                        <p className="text-xs text-slate-600 font-medium mt-0.5">
+                          {college.address}, {college.city.name}, {college.country.name}
+                        </p>
                       </div>
-                    ))}
+                      <a
+                        href={mapsDirectUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-accent hover:bg-accent-hover text-primary font-bold text-xs px-4 py-2 rounded-xl transition inline-flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <span>Open Directions in Maps</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+
+                    <div className="w-full h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-inner bg-slate-100 relative group">
+                      <iframe
+                        title={`${college.name} Location Map`}
+                        src={mapEmbedUrl}
+                        className="w-full h-full border-0"
+                        loading="lazy"
+                        allowFullScreen
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           )}
 
@@ -382,10 +432,43 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
           {/* TAB 3: ADMISSIONS */}
           {activeTab === "admissions" && (
             <div className="bg-white border border-line rounded-2xl p-6 space-y-6">
-              <h3 className="font-serif text-lg font-bold text-primary">Admission Process</h3>
+              <h3 className="font-serif text-lg font-bold text-primary">Admission Process &amp; Eligibility Facilities</h3>
               <p className="text-sm text-slate-600 leading-relaxed">
                 Admissions to {college.name} are offered based on merit, entrance exam performance, and eligibility criteria. Students can apply online through Ink EduVerse or submit an inquiry directly to the admissions team.
               </p>
+
+              {/* SCHOLARSHIP FACILITY BANNER */}
+              {college.hasScholarship && (
+                <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm font-serif">
+                    <span className="text-lg">🎓</span>
+                    <span>Scholarship &amp; Financial Aid Facility</span>
+                    <span className="text-[10px] uppercase font-mono font-bold bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded ml-auto">
+                      Financial Aid Available
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    {college.scholarshipDetails || `${college.name} offers merit-based and need-based tuition scholarships for qualifying domestic and international applicants.`}
+                  </p>
+                </div>
+              )}
+
+              {/* ENTRANCE EXAMS & CUTOFFS BANNER */}
+              {college.hasEntranceExam && (
+                <div className="bg-sky-50/80 border border-sky-200 rounded-2xl p-5 space-y-2">
+                  <div className="flex items-center gap-2 text-sky-900 font-bold text-sm font-serif">
+                    <span className="text-lg">🎯</span>
+                    <span>Required Entrance Exams &amp; Course Cutoffs</span>
+                    <span className="text-[10px] uppercase font-mono font-bold bg-sky-200/60 text-sky-900 px-2 py-0.5 rounded ml-auto">
+                      Entrance Test Mandatory
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium whitespace-pre-line">
+                    {college.entranceExamDetails || `Admission requires qualifying scores in recognised entrance exams (e.g. JEE, NEET, CAT, SAT, GRE). Refer to individual course requirements.`}
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-4">
                 {[
                   { step: "1", title: "Submit Online Application", desc: "Select your desired course and fill out the direct application form." },

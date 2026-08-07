@@ -32,6 +32,10 @@ export default function AddCollegePage() {
     nirfRanking: "",
     qsRanking: "",
     imageUrl: "",
+    hasScholarship: false,
+    scholarshipDetails: "",
+    hasEntranceExam: false,
+    entranceExamDetails: "",
   });
 
   useEffect(() => {
@@ -79,18 +83,49 @@ export default function AddCollegePage() {
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-5 py-12">
         <div className="bg-white border border-line rounded-3xl p-6 md:p-10 shadow-xs space-y-8">
-          <div>
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
-              Step {step} of 3
-            </span>
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mt-2">
-              {step === 1 && "Basic College Information"}
-              {step === 2 && "Location & Contact Details"}
-              {step === 3 && "Rankings, Media & Review"}
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              List your institution on ILMIKA to reach millions of prospective students worldwide.
-            </p>
+          {/* Step Progress Bar */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2 border-b border-line pb-4">
+              {[
+                { num: 1, label: "Basic Info" },
+                { num: 2, label: "Location & Contact" },
+                { num: 3, label: "Scholarships & Cutoffs" },
+              ].map(s => (
+                <button
+                  key={s.num}
+                  type="button"
+                  onClick={() => setStep(s.num)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                    step === s.num
+                      ? "bg-accent text-primary border-accent shadow-xs"
+                      : step > s.num
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-slate-50 text-slate-400 border-slate-200"
+                  }`}
+                >
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold ${
+                    step === s.num ? "bg-primary text-secondary" : "bg-slate-200 text-slate-600"
+                  }`}>
+                    {s.num}
+                  </span>
+                  <span className="hidden sm:inline">{s.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-accent bg-accent/10 px-3 py-1 rounded-full">
+                Step {step} of 3
+              </span>
+              <h1 className="font-serif text-2xl md:text-3xl font-bold text-primary mt-2">
+                {step === 1 && "Basic College Information"}
+                {step === 2 && "Location & Contact Details"}
+                {step === 3 && "Rankings, Scholarships & Entrance Exams"}
+              </h1>
+              <p className="text-xs text-slate-500 mt-1">
+                List your institution on ILMIKA to reach millions of prospective students worldwide.
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -293,12 +328,100 @@ export default function AddCollegePage() {
                   <p className="text-[11px] text-slate-400 mt-1">Or leave blank to use a default campus image.</p>
                 </div>
 
+                {/* Scholarship Facility Section */}
+                <div className="bg-amber-50/60 border border-amber-200/80 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-primary flex items-center gap-1.5">
+                        🎓 Scholarships &amp; Financial Aid Facility
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Does your college offer merit or need-based scholarships to admitted students?</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio" name="hasScholarship"
+                          checked={formData.hasScholarship === true}
+                          onChange={() => setFormData({ ...formData, hasScholarship: true })}
+                          className="accent-accent"
+                        /> Yes
+                      </label>
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio" name="hasScholarship"
+                          checked={formData.hasScholarship === false}
+                          onChange={() => setFormData({ ...formData, hasScholarship: false, scholarshipDetails: "" })}
+                          className="accent-accent"
+                        /> No
+                      </label>
+                    </div>
+                  </div>
+
+                  {formData.hasScholarship && (
+                    <div className="pt-2">
+                      <label className="text-xs font-bold text-slate-700 block mb-1">Scholarship Eligibility Criteria &amp; Waiver Details *</label>
+                      <textarea
+                        rows={3}
+                        value={formData.scholarshipDetails}
+                        onChange={e => setFormData({ ...formData, scholarshipDetails: e.target.value })}
+                        placeholder="Provide details on eligibility (e.g. 50% tuition waiver for >90% marks in 10+2, Merit-cum-Means financial aid available up to ₹1,50,000/yr)..."
+                        className="w-full bg-white border border-amber-200 rounded-xl p-3 text-xs focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Entrance Exam & Cutoffs Section */}
+                <div className="bg-sky-50/60 border border-sky-200/80 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-bold text-sm text-primary flex items-center gap-1.5">
+                        🎯 Entrance Exams &amp; Cutoff Requirements
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Does your college require entrance exams or specific cut-off ranks for courses?</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio" name="hasEntranceExam"
+                          checked={formData.hasEntranceExam === true}
+                          onChange={() => setFormData({ ...formData, hasEntranceExam: true })}
+                          className="accent-accent"
+                        /> Yes
+                      </label>
+                      <label className="flex items-center gap-1 text-xs font-bold text-slate-700 cursor-pointer">
+                        <input
+                          type="radio" name="hasEntranceExam"
+                          checked={formData.hasEntranceExam === false}
+                          onChange={() => setFormData({ ...formData, hasEntranceExam: false, entranceExamDetails: "" })}
+                          className="accent-accent"
+                        /> No
+                      </label>
+                    </div>
+                  </div>
+
+                  {formData.hasEntranceExam && (
+                    <div className="pt-2">
+                      <label className="text-xs font-bold text-slate-700 block mb-1">Accepted Exams, Target Courses &amp; Cutoff Marks/Ranks *</label>
+                      <textarea
+                        rows={3}
+                        value={formData.entranceExamDetails}
+                        onChange={e => setFormData({ ...formData, entranceExamDetails: e.target.value })}
+                        placeholder="Provide details per course (e.g. JEE Advanced (AIR 1 - 250 for B.Tech CS), CAT (Min 95 %ile for MBA), NEET UG (650+ marks for MBBS))..."
+                        className="w-full bg-white border border-sky-200 rounded-xl p-3 text-xs focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 {/* Summary Box */}
                 <div className="bg-paper border border-line rounded-2xl p-5 space-y-2 text-xs text-slate-600">
                   <p className="font-bold text-primary text-sm">Listing Review Summary</p>
                   <p><strong>Name:</strong> {formData.name || "N/A"}</p>
                   <p><strong>City:</strong> {formData.cityName || "N/A"}</p>
                   <p><strong>Type:</strong> {formData.collegeType}</p>
+                  <p><strong>Scholarships Offered:</strong> {formData.hasScholarship ? "Yes" : "No"}</p>
+                  <p><strong>Entrance Exams &amp; Cutoffs:</strong> {formData.hasEntranceExam ? "Yes" : "No"}</p>
                 </div>
               </div>
             )}

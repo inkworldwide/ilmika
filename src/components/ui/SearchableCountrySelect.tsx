@@ -56,7 +56,8 @@ export default function SearchableCountrySelect({
   }, [isOpen]);
 
   const selectedCountryObj = useMemo(() => {
-    if (!value || value === "ANY") return { code: "ANY", name: "🌍 Any / Open to Suggestions" };
+    if (value === "ANY") return { code: "ANY", name: "🌍 All Countries" };
+    if (!value) return null;
     return effectiveCountries.find((c) => c.code.toLowerCase() === value.toLowerCase() || c.name.toLowerCase() === value.toLowerCase());
   }, [effectiveCountries, value]);
 
@@ -117,13 +118,13 @@ export default function SearchableCountrySelect({
           <div className="overflow-y-auto flex-1 p-1 max-h-60 space-y-0.5 custom-scrollbar">
             <button
               type="button"
-              onClick={() => handleSelect("ANY")}
+              onClick={() => handleSelect("")}
               className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition cursor-pointer ${
-                !value || value === "ANY" ? "bg-accent/15 text-accent font-bold" : "text-slate-700 hover:bg-slate-50"
+                !value || value === "" ? "bg-accent/15 text-accent font-bold" : "text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <span>🌍 Any / Open to Suggestions</span>
-              {(!value || value === "ANY") && <Check className="w-3.5 h-3.5 text-accent shrink-0" />}
+              <span>🌍 All Countries</span>
+              {(!value || value === "") && <Check className="w-3.5 h-3.5 text-accent shrink-0" />}
             </button>
 
             {filteredCountries.length === 0 ? (

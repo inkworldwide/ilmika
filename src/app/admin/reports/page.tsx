@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AlertTriangle, Trash2, ShieldAlert, Check, Eye } from "lucide-react";
+import { AlertTriangle, Trash2, ShieldAlert, Check, Eye, Flag } from "lucide-react";
 import Link from "next/link";
 
 interface Report {
@@ -73,7 +73,7 @@ export default function AdminReportsPage() {
     <div className="space-y-6 text-left">
       <div>
         <h2 className="font-serif text-xl sm:text-2xl text-primary font-semibold flex items-center gap-2">
-          <ShieldAlert className="w-6 h-6 text-red-500" /> College Reports
+          <Flag className="w-6 h-6 text-[#D4AF37]" /> Flagged Colleges
         </h2>
         <p className="text-xs text-slate-500 mt-1">Review moderation flags filed regarding college listings or inaccurate information.</p>
       </div>

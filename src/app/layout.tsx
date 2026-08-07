@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import GlobalChatBot from "@/components/chat/GlobalChatBot";
 
 export const metadata: Metadata = {
   title: {
@@ -60,6 +61,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-secondary text-primary">
         {children}
+        <GlobalChatBot />
       </body>
     </html>
   );

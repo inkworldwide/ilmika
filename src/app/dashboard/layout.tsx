@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "My Shortlist", path: "/dashboard/saved", icon: Heart, roles: ["USER"] },
     
     // College Admin Specific
-    { name: "My Colleges", path: "/colleges/add", icon: GraduationCap, roles: ["COLLEGE_ADMIN", "AGENT", "ADMIN"] },
+    { name: "My Colleges", path: "/dashboard/colleges", icon: GraduationCap, roles: ["COLLEGE_ADMIN", "AGENT", "ADMIN"] },
     
     // Joint items
     { name: "Applications & Enquiries", path: "/dashboard/enquiries", icon: Mail, roles: ["USER", "COLLEGE_ADMIN", "AGENT", "ADMIN"] },

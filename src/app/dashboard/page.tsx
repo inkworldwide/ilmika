@@ -188,7 +188,7 @@ export default function DashboardOverview() {
               </Link>
 
               <Link
-                href="/colleges/add"
+                href="/dashboard/colleges"
                 className="flex items-center justify-between border border-line hover:border-accent p-4.5 rounded-2xl transition bg-white group"
               >
                 <div className="flex items-center gap-3">

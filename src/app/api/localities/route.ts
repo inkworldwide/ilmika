@@ -6,11 +6,11 @@ export async function GET(req: Request) {
     const countries = await prisma.country.findMany({
       orderBy: { name: "asc" },
     });
-    return NextResponse.json({ localities: countries, countries });
+    return NextResponse.json({ countries });
   } catch (error) {
-    console.error("Fetch localities API error:", error);
+    console.error("Fetch countries API error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch localities" },
+      { error: "Failed to fetch countries" },
       { status: 500 }
     );
   }

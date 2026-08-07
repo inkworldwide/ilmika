@@ -42,12 +42,20 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "College ID is required" }, { status: 400 });
     }
 
-    if (action === "archive") {
+    if (action === "archive" || action === "delete") {
       const updated = await prisma.college.update({
         where: { id: collegeId },
         data: { status: "ARCHIVED" },
       });
       return NextResponse.json({ message: "College archived successfully", college: updated });
+    }
+
+    if (action === "restore") {
+      const updated = await prisma.college.update({
+        where: { id: collegeId },
+        data: { status: "ACTIVE" },
+      });
+      return NextResponse.json({ message: "College restored successfully", college: updated });
     }
 
     if (action === "toggleFeatured") {
@@ -64,5 +72,40 @@ export async function PUT(req: Request) {
   } catch (error) {
     console.error("Admin college update error:", error);
     return NextResponse.json({ error: "Failed to update college" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const user = await getAuthUser(req);
+    if (!user || user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const collegeId = searchParams.get("collegeId");
+    const permanent = searchParams.get("permanent") === "true";
+
+    if (!collegeId) {
+      return NextResponse.json({ error: "College ID required" }, { status: 400 });
+    }
+
+    if (permanent) {
+      await prisma.college.delete({
+        where: { id: collegeId },
+      });
+      return NextResponse.json({ message: "College permanently deleted" });
+    }
+
+    // Soft delete by setting ARCHIVED status so it can be restored
+    const updated = await prisma.college.update({
+      where: { id: collegeId },
+      data: { status: "ARCHIVED" },
+    });
+
+    return NextResponse.json({ message: "College deleted successfully", college: updated });
+  } catch (error) {
+    console.error("Admin college delete error:", error);
+    return NextResponse.json({ error: "Failed to delete college" }, { status: 500 });
   }
 }

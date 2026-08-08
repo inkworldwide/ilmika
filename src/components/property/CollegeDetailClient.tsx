@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Globe, ShieldCheck, Star, Heart, Share2, BookOpen, GraduationCap,
   Award, Users, Calendar, Phone, Mail, CheckCircle2, MessageSquare, Send,
-  Building, Check, ArrowRight, X, Video, UserCheck, Sparkles, DollarSign, ExternalLink
+  Building, Check, ArrowRight, X, Video, UserCheck, Sparkles, DollarSign, ExternalLink, Lock
 } from "lucide-react";
 
 interface CollegeDetailClientProps {
@@ -28,15 +28,17 @@ function formatExamCutoff(examName: string, eligibility: string, collegeName: st
     if (match && match[1]) return `${examName} Band ${match[1]}+`;
   }
   if (normEligibility.includes("toefl")) {
-    const match = eligibility.match(/toefl\s*([0-9\.]+)/i);
+    const match = eligibility.match(/toefl\s*([0-9]+)/i);
     if (match && match[1]) return `${examName} ${match[1]}+ Score`;
   }
   if (normEligibility.includes("sat")) {
-    const match = eligibility.match(/sat\s*([0-9\.]+)/i);
+    const match = eligibility.match(/sat\s*([0-9]+)/i);
     if (match && match[1]) return `${examName} ${match[1]}+ Score`;
   }
+  
+  // Custom cutoff patterns
   if (normEligibility.includes("jee")) {
-    if (normCollege.includes("bombay")) return `${examName} (AIR 1 - 65)`;
+    if (normCollege.includes("iit")) return `${examName} (AIR 1 - 2,500)`;
     if (normCollege.includes("delhi")) return `${examName} (AIR 1 - 400)`;
     return `${examName} (Qualifying AIR < 15,000)`;
   }
@@ -81,6 +83,14 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
   const [isShortlisted, setIsShortlisted] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
 
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Login Required Modal
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [loginReason, setLoginReason] = useState("");
+
   // Modals
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
@@ -99,6 +109,47 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
   const [counsellingForm, setCounsellingForm] = useState({ date: "", timeSlot: "10:00 AM", type: "VIDEO_CALL", notes: "" });
   const [counsellingSubmitting, setCounsellingSubmitting] = useState(false);
   const [counsellingSuccess, setCounsellingSuccess] = useState(false);
+
+  // Fetch logged-in user on mount
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            setCurrentUser(data.user);
+            setApplyForm(prev => ({
+              ...prev,
+              name: data.user.name || "",
+              email: data.user.email || "",
+              phone: data.user.phone || "",
+            }));
+            setEnquiryForm(prev => ({
+              ...prev,
+              name: data.user.name || "",
+              email: data.user.email || "",
+              phone: data.user.phone || "",
+            }));
+          }
+        }
+      } catch (e) {
+        console.error("Auth check error:", e);
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+    checkAuth();
+  }, []);
+
+  const requireAuthForAction = (reason: string, actionCallback: () => void) => {
+    if (currentUser) {
+      actionCallback();
+    } else {
+      setLoginReason(reason);
+      setLoginModalOpen(true);
+    }
+  };
 
   const flag = COUNTRY_FLAGS[college.country.code] || college.country.flag || "🏫";
   const images = college.images && college.images.length > 0
@@ -231,8 +282,8 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setIsShortlisted(!isShortlisted)}
-              className={`p-3 rounded-2xl border transition flex items-center gap-2 font-bold text-xs ${
+              onClick={() => requireAuthForAction("save colleges to your shortlist", () => setIsShortlisted(!isShortlisted))}
+              className={`p-3 rounded-2xl border transition flex items-center gap-2 font-bold text-xs cursor-pointer ${
                 isShortlisted ? "bg-red-50 text-red-600 border-red-200" : "bg-white text-slate-700 border-line hover:bg-paper"
               }`}
             >
@@ -240,8 +291,8 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
               {isShortlisted ? "Shortlisted" : "Shortlist"}
             </button>
             <button
-              onClick={() => setApplyModalOpen(true)}
-              className="bg-accent hover:bg-accent-hover text-primary font-bold px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition shadow-sm"
+              onClick={() => requireAuthForAction("submit your formal application", () => setApplyModalOpen(true))}
+              className="bg-accent hover:bg-accent-hover text-primary font-bold px-6 py-3 rounded-2xl text-xs uppercase tracking-wider transition shadow-sm cursor-pointer"
             >
               Apply Now
             </button>
@@ -251,18 +302,32 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
         {/* Image Gallery */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2 aspect-[16/9] rounded-2xl overflow-hidden bg-slate-100 relative">
-            <img src={images[activeImage]?.url} alt={college.name} className="w-full h-full object-cover" />
+            <img 
+              src={images[activeImage]?.url} 
+              alt={college.name} 
+              className="w-full h-full object-cover" 
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80";
+              }}
+            />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
             {images.slice(0, 3).map((img: any, i: number) => (
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={`aspect-[16/9] rounded-xl overflow-hidden border-2 transition ${
+                className={`aspect-[16/9] rounded-xl overflow-hidden border-2 transition cursor-pointer ${
                   activeImage === i ? "border-accent" : "border-transparent opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={img.url} alt="" className="w-full h-full object-cover" />
+                <img 
+                  src={img.url} 
+                  alt={img.altText || college.name} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1200&q=80";
+                  }}
+                />
               </button>
             ))}
           </div>
@@ -415,10 +480,12 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
                       </span>
                       <button
                         onClick={() => {
-                          setSelectedCourseId(course.id);
-                          setApplyModalOpen(true);
+                          requireAuthForAction("apply for this course", () => {
+                            setSelectedCourseId(course.id);
+                            setApplyModalOpen(true);
+                          });
                         }}
-                        className="bg-primary hover:bg-primary/90 text-secondary text-xs font-bold px-4 py-2 rounded-xl transition"
+                        className="bg-primary hover:bg-primary/90 text-secondary text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer"
                       >
                         Apply for Course
                       </button>
@@ -540,22 +607,22 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
             <h3 className="font-serif text-lg font-bold text-primary border-b border-line pb-3">Take Action</h3>
 
             <button
-              onClick={() => setApplyModalOpen(true)}
-              className="w-full bg-accent hover:bg-accent-hover text-primary font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2"
+              onClick={() => requireAuthForAction("submit your formal application", () => setApplyModalOpen(true))}
+              className="w-full bg-accent hover:bg-accent-hover text-primary font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <GraduationCap className="w-4 h-4" /> Apply Directly
             </button>
 
             <button
               onClick={() => setEnquiryModalOpen(true)}
-              className="w-full bg-primary hover:bg-primary/95 text-secondary font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary/95 text-secondary font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <Send className="w-4 h-4 text-accent" /> Send Enquiry
             </button>
 
             <button
-              onClick={() => setCounsellingModalOpen(true)}
-              className="w-full bg-paper hover:bg-line/40 border border-line text-primary font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2"
+              onClick={() => requireAuthForAction("book a 1-on-1 expert counselling session", () => setCounsellingModalOpen(true))}
+              className="w-full bg-paper hover:bg-line/40 border border-line text-primary font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <Video className="w-4 h-4 text-accent" /> Book Counselling Session
             </button>
@@ -856,6 +923,53 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
                   </button>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+
+        {/* ── MODAL 4: LOGIN REQUIRED PROMPT ── */}
+        {loginModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white border border-line rounded-3xl max-w-md w-full p-6 space-y-6 relative shadow-2xl text-center"
+            >
+              <button onClick={() => setLoginModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-primary cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto shadow-xs">
+                <Lock className="w-8 h-8 text-amber-600" />
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-serif text-xl font-bold text-primary">Account Log In Required</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Please log in or create a student account to {loginReason || "access this feature"}.
+                </p>
+                <div className="pt-1">
+                  <p className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl font-medium inline-block text-left">
+                    💡 <strong>Guest inquiries allowed:</strong> Anyone can send general questions using the <strong>Send Enquiry</strong> button!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Link
+                  href={`/auth/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`}
+                  className="flex-1 bg-primary hover:bg-primary/95 text-secondary font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition text-center shadow-xs cursor-pointer"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href={`/auth/register?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`}
+                  className="flex-1 bg-accent hover:bg-accent-hover text-primary font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition text-center shadow-xs cursor-pointer"
+                >
+                  Sign Up Free
+                </Link>
+              </div>
             </motion.div>
           </div>
         )}

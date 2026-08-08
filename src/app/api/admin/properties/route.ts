@@ -5,18 +5,31 @@ import { getAuthUser } from "@/lib/auth";
 export async function GET(req: Request) {
   try {
     const user = await getAuthUser(req);
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
-    const colleges = await prisma.college.findMany({
-      include: {
-        city: true,
-        country: true,
-        images: { take: 1, orderBy: { sortOrder: "asc" } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    let colleges;
+    if (user.role === "ADMIN") {
+      colleges = await prisma.college.findMany({
+        include: {
+          city: true,
+          country: true,
+          images: { take: 1, orderBy: { sortOrder: "asc" } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } else {
+      colleges = await prisma.college.findMany({
+        where: { ownerId: user.id },
+        include: {
+          city: true,
+          country: true,
+          images: { take: 1, orderBy: { sortOrder: "asc" } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    }
 
     const active = colleges.filter((c) => c.status !== "ARCHIVED");
     const archived = colleges.filter((c) => c.status === "ARCHIVED");
@@ -31,15 +44,25 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   try {
     const user = await getAuthUser(req);
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const body = await req.json();
-    const { collegeId, action, isFeatured } = body;
+    const { collegeId, action } = body;
 
     if (!collegeId) {
       return NextResponse.json({ error: "College ID is required" }, { status: 400 });
+    }
+
+    const col = await prisma.college.findUnique({ where: { id: collegeId } });
+    if (!col) {
+      return NextResponse.json({ error: "College not found" }, { status: 404 });
+    }
+
+    // Permission check: Must be ADMIN or the owner of the college
+    if (user.role !== "ADMIN" && col.ownerId !== user.id) {
+      return NextResponse.json({ error: "Access denied. You do not own this college listing." }, { status: 403 });
     }
 
     if (action === "archive" || action === "delete") {
@@ -59,8 +82,6 @@ export async function PUT(req: Request) {
     }
 
     if (action === "toggleFeatured") {
-      const col = await prisma.college.findUnique({ where: { id: collegeId } });
-      if (!col) return NextResponse.json({ error: "College not found" }, { status: 404 });
       const updated = await prisma.college.update({
         where: { id: collegeId },
         data: { isFeatured: !col.isFeatured },
@@ -78,8 +99,8 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const user = await getAuthUser(req);
-    if (!user || user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -88,6 +109,16 @@ export async function DELETE(req: Request) {
 
     if (!collegeId) {
       return NextResponse.json({ error: "College ID required" }, { status: 400 });
+    }
+
+    const col = await prisma.college.findUnique({ where: { id: collegeId } });
+    if (!col) {
+      return NextResponse.json({ error: "College not found" }, { status: 404 });
+    }
+
+    // Permission check: Must be ADMIN or the owner of the college
+    if (user.role !== "ADMIN" && col.ownerId !== user.id) {
+      return NextResponse.json({ error: "Access denied. You do not own this college listing." }, { status: 403 });
     }
 
     if (permanent) {

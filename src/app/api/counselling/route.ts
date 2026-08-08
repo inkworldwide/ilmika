@@ -5,6 +5,10 @@ import { getAuthUser } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const user = await getAuthUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Please log in to book a counselling session" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { collegeId, date, timeSlot, type, notes } = body;
 
@@ -21,19 +25,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "College not found" }, { status: 404 });
     }
 
-    let studentId = user?.id;
-    if (!studentId) {
-      const dbUser = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: "student@inkeduverse.com" },
-            { role: "USER" },
-          ],
-        },
-        select: { id: true },
-      });
-      studentId = dbUser?.id || college.ownerId;
-    }
+    const studentId = user.id;
 
     const session = await prisma.counsellingSession.create({
       data: {

@@ -27,10 +27,11 @@ const INITIAL_MESSAGES: Message[] = [
 
 const SUGGESTED_PROMPTS = [
   { label: "🎓 Scholarships", query: "How do I search for scholarships and tuition fee waivers?" },
-  { label: "🎯 Entrance Cutoffs", query: "What entrance exams and cut-off scores are required?" },
-  { label: "📝 How to Apply", query: "How do I submit an application to a university?" },
-  { label: "👨‍💼 Book Counselling", query: "How can I book a counselling session with an advisor?" },
-  { label: "🏛 List a College", query: "How can a university administrator list a college?" },
+  { label: "🎯 Entrance Cutoffs", query: "What entrance exams and cut-off scores are required for B.Tech & MBA?" },
+  { label: "🇮🇳 Indian Universities", query: "Show top colleges and admission requirements in India" },
+  { label: "🇺🇸 Study Abroad", query: "How to study in USA or UK with scholarships?" },
+  { label: "📝 How to Apply", query: "How do I submit direct applications on ILMIKA?" },
+  { label: "🏛 List a College", query: "How can university administrators list a campus?" },
 ];
 
 const CuteIlmikaMascot = ({ className = "w-7 h-7" }: { className?: string }) => (
@@ -136,14 +137,34 @@ export default function GlobalChatBot() {
     setMessages(INITIAL_MESSAGES);
   };
 
-  // Helper to parse markdown bold text
+  // Helper to parse markdown bold text and bullet points cleanly
   const renderFormattedText = (rawText: string) => {
-    const parts = rawText.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, idx) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={idx} className="font-bold text-primary">{part.slice(2, -2)}</strong>;
-      }
-      return part;
+    const lines = rawText.split("\n");
+    return lines.map((line, lineIdx) => {
+      const isBullet = line.trim().startsWith("•");
+      const cleanLine = isBullet ? line.trim().substring(1).trim() : line;
+
+      const parts = cleanLine.split(/(\*\*.*?\*\*)/g);
+      const renderedParts = parts.map((part, idx) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return <strong key={idx} className="font-bold text-[#0F172A]">{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      });
+
+      return (
+        <React.Fragment key={lineIdx}>
+          {lineIdx > 0 && <br />}
+          {isBullet ? (
+            <span className="flex items-start gap-1.5 my-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] shrink-0 mt-1.5"></span>
+              <span>{renderedParts}</span>
+            </span>
+          ) : (
+            renderedParts
+          )}
+        </React.Fragment>
+      );
     });
   };
 

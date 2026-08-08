@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Ilmika — One Universe. All Knowledge.",
+    title: "Ilmika — Your Gateway to Global Education.",
     description: "The world's premier platform for discovering and comparing colleges & courses across every country. Search, shortlist, apply, and get counselled.",
     url: "https://ilmika.com",
     siteName: "Ilmika",
@@ -50,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="font-sans h-full antialiased">
+    <html lang="en" className="font-sans h-full antialiased" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -59,7 +59,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="min-h-full flex flex-col bg-secondary text-primary">
+      <body className="min-h-full flex flex-col bg-secondary text-primary" suppressHydrationWarning>
         {children}
         <GlobalChatBot />
       </body>

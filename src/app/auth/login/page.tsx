@@ -56,7 +56,7 @@ function LoginForm() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8 text-center space-y-2">
           <Logo />
-          <p className="text-xs text-slate-400 font-mono">One Universe. All Knowledge.</p>
+          <p className="text-xs text-slate-400 font-mono">Your Gateway to Global Education.</p>
         </div>
 
         <div className="bg-white border border-line rounded-2xl shadow-sm p-8 space-y-6">

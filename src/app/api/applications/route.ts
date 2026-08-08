@@ -5,6 +5,10 @@ import { getAuthUser } from "@/lib/auth";
 export async function POST(req: Request) {
   try {
     const user = await getAuthUser(req);
+    if (!user) {
+      return NextResponse.json({ error: "Please log in to submit a college application" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { collegeId, courseId, name, email, phone, message } = body;
 
@@ -21,20 +25,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "College not found" }, { status: 404 });
     }
 
-    let studentId = user?.id;
-    if (!studentId) {
-      const dbUser = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { email },
-            { email: "student@inkeduverse.com" },
-            { role: "USER" },
-          ],
-        },
-        select: { id: true },
-      });
-      studentId = dbUser?.id || college.ownerId;
-    }
+    const studentId = user.id;
 
     const application = await prisma.application.create({
       data: {

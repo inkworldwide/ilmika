@@ -46,7 +46,7 @@ export default function Footer() {
         <div className="space-y-6">
           <Logo theme="dark" />
           <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed tracking-wide">
-            The world's premier platform for discovering and comparing colleges &amp; courses across every country. One Universe. All Knowledge.
+            The world's premier platform for discovering and comparing colleges &amp; courses across every country. Your Gateway to Global Education.
           </p>
 
           <div className="space-y-3 pt-2">

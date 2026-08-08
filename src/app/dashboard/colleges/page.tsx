@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   GraduationCap, Plus, Edit3, Trash, Eye, 
-  CheckCircle, Clock, AlertTriangle, ShieldCheck, XCircle, MapPin, Award, BookOpen, ExternalLink, X, DollarSign, Sparkles
+  CheckCircle, Clock, AlertTriangle, ShieldCheck, XCircle, MapPin, Award, BookOpen, ExternalLink, X, DollarSign, Sparkles, Archive, RotateCcw, FileText
 } from "lucide-react";
 
 interface CourseItem {
@@ -47,6 +47,7 @@ interface CollegeListing {
 export default function DashboardMyCollegesPage() {
   const [colleges, setColleges] = useState<CollegeListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "ARCHIVED" | "DRAFT">("ALL");
 
   // Manage Courses Modal state
   const [managingCollege, setManagingCollege] = useState<CollegeListing | null>(null);
@@ -120,33 +121,21 @@ export default function DashboardMyCollegesPage() {
           durationYears: parseFloat(newCourse.durationYears) || 4.0,
           annualFees: parseFloat(newCourse.annualFees) || 0,
           totalSeats: newCourse.totalSeats ? parseInt(newCourse.totalSeats) : null,
+          entranceExams: newCourse.entranceExams.split(",").map(s => s.trim()).filter(Boolean),
         }),
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setCollegeCourses(prev => [data.course, ...prev]);
-        setNewCourse({
-          name: "",
-          degree: "BACHELOR",
-          stream: "ENGINEERING",
-          durationYears: "4.0",
-          annualFees: "",
-          feeCurrency: "INR",
-          totalSeats: "",
-          eligibility: "",
-          entranceExams: "",
-          scholarshipAvailable: false,
-        });
         setShowAddForm(false);
-        fetchMyColleges(); // update course counts
-      } else {
-        const errData = await res.json();
-        alert(errData.error || "Failed to create course");
+        setNewCourse({
+          name: "", degree: "BACHELOR", stream: "ENGINEERING", durationYears: "4.0",
+          annualFees: "", feeCurrency: "INR", totalSeats: "", eligibility: "", entranceExams: "", scholarshipAvailable: false,
+        });
+        openManageCoursesModal(managingCollege);
+        fetchMyColleges();
       }
     } catch (err) {
       console.error(err);
-      alert("Error adding course");
     } finally {
       setActionLoading(false);
     }
@@ -161,7 +150,7 @@ export default function DashboardMyCollegesPage() {
         body: JSON.stringify({ courseId, isActive: !currentStatus }),
       });
       if (res.ok) {
-        setCollegeCourses(prev => prev.map(c => c.id === courseId ? { ...c, isActive: !currentStatus } : c));
+        openManageCoursesModal(managingCollege);
       }
     } catch (err) {
       console.error(err);
@@ -169,13 +158,13 @@ export default function DashboardMyCollegesPage() {
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    if (!managingCollege || !confirm("Delete this course permanently?")) return;
+    if (!managingCollege || !confirm("Are you sure you want to remove this course offering?")) return;
     try {
       const res = await fetch(`/api/colleges/${managingCollege.id}/courses?courseId=${courseId}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        setCollegeCourses(prev => prev.filter(c => c.id !== courseId));
+        openManageCoursesModal(managingCollege);
         fetchMyColleges();
       }
     } catch (err) {
@@ -198,12 +187,52 @@ export default function DashboardMyCollegesPage() {
     }
   };
 
-  const handleDeleteCollege = async (collegeId: string) => {
-    if (!confirm("Are you sure you want to delete this college listing? It will be archived.")) return;
+  const handleArchiveCollege = async (collegeId: string) => {
+    if (!confirm("Are you sure you want to archive this college listing? It will be hidden from public searches and moved to your Archived tab.")) return;
     try {
-      const res = await fetch(`/api/admin/properties?collegeId=${collegeId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/properties`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collegeId, action: "archive" }),
+      });
+      if (res.ok) {
+        setColleges(prev => prev.map(c => c.id === collegeId ? { ...c, status: "ARCHIVED" } : c));
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to archive college");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleRestoreCollege = async (collegeId: string) => {
+    try {
+      const res = await fetch(`/api/admin/properties`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collegeId, action: "restore" }),
+      });
+      if (res.ok) {
+        setColleges(prev => prev.map(c => c.id === collegeId ? { ...c, status: "ACTIVE" } : c));
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to restore college");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePermanentDeleteCollege = async (collegeId: string) => {
+    if (!confirm("Are you sure you want to PERMANENTLY delete this college? This action cannot be undone and will remove all associated data.")) return;
+    try {
+      const res = await fetch(`/api/admin/properties?collegeId=${collegeId}&permanent=true`, { method: "DELETE" });
       if (res.ok) {
         setColleges(prev => prev.filter(c => c.id !== collegeId));
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to permanently delete college");
       }
     } catch (err) {
       console.error(err);
@@ -220,15 +249,22 @@ export default function DashboardMyCollegesPage() {
   }
 
   const STATUS_BADGES: Record<string, { label: string; bg: string }> = {
-    ACTIVE: { label: "Live / Active", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    ACTIVE: { label: "Active", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" },
     PENDING_VERIFICATION: { label: "Pending Verification", bg: "bg-amber-50 text-amber-700 border-amber-200" },
     DRAFT: { label: "Draft", bg: "bg-slate-100 text-slate-600 border-slate-200" },
     REJECTED: { label: "Needs Revision", bg: "bg-red-50 text-red-700 border-red-200" },
     ARCHIVED: { label: "Archived", bg: "bg-gray-100 text-gray-500 border-gray-200" },
   };
 
+  const filteredColleges = colleges.filter((c) => {
+    if (statusFilter === "ACTIVE") return c.status === "ACTIVE";
+    if (statusFilter === "ARCHIVED") return c.status === "ARCHIVED";
+    if (statusFilter === "DRAFT") return c.status === "DRAFT" || c.status === "PENDING_VERIFICATION" || c.status === "REJECTED";
+    return true;
+  });
+
   return (
-    <div className="space-y-6 text-left relative">
+    <div className="space-y-6 text-left relative font-sans">
       {/* Header */}
       <div className="flex items-center justify-between gap-4 flex-wrap border-b border-slate-100 pb-4">
         <div>
@@ -245,27 +281,45 @@ export default function DashboardMyCollegesPage() {
         </Link>
       </div>
 
-      {colleges.length === 0 ? (
+      {/* Status Filter Tabs */}
+      <div className="flex border-b border-slate-200 gap-2 sm:gap-6 overflow-x-auto no-scrollbar pb-1 text-xs font-bold">
+        {[
+          { id: "ALL", label: `All Listings (${colleges.length})` },
+          { id: "ACTIVE", label: `Active (${colleges.filter(c => c.status === "ACTIVE").length})` },
+          { id: "ARCHIVED", label: `Archived (${colleges.filter(c => c.status === "ARCHIVED").length})` },
+          { id: "DRAFT", label: `Drafts & Pending (${colleges.filter(c => c.status === "DRAFT" || c.status === "PENDING_VERIFICATION" || c.status === "REJECTED").length})` },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setStatusFilter(tab.id as any)}
+            className={`pb-2.5 transition whitespace-nowrap border-b-2 cursor-pointer font-bold ${
+              statusFilter === tab.id
+                ? "text-[#0F172A] border-[#D4AF37]"
+                : "text-slate-400 border-transparent hover:text-slate-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {filteredColleges.length === 0 ? (
         <div className="border border-line rounded-3xl p-12 text-center max-w-md mx-auto my-8 bg-slate-50/50 space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-accent mx-auto">
             <GraduationCap className="w-8 h-8" />
           </div>
           <div>
-            <h3 className="font-serif text-lg text-primary font-bold">No Colleges Posted Yet</h3>
+            <h3 className="font-serif text-lg text-primary font-bold">No Colleges Found</h3>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Post your university or institute on ILMIKA to reach thousands of prospective students worldwide.
+              {statusFilter === "ARCHIVED"
+                ? "You have no archived colleges."
+                : "No college listings matched the selected filter."}
             </p>
           </div>
-          <Link
-            href="/colleges/add"
-            className="bg-primary text-secondary font-bold px-6 py-3 rounded-xl hover:bg-slate-800 transition text-xs inline-flex items-center gap-2 shadow-sm"
-          >
-            <Plus className="w-4 h-4 text-accent" /> Post Your First College
-          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-5">
-          {colleges.map((col) => {
+          {filteredColleges.map((col) => {
             const statusConfig = STATUS_BADGES[col.status] || STATUS_BADGES["DRAFT"];
             const coverUrl = col.images && col.images.length > 0
               ? col.images[0].url
@@ -343,6 +397,14 @@ export default function DashboardMyCollegesPage() {
                     </div>
                   )}
 
+                  {/* Archived Banner Notice */}
+                  {col.status === "ARCHIVED" && (
+                    <div className="bg-slate-100 border border-slate-200 p-2.5 rounded-xl text-xs text-slate-600 flex items-center gap-2 font-medium">
+                      <Archive className="w-4 h-4 text-slate-500 shrink-0" />
+                      <span>This college is currently archived and hidden from public search results.</span>
+                    </div>
+                  )}
+
                   {/* Action Bar */}
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3 flex-wrap gap-2">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -370,13 +432,34 @@ export default function DashboardMyCollegesPage() {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => handleDeleteCollege(col.id)}
-                      className="text-red-600 hover:bg-red-50 p-2 rounded-xl transition cursor-pointer text-xs font-bold inline-flex items-center gap-1"
-                      title="Archive College"
-                    >
-                      <Trash className="w-3.5 h-3.5" /> Delete
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {col.status === "ARCHIVED" ? (
+                        <>
+                          <button
+                            onClick={() => handleRestoreCollege(col.id)}
+                            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-xs font-bold inline-flex items-center gap-1.5"
+                            title="Restore to Active"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" /> Restore Listing
+                          </button>
+                          <button
+                            onClick={() => handlePermanentDeleteCollege(col.id)}
+                            className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-xs font-bold inline-flex items-center gap-1.5"
+                            title="Delete Permanently"
+                          >
+                            <Trash className="w-3.5 h-3.5" /> Permanently Delete
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => handleArchiveCollege(col.id)}
+                          className="text-red-600 hover:bg-red-50 p-2 rounded-xl transition cursor-pointer text-xs font-bold inline-flex items-center gap-1"
+                          title="Delete College"
+                        >
+                          <Trash className="w-3.5 h-3.5 text-red-600" /> Delete
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                 </div>

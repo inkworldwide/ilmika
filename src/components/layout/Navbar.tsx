@@ -238,6 +238,7 @@ export default function Navbar() {
             type="button"
             className="lg:hidden w-10 h-10 grid place-items-center rounded-full border border-line cursor-pointer text-primary"
             aria-label="Toggle menu"
+            suppressHydrationWarning
           >
             {mMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>

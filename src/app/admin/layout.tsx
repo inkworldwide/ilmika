@@ -17,6 +17,7 @@ import {
   Sparkles,
   ChevronRight,
   BookOpen,
+  Megaphone,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 
@@ -65,6 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "User Directory", path: "/admin/users", icon: Users },
     { name: "Listed Colleges", path: "/admin/properties", icon: GraduationCap },
     { name: "Course Management", path: "/admin/courses", icon: BookOpen },
+    { name: "Adds Buzz", path: "/admin/ads", icon: Megaphone },
     { name: "Platform Configuration", path: "/admin/database", icon: Database },
     { name: "Flagged Colleges", path: "/admin/reports", icon: Flag },
   ];

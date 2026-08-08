@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import CollegeCard from "@/components/property/CollegeCard";
+import AdSidebarColumn from "@/components/ads/AdSidebarColumn";
 import SearchableCountrySelect from "../ui/SearchableCountrySelect";
 import { Search, SlidersHorizontal, X, ChevronDown, Globe, GraduationCap, BookOpen, Filter, Layers } from "lucide-react";
 
@@ -692,6 +693,9 @@ export default function CollegesSearchContent() {
             </>
           )}
         </div>
+
+        {/* Right Sidebar Ad Column */}
+        <AdSidebarColumn page="inner" className="hidden xl:block shrink-0" />
       </div>
     </main>
   );

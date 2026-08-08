@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CollegeCard from "@/components/property/CollegeCard";
 import HeroSearchForm from "@/components/home/HeroSearchForm";
+import AdSidebarColumn from "@/components/ads/AdSidebarColumn";
 import {
   GraduationCap, MapPin, Search, ShieldCheck, Heart, ArrowRight,
   Sparkles, Users, BookOpen, Award, Star, FlaskConical,
@@ -211,156 +212,161 @@ export default async function HomePage() {
     <div className="min-h-screen bg-secondary flex flex-col text-left">
       <Navbar />
 
-      {/* ── 1. HERO SECTION ── */}
-      <section className="relative w-full bg-[#0B1120] overflow-hidden border-b border-slate-800/80">
-        {/* Ambient Spotlight Lighting & Radial Mesh */}
-        <div 
-          className="absolute inset-0 opacity-30 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(circle at 18% 25%, rgba(212,175,55,0.22) 0%, transparent 45%), radial-gradient(circle at 82% 65%, rgba(16,185,129,0.15) 0%, transparent 50%), radial-gradient(circle at 50% 90%, rgba(59,130,246,0.12) 0%, transparent 50%)" }}
-        />
+      {/* ── MAIN BODY CONTENT & RIGHT AD SIDEBAR COLUMN (Starts alongside Hero) ── */}
+      <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 py-6 grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-8 items-start">
+        {/* Left Content Column */}
+        <div className="space-y-12 min-w-0">
 
-        {/* Subtle Luxury Grid Overlay */}
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:4rem_4rem]"
-        />
+          {/* ── 1. HERO SECTION ── */}
+          <section className="relative w-full bg-[#0B1120] rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl">
+            {/* Ambient Spotlight Lighting & Radial Mesh */}
+            <div 
+              className="absolute inset-0 opacity-30 pointer-events-none"
+              style={{ backgroundImage: "radial-gradient(circle at 18% 25%, rgba(212,175,55,0.22) 0%, transparent 45%), radial-gradient(circle at 82% 65%, rgba(16,185,129,0.15) 0%, transparent 50%), radial-gradient(circle at 50% 90%, rgba(59,130,246,0.12) 0%, transparent 50%)" }}
+            />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            
-            {/* LEFT COLUMN: Main Copy + Luxury Search + Stats */}
-            <div className="lg:col-span-7 space-y-7 text-left">
-              {/* Glassmorphic Luxury Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/80 border border-[#D4AF37]/40 text-xs font-semibold tracking-wide shadow-xl shadow-[#D4AF37]/10 backdrop-blur-xl transition-all duration-300 hover:border-[#D4AF37]/70">
-                <span className="flex h-2 w-2 relative shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]"></span>
-                </span>
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
-                <span className="text-slate-200">Your Gateway to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FDE68A] via-[#D4AF37] to-[#F59E0B] font-bold">Global Education.</span></span>
-              </div>
+            {/* Subtle Luxury Grid Overlay */}
+            <div 
+              className="absolute inset-0 opacity-10 pointer-events-none bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:4rem_4rem]"
+            />
 
-              {/* Masterpiece Headline */}
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.12] tracking-tight">
-                Find Your Ideal <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FDE68A] via-[#D4AF37] to-[#F59E0B] italic font-normal">College</span> <br />
-                Across the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FBBF24] to-[#FEF08A]">Globe</span>
-              </h1>
-
-              {/* Subtitle & Value Proposition */}
-              <p className="text-slate-300 text-base md:text-lg leading-relaxed max-w-xl font-medium">
-                Search, compare, and apply to 12,000+ top-accredited universities across 180+ countries. 
-                Discover <span className="text-white font-semibold">Bachelor's, Master's, PhD</span>, and online programmes with direct fee transparency.
-              </p>
-
-              {/* Executive Command Search Bar */}
-              <HeroSearchForm countries={countries} />
-
-              {/* Trust Avatars & Metallic Metric Bar */}
-              <div className="pt-4 flex flex-wrap items-center justify-between gap-6 border-t border-slate-800/80">
-                {/* Student Trust Proof */}
-                <div className="flex items-center gap-3">
-                  <div className="flex -space-x-2.5 overflow-hidden">
-                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Student" />
-                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Student" />
-                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Student" />
-                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Student" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-[#D4AF37] text-xs">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-[#D4AF37]" />
-                      ))}
-                      <span className="font-bold text-white ml-1">4.9/5</span>
-                    </div>
-                    <p className="text-xs text-slate-300 font-medium">Trusted by 2M+ Scholars</p>
-                  </div>
-                </div>
-
-                {/* Metric Pills */}
-                <div className="flex items-center gap-5 sm:gap-6">
-                  <div>
-                    <p className="font-serif font-bold text-[#D4AF37] text-xl">12,000+</p>
-                    <p className="text-slate-400 text-[10px] font-mono uppercase font-bold tracking-wider">Colleges</p>
-                  </div>
-                  <div className="w-px h-7 bg-slate-800" />
-                  <div>
-                    <p className="font-serif font-bold text-[#D4AF37] text-xl">180+</p>
-                    <p className="text-slate-400 text-[10px] font-mono uppercase font-bold tracking-wider">Countries</p>
-                  </div>
-                  <div className="w-px h-7 bg-slate-800" />
-                  <div>
-                    <p className="font-serif font-bold text-[#D4AF37] text-xl">50k+</p>
-                    <p className="text-slate-400 text-[10px] font-mono uppercase font-bold tracking-wider">Courses</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: Image Composition & Clean Floating Glass Cards */}
-            <div className="lg:col-span-5 relative flex justify-center lg:justify-end pt-4 lg:pt-0">
-              <div className="relative w-full max-w-md">
+            <div className="relative z-10 p-6 sm:p-8 lg:p-10">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-center">
                 
-                {/* Main Large Image: Iconic Campus */}
-                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl shadow-slate-950 bg-slate-900 group ring-1 ring-white/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=80"
-                    alt="University Campus"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120]/80 via-transparent to-transparent opacity-60" />
+                {/* LEFT COLUMN: Main Copy + Luxury Search + Stats */}
+                <div className="xl:col-span-7 space-y-6 text-left">
+                  {/* Glassmorphic Luxury Badge */}
+                  <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/80 border border-[#D4AF37]/40 text-xs font-semibold tracking-wide shadow-xl shadow-[#D4AF37]/10 backdrop-blur-xl transition-all duration-300 hover:border-[#D4AF37]/70">
+                    <span className="flex h-2 w-2 relative shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4AF37]"></span>
+                    </span>
+                    <Sparkles className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                    <span className="text-slate-200">Your Gateway to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FDE68A] via-[#D4AF37] to-[#F59E0B] font-bold">Global Education.</span></span>
+                  </div>
+
+                  {/* Masterpiece Headline */}
+                  <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-[1.12] tracking-tight">
+                    Find Your Ideal <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FDE68A] via-[#D4AF37] to-[#F59E0B] italic font-normal">College</span> <br />
+                    Across the <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] via-[#FBBF24] to-[#FEF08A]">Globe</span>
+                  </h1>
+
+                  {/* Subtitle & Value Proposition */}
+                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl font-medium">
+                    Search, compare, and apply to 12,000+ top-accredited universities across 180+ countries. 
+                    Discover <span className="text-white font-semibold">Bachelor's, Master's, PhD</span>, and online programmes with direct fee transparency.
+                  </p>
+
+                  {/* Executive Command Search Bar */}
+                  <HeroSearchForm countries={countries} />
+
+                  {/* Trust Avatars & Metallic Metric Bar */}
+                  <div className="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800/80">
+                    {/* Student Trust Proof */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex -space-x-2.5 overflow-hidden">
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Student" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Student" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Student" />
+                        <img className="inline-block h-7 w-7 rounded-full ring-2 ring-[#0F172A] object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80" alt="Student" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1 text-[#D4AF37] text-xs">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star key={i} className="w-3 h-3 fill-[#D4AF37]" />
+                          ))}
+                          <span className="font-bold text-white ml-1">4.9/5</span>
+                        </div>
+                        <p className="text-[11px] text-slate-300 font-medium">Trusted by 2M+ Scholars</p>
+                      </div>
+                    </div>
+
+                    {/* Metric Pills */}
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <p className="font-serif font-bold text-[#D4AF37] text-lg">12,000+</p>
+                        <p className="text-slate-400 text-[9px] font-mono uppercase font-bold tracking-wider">Colleges</p>
+                      </div>
+                      <div className="w-px h-6 bg-slate-800" />
+                      <div>
+                        <p className="font-serif font-bold text-[#D4AF37] text-lg">180+</p>
+                        <p className="text-slate-400 text-[9px] font-mono uppercase font-bold tracking-wider">Countries</p>
+                      </div>
+                      <div className="w-px h-6 bg-slate-800" />
+                      <div>
+                        <p className="font-serif font-bold text-[#D4AF37] text-lg">50k+</p>
+                        <p className="text-slate-400 text-[9px] font-mono uppercase font-bold tracking-wider">Courses</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Secondary Image: Modern Library / Students (Bottom Left Stack) */}
-                <div className="absolute -bottom-6 -left-6 w-48 sm:w-56 aspect-[4/3] rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl hidden sm:block bg-slate-900 ring-1 ring-white/10">
-                  <img
-                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
-                    alt="Students Learning"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                {/* RIGHT COLUMN: Image Composition & Clean Floating Glass Cards */}
+                <div className="xl:col-span-5 relative flex justify-center xl:justify-end pt-4 xl:pt-0">
+                  <div className="relative w-full max-w-sm">
+                    
+                    {/* Main Large Image: Iconic Campus */}
+                    <div className="relative aspect-[4/5] rounded-3xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl shadow-slate-950 bg-slate-900 group ring-1 ring-white/10">
+                      <img
+                        src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=80"
+                        alt="University Campus"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0B1120]/80 via-transparent to-transparent opacity-60" />
+                    </div>
 
-                {/* Floating Glass Badge 1: Verification & Rating (Top Left) */}
-                <div className="absolute -top-4 -left-4 sm:-left-6 bg-slate-950/90 border border-emerald-500/40 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl flex items-center gap-3 text-left z-30 ring-1 ring-white/10">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-                    <ShieldCheck className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-xs text-white flex items-center gap-1">
-                      <span>Verified Institution</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    </p>
-                    <p className="text-[10px] text-slate-300 font-medium">Govt &amp; NAAC Accredited</p>
-                  </div>
-                </div>
+                    {/* Secondary Image: Modern Library / Students */}
+                    <div className="absolute -bottom-4 -left-4 w-40 aspect-[4/3] rounded-2xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl hidden sm:block bg-slate-900 ring-1 ring-white/10">
+                      <img
+                        src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=600&q=80"
+                        alt="Students Learning"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-                {/* Floating Glass Badge 2: Global Destinations (Middle Right) */}
-                <div className="absolute top-1/2 -right-4 sm:-right-8 -translate-y-1/2 bg-slate-950/90 border border-[#D4AF37]/40 p-4 rounded-2xl shadow-2xl backdrop-blur-xl space-y-2.5 text-left z-30 min-w-[210px] ring-1 ring-white/10">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase text-[#D4AF37] tracking-wider">Destinations</span>
-                    <Globe className="w-4 h-4 text-[#D4AF37]" />
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-slate-200">
-                    <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">🇮🇳 India</span>
-                    <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">🇺🇸 USA</span>
-                    <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">🇬🇧 UK</span>
-                    <span className="bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">🇨🇦 CA</span>
-                  </div>
-                  
-                  <div className="pt-1 border-t border-slate-800 flex items-center justify-between">
-                    <span className="text-[10px] text-[#D4AF37] font-mono font-bold">180+ Global Options</span>
-                    <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/30">Active</span>
+                    {/* Floating Glass Badge 1: Verification */}
+                    <div className="absolute -top-3 -left-3 bg-slate-950/90 border border-emerald-500/40 p-3 rounded-2xl shadow-2xl backdrop-blur-xl flex items-center gap-2.5 text-left z-30 ring-1 ring-white/10">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-[11px] text-white flex items-center gap-1">
+                          <span>Verified Institution</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                        </p>
+                        <p className="text-[9px] text-slate-300 font-medium">Govt Accredited</p>
+                      </div>
+                    </div>
+
+                    {/* Floating Glass Badge 2: Destinations */}
+                    <div className="absolute top-1/2 -right-4 -translate-y-1/2 bg-slate-950/90 border border-[#D4AF37]/40 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl space-y-2 text-left z-30 min-w-[190px] ring-1 ring-white/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-mono font-bold uppercase text-[#D4AF37] tracking-wider">Destinations</span>
+                        <Globe className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      </div>
+                      
+                      <div className="flex flex-wrap items-center gap-1 text-[10px] font-medium text-slate-200">
+                        <span className="bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">🇮🇳 IN</span>
+                        <span className="bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">🇺🇸 US</span>
+                        <span className="bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">🇬🇧 UK</span>
+                        <span className="bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded">🇨🇦 CA</span>
+                      </div>
+                      
+                      <div className="pt-1 border-t border-slate-800 flex items-center justify-between">
+                        <span className="text-[9px] text-[#D4AF37] font-mono font-bold">180+ Global Options</span>
+                        <span className="text-[8px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.2 rounded border border-emerald-500/30">Active</span>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
 
               </div>
             </div>
+          </section>
 
-          </div>
-        </div>
-      </section>
-
-      {/* ── 2. BROWSE BY STREAM ── */}
-      <section className="py-16 max-w-7xl mx-auto w-full px-5 md:px-8 space-y-8">
+          {/* ── 2. BROWSE BY STREAM ── */}
+          <section className="space-y-8">
         <div className="flex justify-between items-end">
           <div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Browse by Stream</h2>
@@ -655,15 +661,14 @@ export default async function HomePage() {
                     <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent group-hover:scale-105 transition-transform">
                       <Award className="w-5 h-5" />
                     </div>
-                    <h4 className="font-serif text-base font-bold text-primary group-hover:text-accent transition">{s.name}</h4>
-                    <p className="text-xs text-slate-500">{s.provider}</p>
+                    <h4 className="font-serif text-base font-bold text-primary group-hover:text-accent transition">{s.title || s.name}</h4>
+                    <p className="text-xs text-slate-500">{s.provider || s.description}</p>
                     {s.amount && (
                       <p className="font-mono font-bold text-accent text-sm">
                         {s.currency === "INR" ? "₹" : s.currency}{" "}
                         {Number(s.amount).toLocaleString()}
                       </p>
                     )}
-                    <p className="text-xs text-slate-600 line-clamp-2">{s.eligibility}</p>
                   </div>
                   <div className="pt-2 border-t border-line">
                     <span className="text-[11px] font-bold text-accent font-mono uppercase group-hover:underline flex items-center gap-1">
@@ -673,50 +678,6 @@ export default async function HomePage() {
                 </Link>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 7. ENTRANCE EXAMS ── */}
-      {exams.length > 0 && (
-        <section className="py-16 max-w-7xl mx-auto w-full px-5 md:px-8 space-y-8">
-          <div className="flex justify-between items-end">
-            <div>
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary flex items-center gap-2">
-                <Landmark className="w-7 h-7 text-accent" /> Key Entrance Exams
-              </h2>
-              <p className="text-xs font-semibold text-indigo-900 bg-indigo-50 border border-indigo-200/80 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mt-1.5 shadow-xs">
-                <Landmark className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
-                <span>Prepare for the exams that unlock your dream college.</span>
-              </p>
-            </div>
-            <Link href="/exams" className="text-xs font-bold text-accent hover:underline flex items-center gap-1 font-mono uppercase">
-              All Exams <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {exams.map((exam: any) => (
-              <Link
-                key={exam.id}
-                href={`/exams?q=${encodeURIComponent(exam.name)}&country=${encodeURIComponent(exam.country?.name || "")}`}
-                className="bg-white border border-line rounded-xl p-4 text-center hover:shadow-sm hover:border-accent/30 transition group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="w-10 h-10 rounded-xl bg-primary text-accent flex items-center justify-center font-bold text-xs mx-auto mb-2 group-hover:scale-105 transition-transform">
-                    {exam.name.slice(0, 4)}
-                  </div>
-                  <p className="font-bold text-xs text-primary group-hover:text-accent transition">{exam.name}</p>
-                  {exam.country && (
-                    <p className="text-[10px] text-slate-500 font-medium mt-0.5">{exam.country.name}</p>
-                  )}
-                </div>
-                {exam.cutoffScore && (
-                  <div className="mt-2 pt-2 border-t border-line text-[9px] font-mono text-accent font-bold truncate">
-                    {exam.cutoffScore.split("(")[0]}
-                  </div>
-                )}
-              </Link>
-            ))}
           </div>
         </section>
       )}
@@ -834,6 +795,12 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+        </div>
+
+        {/* Right Column: Adds Buzz Banner Column */}
+        <AdSidebarColumn page="home" className="hidden lg:block" />
+      </div>
 
       {/* ── 11. FINAL CTA: FOR COLLEGES ── */}
       <section className="py-16 bg-primary text-secondary border-t border-line text-center">

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import AdSidebarColumn from "@/components/ads/AdSidebarColumn";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MapPin, Globe, ShieldCheck, Star, Heart, Share2, BookOpen, GraduationCap,
@@ -224,9 +225,12 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
   };
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto w-full px-5 md:px-8 py-8 space-y-8">
-      {/* Header Banner */}
-      <div className="bg-white border border-line rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+    <>
+      <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 py-6 grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-8 items-start">
+        {/* Left Column: Main Details Content */}
+        <div className="space-y-8 min-w-0">
+        {/* Header Banner */}
+        <div className="bg-white border border-line rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line pb-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -641,6 +645,11 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
           </div>
         </div>
       </div>
+    </div>
+
+    {/* Right Column: Adds Buzz Banner Column (Starts right from top level!) */}
+    <AdSidebarColumn page="inner" title="Sponsored Promotions" className="hidden lg:block" />
+  </main>
 
       {/* ── MODAL 1: APPLY NOW ── */}
       <AnimatePresence>
@@ -974,6 +983,6 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
           </div>
         )}
       </AnimatePresence>
-    </main>
+    </>
   );
 }

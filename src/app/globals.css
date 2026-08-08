@@ -122,6 +122,22 @@ body {
   scrollbar-width: none;
 }
 
+/* Thin Gold Custom Scrollbar for Ad Column */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.8);
+}
+
 /* Custom shimmer skeleton */
 .shimmer-bg {
   background: linear-gradient(90deg, #f5f2e9 25%, #e2dac6 50%, #f5f2e9 75%);

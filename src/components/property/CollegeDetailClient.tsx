@@ -648,7 +648,7 @@ export default function CollegeDetailClient({ college }: CollegeDetailClientProp
     </div>
 
     {/* Right Column: Adds Buzz Banner Column (Starts right from top level!) */}
-    <AdSidebarColumn page="inner" title="Sponsored Promotions" className="hidden lg:block" />
+    <AdSidebarColumn page="college_detail" title="Sponsored Promotions" className="hidden lg:block" />
   </main>
 
       {/* ── MODAL 1: APPLY NOW ── */}

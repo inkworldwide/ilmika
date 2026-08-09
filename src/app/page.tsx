@@ -498,7 +498,7 @@ export default async function HomePage() {
 
       {/* ── 5. RECENTLY ADDED COLLEGES ── */}
       <section className="py-16 bg-white border-t border-line">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-8">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Recently Added Colleges</h2>
@@ -521,7 +521,7 @@ export default async function HomePage() {
 
       {/* ── 5a. POPULAR COUNTRIES ── */}
       {countries.length > 0 && (
-        <section className="py-16 max-w-7xl mx-auto w-full px-5 md:px-8 space-y-8">
+        <section className="py-16 max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary flex items-center gap-2">
@@ -609,7 +609,7 @@ export default async function HomePage() {
 
       {/* ── 5c. TRENDING COLLEGES ── */}
       {trendingSafe.length > 0 && (
-        <section className="py-16 max-w-7xl mx-auto w-full px-5 md:px-8 space-y-8">
+        <section className="py-16 max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
           <div className="flex justify-between items-end">
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary flex items-center gap-2">
@@ -635,7 +635,7 @@ export default async function HomePage() {
       {/* ── 6. FEATURED SCHOLARSHIPS ── */}
       {scholarships.length > 0 && (
         <section className="py-16 bg-white border-t border-line">
-          <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-8">
+          <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
             <div className="flex justify-between items-end">
               <div>
                 <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary flex items-center gap-2">
@@ -684,7 +684,7 @@ export default async function HomePage() {
 
       {/* ── 8. HOW IT WORKS ── */}
       <section className="py-16 bg-white border-t border-line">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-10">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-10">
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">How Ilmika Works</h2>
             <p className="text-xs font-semibold text-teal-900 bg-teal-50 border border-teal-200/80 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mt-1.5 shadow-xs">
@@ -716,7 +716,7 @@ export default async function HomePage() {
 
       {/* ── 9. TOP COLLEGE ADVISORS ── */}
       {featuredAdmins.length > 0 && (
-        <section className="py-16 max-w-7xl mx-auto w-full px-5 md:px-8 space-y-8">
+        <section className="py-16 max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Featured College Advisors</h2>
             <p className="text-xs font-semibold text-violet-900 bg-violet-50 border border-violet-200/80 px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 mt-1.5 shadow-xs">
@@ -758,7 +758,7 @@ export default async function HomePage() {
 
       {/* ── 10. TESTIMONIALS ── */}
       <section className="py-16 bg-white border-t border-line">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 space-y-8">
+        <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Student Success Stories</h2>
             <p className="text-xs text-slate-500">Hear from students who found their dream college on Ilmika.</p>

@@ -635,11 +635,16 @@ enum AdPlacement {
   HOME_ONLY
   INNER_ONLY
   BOTH
+  COLLEGES_ONLY
+  COLLEGE_DETAIL_ONLY
+  SCHOLARSHIPS_ONLY
+  EXAMS_ONLY
 }
 
 enum AdFormat {
   FULL_WIDTH
   HALF_WIDTH
+  QUAD_GRID
 }
 
 model Advertisement {

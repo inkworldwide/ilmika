@@ -480,7 +480,7 @@ export default function CollegesSearchContent() {
   );
 
   return (
-    <main className="flex-1 max-w-7xl mx-auto w-full px-5 md:px-8 py-10 text-left">
+    <main className="flex-1 max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 py-6 text-left">
       {/* Page header */}
       <div className="mb-6">
         <h1 className="font-serif text-2xl sm:text-3xl font-bold text-primary">Search Colleges &amp; Courses</h1>
@@ -695,7 +695,7 @@ export default function CollegesSearchContent() {
         </div>
 
         {/* Right Sidebar Ad Column */}
-        <AdSidebarColumn page="inner" className="hidden xl:block shrink-0" />
+        <AdSidebarColumn page="colleges" className="hidden xl:block shrink-0" />
       </div>
     </main>
   );

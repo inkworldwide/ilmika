@@ -100,7 +100,7 @@ export default async function ScholarshipsPage() {
         </div>
 
         {/* Right Column: Adds Buzz Banner Column */}
-        <AdSidebarColumn page="inner" title="Grant Promotions" className="hidden lg:block" />
+        <AdSidebarColumn page="scholarships" title="Grant Promotions" className="hidden lg:block" />
       </main>
 
       <Footer />

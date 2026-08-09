@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { 
   Megaphone, Plus, Trash2, Edit3, ExternalLink, Eye, CheckCircle2, XCircle, 
-  Sparkles, Layers, Image as ImageIcon, MousePointerClick, RefreshCw, Filter, LayoutGrid, X
+  Sparkles, Layers, Image as ImageIcon, MousePointerClick, RefreshCw, Filter, LayoutGrid, X, Search
 } from "lucide-react";
 
 interface Advertisement {
@@ -11,13 +11,25 @@ interface Advertisement {
   name: string;
   imageUrl: string;
   targetUrl: string;
-  placement: "HOME_ONLY" | "INNER_ONLY" | "BOTH";
-  format: "FULL_WIDTH" | "HALF_WIDTH";
+  placement: "HOME_ONLY" | "INNER_ONLY" | "BOTH" | "COLLEGES_ONLY" | "COLLEGE_DETAIL_ONLY" | "SCHOLARSHIPS_ONLY" | "EXAMS_ONLY";
+  format: "FULL_WIDTH" | "HALF_WIDTH" | "QUAD_GRID";
   isActive: boolean;
   displayOrder: number;
   clickCount: number;
   createdAt: string;
 }
+
+const getPlacementLabel = (p: string) => {
+  switch (p) {
+    case "HOME_ONLY": return "Home Page Only";
+    case "INNER_ONLY": return "All Inner Pages";
+    case "COLLEGES_ONLY": return "Colleges Page";
+    case "COLLEGE_DETAIL_ONLY": return "College Profiles";
+    case "SCHOLARSHIPS_ONLY": return "Scholarships Page";
+    case "EXAMS_ONLY": return "Exams Directory";
+    case "BOTH": default: return "All Pages";
+  }
+};
 
 const PRESET_SAMPLE_ADS = [
   {
@@ -47,6 +59,7 @@ export default function AdminAdsBuzzPage() {
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterPlacement, setFilterPlacement] = useState<string>("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -58,9 +71,9 @@ export default function AdminAdsBuzzPage() {
     name: "",
     imageUrl: "",
     targetUrl: "",
-    placement: "BOTH" as "HOME_ONLY" | "INNER_ONLY" | "BOTH",
-    format: "FULL_WIDTH" as "FULL_WIDTH" | "HALF_WIDTH",
-    displayOrder: 0,
+    placement: "BOTH" as "HOME_ONLY" | "INNER_ONLY" | "BOTH" | "COLLEGES_ONLY" | "COLLEGE_DETAIL_ONLY" | "SCHOLARSHIPS_ONLY" | "EXAMS_ONLY",
+    format: "FULL_WIDTH" as "FULL_WIDTH" | "HALF_WIDTH" | "QUAD_GRID",
+    displayOrder: "1" as string | number,
     isActive: true,
   });
 
@@ -93,7 +106,7 @@ export default function AdminAdsBuzzPage() {
       targetUrl: "",
       placement: "BOTH",
       format: "FULL_WIDTH",
-      displayOrder: ads.length + 1,
+      displayOrder: String(ads.length + 1),
       isActive: true,
     });
     setModalOpen(true);
@@ -136,7 +149,7 @@ export default function AdminAdsBuzzPage() {
       targetUrl: ad.targetUrl,
       placement: ad.placement,
       format: ad.format,
-      displayOrder: ad.displayOrder,
+      displayOrder: String(ad.displayOrder || 1),
       isActive: ad.isActive,
     });
     setModalOpen(true);
@@ -149,11 +162,25 @@ export default function AdminAdsBuzzPage() {
       return;
     }
 
+    // Clean target URL if missing protocol
+    let cleanedTargetUrl = form.targetUrl.trim();
+    if (!cleanedTargetUrl.startsWith("http://") && !cleanedTargetUrl.startsWith("https://") && !cleanedTargetUrl.startsWith("/")) {
+      cleanedTargetUrl = `https://${cleanedTargetUrl}`;
+    }
+
+    const parsedOrder = parseInt(String(form.displayOrder).trim(), 10);
+    const finalDisplayOrder = isNaN(parsedOrder) || parsedOrder < 1 ? 1 : parsedOrder;
+
     setSaving(true);
     try {
       const url = "/api/admin/ads";
       const method = editingAd ? "PUT" : "POST";
-      const body = editingAd ? { ...form, id: editingAd.id } : form;
+      const payload = {
+        ...form,
+        displayOrder: finalDisplayOrder,
+        targetUrl: cleanedTargetUrl,
+      };
+      const body = editingAd ? { ...payload, id: editingAd.id } : payload;
 
       const res = await fetch(url, {
         method,
@@ -204,6 +231,10 @@ export default function AdminAdsBuzzPage() {
   };
 
   const filteredAds = ads.filter(ad => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q || ad.name.toLowerCase().includes(q) || ad.targetUrl.toLowerCase().includes(q);
+    if (!matchesSearch) return false;
+
     if (filterPlacement === "HOME") return ad.placement === "HOME_ONLY" || ad.placement === "BOTH";
     if (filterPlacement === "INNER") return ad.placement === "INNER_ONLY" || ad.placement === "BOTH";
     if (filterPlacement === "ACTIVE") return ad.isActive;
@@ -345,8 +376,9 @@ export default function AdminAdsBuzzPage() {
 
       </div>
 
-      {/* Professional Segmented Control Filter Bar */}
-      <div className="bg-slate-100/80 border border-slate-200/80 p-1.5 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+      {/* Professional Segmented Control Filter Bar & Search Input */}
+      <div className="bg-slate-100/80 border border-slate-200/80 p-2 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+        {/* Placement Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
           {[
             { id: "ALL", label: "All Ads", count: ads.length },
@@ -358,7 +390,7 @@ export default function AdminAdsBuzzPage() {
             <button
               key={tab.id}
               onClick={() => setFilterPlacement(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
                 filterPlacement === tab.id
                   ? "bg-white text-[#0F172A] shadow-xs border border-slate-200/90"
                   : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
@@ -374,13 +406,38 @@ export default function AdminAdsBuzzPage() {
           ))}
         </div>
 
-        <button
-          onClick={fetchAds}
-          className="text-xs font-bold text-slate-600 hover:text-[#0F172A] flex items-center gap-1.5 cursor-pointer px-3 py-1.5 rounded-xl hover:bg-slate-200/60 transition"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Refresh</span>
-        </button>
+        {/* Right Actions: Search Bar & Refresh */}
+        <div className="flex items-center gap-2.5 flex-1 max-w-md min-w-[240px] justify-end">
+          {/* Ad Name Search Input */}
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search ad by name or target URL..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-white border border-slate-200 focus:border-[#D4AF37] pl-8 pr-7 py-2 rounded-xl text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none transition shadow-2xs"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded-md"
+                title="Clear search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={fetchAds}
+            className="text-xs font-bold text-slate-600 hover:text-[#0F172A] flex items-center gap-1.5 cursor-pointer px-3 py-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 transition shadow-2xs shrink-0"
+            title="Refresh Ad List"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Ad List Grid */}
@@ -448,10 +505,10 @@ export default function AdminAdsBuzzPage() {
                 {/* Placement & Format Badges */}
                 <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono font-bold">
                   <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
-                    📍 {ad.placement === "HOME_ONLY" ? "Home Page Only" : ad.placement === "INNER_ONLY" ? "Inner Pages Only" : "Both Pages"}
+                    📍 {getPlacementLabel(ad.placement)}
                   </span>
                   <span className="bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200">
-                    📐 {ad.format === "FULL_WIDTH" ? "Full Banner" : "Half Grid Banner"}
+                    📐 {ad.format === "FULL_WIDTH" ? "Sidebar Banner" : ad.format === "HALF_WIDTH" ? "Dual Half Grid" : "4-Card Combined Grid"}
                   </span>
                 </div>
               </div>
@@ -532,9 +589,9 @@ export default function AdminAdsBuzzPage() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <input
-                      type="url"
+                      type="text"
                       required
-                      placeholder="Paste Image URL or Upload File below"
+                      placeholder="Paste Image URL or Upload File below (e.g. https://... or /uploads/...)"
                       value={form.imageUrl}
                       onChange={e => setForm({ ...form, imageUrl: e.target.value })}
                       className="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
@@ -554,7 +611,14 @@ export default function AdminAdsBuzzPage() {
 
                   {form.imageUrl && (
                     <div className="aspect-[3.2/1] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 relative">
-                      <img src={form.imageUrl} alt="Ad Preview" className="w-full h-full object-cover" />
+                      <img 
+                        src={form.imageUrl} 
+                        alt="Ad Preview" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80";
+                        }}
+                      />
                     </div>
                   )}
 
@@ -577,9 +641,9 @@ export default function AdminAdsBuzzPage() {
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Destination Target Link (URL) *</label>
                 <input
-                  type="url"
+                  type="text"
                   required
-                  placeholder="https://yourwebsite.com/ad-page"
+                  placeholder="e.g. https://yourwebsite.com/ad-page or /colleges"
                   value={form.targetUrl}
                   onChange={e => setForm({ ...form, targetUrl: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
@@ -588,39 +652,47 @@ export default function AdminAdsBuzzPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Display Placement *</label>
+                  <label className="block font-bold text-slate-700 mb-1">Target Page Placement *</label>
                   <select
                     value={form.placement}
                     onChange={e => setForm({ ...form, placement: e.target.value as any })}
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-semibold"
                   >
-                    <option value="BOTH">🌐 Both Home &amp; Inner Pages</option>
-                    <option value="HOME_ONLY">🏠 Home Page Only</option>
-                    <option value="INNER_ONLY">📄 Inner Pages Only</option>
+                    <option value="BOTH">🌐 All Pages Everywhere</option>
+                    <option value="HOME_ONLY">🏠 Home Page Main Sidebar</option>
+                    <option value="INNER_ONLY">📄 All Inner Pages</option>
+                    <option value="COLLEGES_ONLY">🏫 Colleges Search Page Only</option>
+                    <option value="COLLEGE_DETAIL_ONLY">🎓 College Profiles Only</option>
+                    <option value="SCHOLARSHIPS_ONLY">🏆 Scholarships Page Only</option>
+                    <option value="EXAMS_ONLY">📝 Entrance Exams Page Only</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Ad Format *</label>
+                  <label className="block font-bold text-slate-700 mb-1">Ad Format &amp; Layout *</label>
                   <select
                     value={form.format}
                     onChange={e => setForm({ ...form, format: e.target.value as any })}
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-semibold"
                   >
-                    <option value="FULL_WIDTH">🖼️ Full Width Banner</option>
-                    <option value="HALF_WIDTH">📐 Dual Half Width Grid</option>
+                    <option value="FULL_WIDTH">🖼️ Full Width Sidebar Banner</option>
+                    <option value="HALF_WIDTH">📐 Dual Half Width Sidebar Grid</option>
+                    <option value="QUAD_GRID">🧩 4-Card Combined Grid Block</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 items-center pt-1">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Sort Display Order</label>
+                  <label className="block font-bold text-slate-700 mb-1">Sort Display Order (Priority #) *</label>
                   <input
                     type="number"
+                    min={1}
+                    step={1}
+                    required
                     value={form.displayOrder}
-                    onChange={e => setForm({ ...form, displayOrder: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium"
+                    onChange={e => setForm({ ...form, displayOrder: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-bold text-xs"
                   />
                 </div>
 

@@ -41,7 +41,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-gradient-to-b from-slate-950 via-[#0B132B] to-[#060C1B] text-slate-300 border-t border-slate-800/80">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 grid grid-cols-1 lg:grid-cols-[1.3fr_2fr] gap-12 lg:gap-16">
+      <div className="max-w-[1440px] mx-auto w-full px-4 sm:px-6 md:px-8 py-16 grid grid-cols-1 lg:grid-cols-[1.3fr_2fr] gap-12 lg:gap-16">
         {/* Left Column: Brand & Newsletter */}
         <div className="space-y-6">
           <Logo theme="dark" />

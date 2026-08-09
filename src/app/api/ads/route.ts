@@ -4,13 +4,21 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const page = searchParams.get("page"); // "home" or "inner"
+    const page = searchParams.get("page"); // "home", "colleges", "college_detail", "scholarships", "exams", "inner"
 
     let placementCondition: any = {};
     if (page === "home") {
       placementCondition = { in: ["HOME_ONLY", "BOTH"] };
+    } else if (page === "colleges") {
+      placementCondition = { in: ["COLLEGES_ONLY", "INNER_ONLY", "BOTH"] };
+    } else if (page === "college_detail") {
+      placementCondition = { in: ["COLLEGE_DETAIL_ONLY", "INNER_ONLY", "BOTH"] };
+    } else if (page === "scholarships") {
+      placementCondition = { in: ["SCHOLARSHIPS_ONLY", "INNER_ONLY", "BOTH"] };
+    } else if (page === "exams") {
+      placementCondition = { in: ["EXAMS_ONLY", "INNER_ONLY", "BOTH"] };
     } else if (page === "inner") {
-      placementCondition = { in: ["INNER_ONLY", "BOTH"] };
+      placementCondition = { in: ["INNER_ONLY", "COLLEGES_ONLY", "COLLEGE_DETAIL_ONLY", "SCHOLARSHIPS_ONLY", "EXAMS_ONLY", "BOTH"] };
     }
 
     const ads = await prisma.advertisement.findMany({

@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     }
 
     const ads = await prisma.advertisement.findMany({
-      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+      orderBy: [{ isExclusive: "desc" }, { displayOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return NextResponse.json({ ads });
@@ -28,10 +28,16 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, imageUrl, targetUrl, placement, format, displayOrder, isActive } = body;
+    const { name, imageUrl, targetUrl, placement, format, isExclusive, displayOrder, isActive } = body;
 
     if (!name || !imageUrl || !targetUrl) {
       return NextResponse.json({ error: "Name, Image URL, and Target URL are required" }, { status: 400 });
+    }
+
+    if (isExclusive) {
+      await prisma.advertisement.updateMany({
+        data: { isExclusive: false },
+      });
     }
 
     const ad = await prisma.advertisement.create({
@@ -41,7 +47,8 @@ export async function POST(req: Request) {
         targetUrl,
         placement: placement || "BOTH",
         format: format || "FULL_WIDTH",
-        displayOrder: Number(displayOrder) || 0,
+        isExclusive: Boolean(isExclusive),
+        displayOrder: isExclusive ? 1 : (Number(displayOrder) || 1),
         isActive: isActive !== undefined ? Boolean(isActive) : true,
       },
     });
@@ -61,23 +68,32 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, name, imageUrl, targetUrl, placement, format, displayOrder, isActive } = body;
+    const { id, name, imageUrl, targetUrl, placement, format, isExclusive, displayOrder, isActive } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Ad ID is required" }, { status: 400 });
     }
 
+    if (isExclusive) {
+      await prisma.advertisement.updateMany({
+        where: { id: { not: id } },
+        data: { isExclusive: false },
+      });
+    }
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (targetUrl !== undefined) updateData.targetUrl = targetUrl;
+    if (placement !== undefined) updateData.placement = placement;
+    if (format !== undefined) updateData.format = format;
+    if (isExclusive !== undefined) updateData.isExclusive = Boolean(isExclusive);
+    if (displayOrder !== undefined) updateData.displayOrder = isExclusive ? 1 : Number(displayOrder);
+    if (isActive !== undefined) updateData.isActive = Boolean(isActive);
+
     const ad = await prisma.advertisement.update({
       where: { id },
-      data: {
-        ...(name && { name }),
-        ...(imageUrl && { imageUrl }),
-        ...(targetUrl && { targetUrl }),
-        ...(placement && { placement }),
-        ...(format && { format }),
-        ...(displayOrder !== undefined && { displayOrder: Number(displayOrder) }),
-        ...(isActive !== undefined && { isActive: Boolean(isActive) }),
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ message: "Advertisement updated successfully", ad });

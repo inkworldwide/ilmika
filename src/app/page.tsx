@@ -15,15 +15,71 @@ import {
 
 export const revalidate = 60;
 
-const STREAM_META: Record<string, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
-  ENGINEERING:            { label: "Engineering",         icon: <FlaskConical className="w-6 h-6" />,   color: "text-blue-700",   bg: "bg-blue-50 border-blue-200" },
-  MEDICAL:                { label: "Medical & Health",    icon: <Stethoscope className="w-6 h-6" />,    color: "text-red-700",    bg: "bg-red-50 border-red-200" },
-  MANAGEMENT:             { label: "Management",          icon: <Briefcase className="w-6 h-6" />,      color: "text-amber-700",  bg: "bg-amber-50 border-amber-200" },
-  LAW:                    { label: "Law",                 icon: <Scale className="w-6 h-6" />,          color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
-  DESIGN:                 { label: "Design & Art",        icon: <Palette className="w-6 h-6" />,        color: "text-pink-700",   bg: "bg-pink-50 border-pink-200" },
-  ARTS:                   { label: "Arts & Humanities",   icon: <BookOpen className="w-6 h-6" />,       color: "text-green-700",  bg: "bg-green-50 border-green-200" },
-  COMMERCE:               { label: "Commerce",            icon: <Building2 className="w-6 h-6" />,      color: "text-orange-700", bg: "bg-orange-50 border-orange-200" },
-  INFORMATION_TECHNOLOGY: { label: "IT & Computing",      icon: <Compass className="w-6 h-6" />,        color: "text-indigo-700", bg: "bg-indigo-50 border-indigo-200" },
+const STREAM_META: Record<string, { label: string; num: string; cover: string; icon: React.ReactNode; color: string; bg: string }> = {
+  MEDICAL: {
+    label: "Medicine & Health",
+    num: "01",
+    cover: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80",
+    icon: <Stethoscope className="w-6 h-6" />,
+    color: "text-red-700",
+    bg: "bg-red-50 border-red-200",
+  },
+  ENGINEERING: {
+    label: "Engineering & Tech",
+    num: "02",
+    cover: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
+    icon: <FlaskConical className="w-6 h-6" />,
+    color: "text-blue-700",
+    bg: "bg-blue-50 border-blue-200",
+  },
+  MANAGEMENT: {
+    label: "Business & Management",
+    num: "03",
+    cover: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80",
+    icon: <Briefcase className="w-6 h-6" />,
+    color: "text-amber-700",
+    bg: "bg-amber-50 border-amber-200",
+  },
+  INFORMATION_TECHNOLOGY: {
+    label: "Computer Science & IT",
+    num: "04",
+    cover: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80",
+    icon: <Compass className="w-6 h-6" />,
+    color: "text-indigo-700",
+    bg: "bg-indigo-50 border-indigo-200",
+  },
+  LAW: {
+    label: "Law & Governance",
+    num: "05",
+    cover: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=600&q=80",
+    icon: <Scale className="w-6 h-6" />,
+    color: "text-purple-700",
+    bg: "bg-purple-50 border-purple-200",
+  },
+  DESIGN: {
+    label: "Design & Creative Arts",
+    num: "06",
+    cover: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80",
+    icon: <Palette className="w-6 h-6" />,
+    color: "text-pink-700",
+    bg: "bg-pink-50 border-pink-200",
+  },
+  COMMERCE: {
+    label: "Commerce & Finance",
+    num: "07",
+    cover: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80",
+    icon: <Building2 className="w-6 h-6" />,
+    color: "text-orange-700",
+    bg: "bg-orange-50 border-orange-200",
+  },
+  ARTS: {
+    label: "Arts & Humanities",
+    num: "08",
+    cover: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80",
+    icon: <BookOpen className="w-6 h-6" />,
+    color: "text-green-700",
+    bg: "bg-green-50 border-green-200",
+  },
 };
 
 const COUNTRY_FLAGS: Record<string, string> = {
@@ -380,15 +436,37 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-3.5">
           {Object.entries(STREAM_META).map(([key, meta]) => (
             <Link
               key={key}
               href={`/colleges?stream=${key}`}
-              className={`group border rounded-2xl p-4 flex flex-col items-center gap-2 text-center hover:shadow-sm transition ${meta.bg}`}
+              className="group relative aspect-[3/5.2] rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-800/80 shadow-md hover:shadow-2xl transition-all duration-500 cursor-pointer bg-slate-900 flex flex-col justify-between"
             >
-              <div className={`${meta.color}`}>{meta.icon}</div>
-              <p className={`text-[11px] font-bold ${meta.color} leading-snug`}>{meta.label}</p>
+              {/* High-Res Background Imagery */}
+              <img
+                src={meta.cover}
+                alt={meta.label}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out brightness-90 group-hover:brightness-100"
+              />
+              
+              {/* Gradient Dark Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20 z-10 transition duration-500 group-hover:from-black/90 group-hover:via-black/25" />
+              
+              {/* Top-Left Watermark Number (e.g. 01, 02) */}
+              <span className="relative z-20 p-3 text-white/75 font-serif text-lg sm:text-xl font-light tracking-widest drop-shadow-md select-none">
+                {meta.num}
+              </span>
+
+              {/* Bottom Stream Title & Hover Arrow */}
+              <div className="relative z-20 p-3 sm:p-3.5 text-white space-y-1">
+                <h3 className="font-semibold text-xs sm:text-sm leading-snug font-sans group-hover:text-amber-300 transition-colors drop-shadow-xs">
+                  {meta.label}
+                </h3>
+                <span className="text-[10px] text-amber-300 font-mono font-bold flex items-center gap-1 opacity-90 group-hover:opacity-100 group-hover:translate-x-1.5 transition-all">
+                  →
+                </span>
+              </div>
             </Link>
           ))}
         </div>

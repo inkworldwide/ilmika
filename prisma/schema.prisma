@@ -654,6 +654,7 @@ model Advertisement {
   targetUrl    String
   placement    AdPlacement @default(BOTH)
   format       AdFormat    @default(FULL_WIDTH)
+  isExclusive  Boolean     @default(false)
   isActive     Boolean     @default(true)
   displayOrder Int         @default(0)
   clickCount   Int         @default(0)
@@ -663,4 +664,5 @@ model Advertisement {
   @@index([placement])
   @@index([isActive])
   @@index([displayOrder])
+  @@index([isExclusive])
 }

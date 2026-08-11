@@ -26,7 +26,7 @@ export async function GET(req: Request) {
         isActive: true,
         ...(page && { placement: placementCondition }),
       },
-      orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+      orderBy: [{ isExclusive: "desc" }, { displayOrder: "asc" }, { createdAt: "desc" }],
     });
 
     return NextResponse.json({ ads });

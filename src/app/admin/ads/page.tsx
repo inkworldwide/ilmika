@@ -13,6 +13,7 @@ interface Advertisement {
   targetUrl: string;
   placement: "HOME_ONLY" | "INNER_ONLY" | "BOTH" | "COLLEGES_ONLY" | "COLLEGE_DETAIL_ONLY" | "SCHOLARSHIPS_ONLY" | "EXAMS_ONLY";
   format: "FULL_WIDTH" | "HALF_WIDTH" | "QUAD_GRID";
+  isExclusive: boolean;
   isActive: boolean;
   displayOrder: number;
   clickCount: number;
@@ -73,6 +74,7 @@ export default function AdminAdsBuzzPage() {
     targetUrl: "",
     placement: "BOTH" as "HOME_ONLY" | "INNER_ONLY" | "BOTH" | "COLLEGES_ONLY" | "COLLEGE_DETAIL_ONLY" | "SCHOLARSHIPS_ONLY" | "EXAMS_ONLY",
     format: "FULL_WIDTH" as "FULL_WIDTH" | "HALF_WIDTH" | "QUAD_GRID",
+    isExclusive: false,
     displayOrder: "1" as string | number,
     isActive: true,
   });
@@ -106,6 +108,7 @@ export default function AdminAdsBuzzPage() {
       targetUrl: "",
       placement: "BOTH",
       format: "FULL_WIDTH",
+      isExclusive: false,
       displayOrder: String(ads.length + 1),
       isActive: true,
     });
@@ -149,6 +152,7 @@ export default function AdminAdsBuzzPage() {
       targetUrl: ad.targetUrl,
       placement: ad.placement,
       format: ad.format,
+      isExclusive: Boolean(ad.isExclusive),
       displayOrder: String(ad.displayOrder || 1),
       isActive: ad.isActive,
     });
@@ -177,6 +181,7 @@ export default function AdminAdsBuzzPage() {
       const method = editingAd ? "PUT" : "POST";
       const payload = {
         ...form,
+        isExclusive: Boolean(form.isExclusive),
         displayOrder: finalDisplayOrder,
         targetUrl: cleanedTargetUrl,
       };
@@ -230,17 +235,23 @@ export default function AdminAdsBuzzPage() {
     }
   };
 
-  const filteredAds = ads.filter(ad => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesSearch = !q || ad.name.toLowerCase().includes(q) || ad.targetUrl.toLowerCase().includes(q);
-    if (!matchesSearch) return false;
+  const filteredAds = ads
+    .filter(ad => {
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch = !q || ad.name.toLowerCase().includes(q) || ad.targetUrl.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
 
-    if (filterPlacement === "HOME") return ad.placement === "HOME_ONLY" || ad.placement === "BOTH";
-    if (filterPlacement === "INNER") return ad.placement === "INNER_ONLY" || ad.placement === "BOTH";
-    if (filterPlacement === "ACTIVE") return ad.isActive;
-    if (filterPlacement === "INACTIVE") return !ad.isActive;
-    return true;
-  });
+      if (filterPlacement === "HOME") return ad.placement === "HOME_ONLY" || ad.placement === "BOTH";
+      if (filterPlacement === "INNER") return ad.placement === "INNER_ONLY" || ad.placement === "BOTH";
+      if (filterPlacement === "ACTIVE") return ad.isActive;
+      if (filterPlacement === "INACTIVE") return !ad.isActive;
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.isExclusive !== b.isExclusive) return a.isExclusive ? -1 : 1;
+      if (a.displayOrder !== b.displayOrder) return a.displayOrder - b.displayOrder;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   const totalClicks = ads.reduce((acc, curr) => acc + (curr.clickCount || 0), 0);
   const activeCount = ads.filter(a => a.isActive).length;
@@ -257,7 +268,7 @@ export default function AdminAdsBuzzPage() {
             <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#0F172A] flex items-center justify-center shadow-2xs">
               <Megaphone className="w-5 h-5 text-[#D4AF37]" />
             </div>
-            <span>Adds Buzz Manager</span>
+            <span>Ads Buzz Manager</span>
           </h1>
           <p className="text-xs text-slate-500 mt-1.5 font-medium">
             Manage right-side ad banner promotions, target link destinations, formats, and page placements.
@@ -504,6 +515,11 @@ export default function AdminAdsBuzzPage() {
 
                 {/* Placement & Format Badges */}
                 <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono font-bold">
+                  {ad.isExclusive && (
+                    <span className="bg-amber-400 text-slate-950 px-2.5 py-0.5 rounded-md border border-amber-500 shadow-xs flex items-center gap-1 font-bold">
+                      👑 EXCLUSIVE SOLO AD
+                    </span>
+                  )}
                   <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">
                     📍 {getPlacementLabel(ad.placement)}
                   </span>
@@ -556,7 +572,7 @@ export default function AdminAdsBuzzPage() {
       {/* Add / Edit Ad Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-5 animate-fadeIn">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl p-6 space-y-5 animate-fadeIn max-h-[90vh] overflow-y-auto">
             
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-serif font-bold text-lg text-[#0F172A] flex items-center gap-2">
@@ -591,21 +607,15 @@ export default function AdminAdsBuzzPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Paste Image URL or Upload File below (e.g. https://... or /uploads/...)"
+                      placeholder="https://... or upload image"
                       value={form.imageUrl}
                       onChange={e => setForm({ ...form, imageUrl: e.target.value })}
                       className="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
                     />
-                    <label className="bg-[#0F172A] hover:bg-slate-800 text-[#D4AF37] border border-[#D4AF37]/30 font-bold text-xs px-3.5 py-2.5 rounded-xl cursor-pointer transition shrink-0 shadow-xs flex items-center gap-1.5">
-                      <ImageIcon className="w-3.5 h-3.5" />
-                      <span>{uploadingImage ? "Uploading..." : "Upload File"}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                        disabled={uploadingImage}
-                      />
+                    <label className="bg-[#0F172A] hover:bg-slate-800 text-[#D4AF37] font-bold px-3 py-2.5 rounded-xl transition cursor-pointer text-xs shrink-0 border border-[#D4AF37]/40 flex items-center gap-1">
+                      <ImageIcon className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <span>{uploadingImage ? "Uploading..." : "Browse"}</span>
+                      <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                     </label>
                   </div>
 
@@ -628,8 +638,8 @@ export default function AdminAdsBuzzPage() {
                       <button
                         key={idx}
                         type="button"
-                        onClick={() => setForm({ ...form, name: sample.name, imageUrl: sample.imageUrl, targetUrl: sample.targetUrl })}
-                        className="text-[10px] bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-900 border border-slate-200 px-2 py-0.5 rounded-lg font-semibold transition"
+                        onClick={() => setForm(prev => ({ ...prev, imageUrl: sample.imageUrl, ...(prev.name ? {} : { name: sample.name, targetUrl: sample.targetUrl }) }))}
+                        className="text-[10px] bg-slate-100 hover:bg-amber-50 text-slate-700 hover:text-amber-900 border border-slate-200 px-2 py-0.5 rounded-lg font-semibold transition cursor-pointer"
                       >
                         Sample #{idx + 1}
                       </button>
@@ -639,14 +649,14 @@ export default function AdminAdsBuzzPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Destination Target Link (URL) *</label>
+                <label className="block font-bold text-slate-700 mb-1">Target Click Destination URL *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. https://yourwebsite.com/ad-page or /colleges"
+                  placeholder="e.g. https://apply.college.edu or /colleges/nitte"
                   value={form.targetUrl}
                   onChange={e => setForm({ ...form, targetUrl: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium"
                 />
               </div>
 
@@ -656,30 +666,49 @@ export default function AdminAdsBuzzPage() {
                   <select
                     value={form.placement}
                     onChange={e => setForm({ ...form, placement: e.target.value as any })}
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-semibold"
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
                   >
-                    <option value="BOTH">🌐 All Pages Everywhere</option>
-                    <option value="HOME_ONLY">🏠 Home Page Main Sidebar</option>
+                    <option value="BOTH">🌐 All Pages (Home & Inner)</option>
+                    <option value="HOME_ONLY">🏠 Home Page Only</option>
                     <option value="INNER_ONLY">📄 All Inner Pages</option>
-                    <option value="COLLEGES_ONLY">🏫 Colleges Search Page Only</option>
-                    <option value="COLLEGE_DETAIL_ONLY">🎓 College Profiles Only</option>
-                    <option value="SCHOLARSHIPS_ONLY">🏆 Scholarships Page Only</option>
-                    <option value="EXAMS_ONLY">📝 Entrance Exams Page Only</option>
+                    <option value="COLLEGES_ONLY">🎓 Colleges Page</option>
+                    <option value="COLLEGE_DETAIL_ONLY">🏛️ College Profiles</option>
+                    <option value="SCHOLARSHIPS_ONLY">🏆 Scholarships Page</option>
+                    <option value="EXAMS_ONLY">📝 Entrance Exams</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Ad Format &amp; Layout *</label>
+                  <label className="block font-bold text-slate-700 mb-1">Banner Layout Format *</label>
                   <select
                     value={form.format}
                     onChange={e => setForm({ ...form, format: e.target.value as any })}
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-semibold"
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-[#D4AF37] p-2.5 rounded-xl text-slate-900 focus:outline-none transition font-medium text-xs"
                   >
                     <option value="FULL_WIDTH">🖼️ Full Width Sidebar Banner</option>
                     <option value="HALF_WIDTH">📐 Dual Half Width Sidebar Grid</option>
                     <option value="QUAD_GRID">🧩 4-Card Combined Grid Block</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Exclusive Solo Ad Banner Option */}
+              <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="isExclusiveCheck"
+                    checked={form.isExclusive}
+                    onChange={e => setForm({ ...form, isExclusive: e.target.checked })}
+                    className="w-4 h-4 text-[#D4AF37] accent-[#0F172A] rounded cursor-pointer"
+                  />
+                  <label htmlFor="isExclusiveCheck" className="font-bold text-amber-950 cursor-pointer text-xs flex items-center gap-1">
+                    👑 Exclusive Solo Banner Takeover (Hide All Other Ads)
+                  </label>
+                </div>
+                <p className="text-[10.5px] text-amber-800 leading-relaxed font-medium pl-6">
+                  Check this if the advertiser purchased an exclusive package. When active, ONLY this single ad will appear in the sidebar, hiding secondary ads on that placement.
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 items-center pt-1">
